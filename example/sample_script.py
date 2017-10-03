@@ -1,7 +1,7 @@
+from django.db import connection
 from core.models import Driver
 
 def run():
-    print('starting script')
 
     Driver.objects.bulk_create([
         Driver(name='omar'),
@@ -9,14 +9,8 @@ def run():
         Driver(name='ali'),
     ])
 
-    print('Testing query output')
 
     qs = Driver.objects.all()
+    names = list(qs.values_list('name', flat=True))
 
-    print(f'qs: {qs.query}')
-
-    names = qs.values_list('name', flat=True)
-
-    print(f'output: {names}')
-
-    print('ending script')
+    print(connection.queries)

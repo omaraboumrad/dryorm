@@ -4,4 +4,4 @@ ADD ./sample/requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 ADD ./sample/ /app/
 WORKDIR /app/
-CMD ["./manage.py", "execute"]
+CMD ["./run.sh"]
