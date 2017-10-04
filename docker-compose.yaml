@@ -1,0 +1,12 @@
+version: '2.1'
+
+services:
+    executor:
+        build: ./executor/
+        image: djanground/executor
+
+    backend:
+        build: ./backend/
+        image: djanground/backend
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
