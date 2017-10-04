@@ -23,9 +23,15 @@ You can confirm that the container is working by simply running
 ```shell
 % docker run djanground
 
-starting script
-<QuerySet []>
-ending script
+{
+  "output": "starting script\n<QuerySet []>\nending script\n",
+  "queries": [
+    {
+      "sql": "SELECT \"core_question\".\"id\", \"core_question\".\"name\" FROM \"core_question\" LIMIT 21",
+      "time": "0.000"
+    }
+  ]
+}
 ```
 
 There's also an [example](./example) available, you can run it using
@@ -36,9 +42,22 @@ docker run \
     -v /path/to/host/example/sample_script.py:/app/core/scripts/sample_script.py \
     djanground
 
-starting script
-Testing query output
-qs: SELECT "core_driver"."id", "core_driver"."name" FROM "core_driver"
-output: <QuerySet ['john', 'doe', 'jane', 'smith']>
-ending script
+{
+  "output": "Available Drivers: ['john', 'doe', 'jane', 'smith']\n",
+  "queries": [
+    {
+      "sql": "BEGIN",
+      "time": "0.000"
+    },
+    {
+      "sql": "INSERT INTO \"core_driver\" (\"name\") SELECT 'john' UNION ALL SELECT 'doe' UNION ALL SELECT 'jane' UNION ALL SELECT 'smith'",
+      "time": "0.000"
+    },
+    {
+      "sql": "SELECT \"core_driver\".\"name\" FROM \"core_driver\"",
+      "time": "0.000"
+    }
+  ]
+}
+
 ```
