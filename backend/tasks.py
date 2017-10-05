@@ -1,18 +1,12 @@
 import docker
-
-from rq import get_current_job
+import redis
 
 
 def run_django(channel):
-
-    # channel will eventually be the actual reply_channel
-    # and instead of storing it in the meta, the result
-    # will be published to redis through PUBLISH and
-    # read back from the backend using SUBSCRIBE
-
-    job = get_current_job()
-    job.meta['channel'] = channel
-    job.save_meta()
-
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-    return client.containers.run("djanground/executor", remove=True)
+    result = client.containers.run("djanground/executor", remove=True)
+
+    connection = redis.Redis('redis', 6379)
+    connection.publish(channel, result)
+
+    return result
