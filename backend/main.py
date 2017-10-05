@@ -1,6 +1,16 @@
-import docker
-client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-output = client.containers.run("djanground/executor", remove=True)
+import time
 
-print('=== From backend container ===')
-print(output)
+import redis
+import rq
+
+import tasks
+
+
+if __name__ == '__main__':
+    connection = redis.Redis('redis', 6379)
+    queue = rq.Queue(connection=connection)
+    job = queue.enqueue(tasks.run_django)
+
+    time.sleep(5)
+
+    print(job.result)
