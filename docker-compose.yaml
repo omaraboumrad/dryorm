@@ -21,13 +21,16 @@ services:
         command: rq worker --url redis://redis:6379
 
     backend:
+        build: ./backend/
         image: djanground/backend
+        volumes:
+            - ./backend:/app
         depends_on:
             - redis
         links:
             - redis
         ports:
-            - 8000:80
+            - 8000:8000
         command: python manage.py runserver 0.0.0.0:8000
 
     monitor:
@@ -36,4 +39,4 @@ services:
             - redis
         links:
             - redis
-        command: python monitor.py
+        command: python manage.py monitor
