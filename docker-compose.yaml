@@ -8,17 +8,7 @@ services:
     executor:
         build: ./executor/
         image: djanground/executor
-
-    worker:
-        build: ./backend/
-        image: djanground/backend
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-        depends_on:
-            - redis
-        links:
-            - redis
-        command: rq worker --url redis://redis:6379
+        command: /bin/true
 
     backend:
         build: ./backend/
@@ -33,10 +23,22 @@ services:
             - 8000:8000
         command: python manage.py runserver 0.0.0.0:8000
 
+    worker:
+        image: djanground/backend
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        depends_on:
+            - redis
+            - backend
+        links:
+            - redis
+        command: rq worker --url redis://redis:6379
+
     monitor:
         image: djanground/backend
         depends_on:
             - redis
+            - backend
         links:
             - redis
         command: python manage.py monitor
