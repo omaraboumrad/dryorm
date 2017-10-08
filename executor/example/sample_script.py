@@ -1,18 +1,1 @@
-from django.db import connection
-from core.models import Driver
-
-
-def run():
-
-    Driver.objects.bulk_create([
-        Driver(name='john'),
-        Driver(name='doe'),
-        Driver(name='jane'),
-        Driver(name='smith'),
-    ])
-
-
-    qs = Driver.objects.all()
-    names = list(qs.values_list('name', flat=True))
-
-    print(f'Available Drivers: {names}')
+from core.models import Driver\n\n\ndef run():\n\n    Driver.objects.bulk_create([\n        Driver(name='john'),\n        Driver(name='doe'),\n        Driver(name='jane'),\n        Driver(name='smith'),\n    ])\n\n    qs = Driver.objects.all()\n    names = list(qs.values_list('name', flat=True))\n\n    print('Available Drivers:', names)\n
