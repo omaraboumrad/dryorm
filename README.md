@@ -10,10 +10,10 @@ Clone the repository
 $ git clone https://github.com/omaraboumrad/djanground
 ```
 
-Build the image
+Build the stack
 
 ```shell
-$ docker build -t djanground .
+$ docker-compose build
 ```
 
 ## How to run
@@ -21,7 +21,7 @@ $ docker build -t djanground .
 You can confirm that the container is working by simply running
 
 ```shell
-% docker run djanground
+% docker run djanground/executor
 
 {
   "output": "starting script\n<QuerySet []>\nending script\n",
