@@ -22,5 +22,6 @@ from core import views
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html')),
     url(r'^invoke/', views.invoke),
+    url(r'^check/', views.check),
     url(r'^admin/', admin.site.urls),
 ]

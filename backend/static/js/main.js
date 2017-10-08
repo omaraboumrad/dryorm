@@ -17,6 +17,7 @@ $(document).ready(function() {
 
     transactions_editor.setValue(default_transactions_code);
 
+
     $('#run_button').click(function(){
         $.post({
             url: "/invoke/",
@@ -24,8 +25,24 @@ $(document).ready(function() {
                 models: models_editor.getValue(),
                 transactions: transactions_editor.getValue()
             }
-        }).done(function() {
-            $( this ).addClass( "done" );
+        }).done(function(data) {
+            $("#job").html(data);
+
+            var handle;
+
+            var poll = function(){
+                $.post({
+                    url: "/check/",
+                    data: {
+                        job: data
+                    }
+                }).done(function(result){
+                    $('#result').html(result);
+                    clearInterval(handle);
+                });
+            }
+
+            handle = setInterval(poll, 2000);
         });
     });            
 });

@@ -35,11 +35,12 @@ services:
             - redis
         command: rq worker --url redis://redis:6379
 
-    monitor:
-        image: djanground/backend
-        depends_on:
-            - redis
-            - backend
-        links:
-            - redis
-        command: python manage.py monitor
+    # In this iteration, we'll poll. LIKE A BAWS!
+    # monitor:
+    #     image: djanground/backend
+    #     depends_on:
+    #         - redis
+    #         - backend
+    #     links:
+    #         - redis
+    #     command: python manage.py monitor

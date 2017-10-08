@@ -38,3 +38,13 @@ def invoke(request):
             trans_file_name)
 
     return HttpResponse(job.key)
+
+
+@csrf_exempt
+def check(request):
+    key = request.POST.get('job')
+    connection = redis.Redis('redis', 6379)
+    result = connection.hget(key, b'result')
+    print(result)
+
+    return HttpResponse(result)
