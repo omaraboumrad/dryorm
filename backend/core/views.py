@@ -10,5 +10,9 @@ import tasks
 def invoke(request):
     connection = redis.Redis('redis', 6379)
     queue = rq.Queue(connection=connection)
-    job = queue.enqueue(tasks.run_django, 'back-channel')
+    job = queue.enqueue(
+        tasks.run_django,
+        'back-channel',
+        request.POST.get('models'),
+        request.POST.get('transactions'))
     return HttpResponse('Success')

@@ -1,72 +1,47 @@
+{% load static %}
 <!doctype html>
 <html class="no-js" lang="">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="manifest" href="site.webmanifest">
-        <link rel="apple-touch-icon" href="icon.png">
-        <!-- Place favicon.ico in the root directory -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
+    <title>Djanground</title>
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
+    <style>
+    .toolbar {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    </style>
 
-    </head>
-    <body>
-        <!--[if lte IE 9]>
-            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
-        <![endif]-->
-
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <button class="btn btn-primary" id="run_button">Execute</button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <textarea id="code_models"></textarea>
-                </div>
-                <div class="col-md-6">
-                    <textarea id="code_transactions"></textarea>
-                </div>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 toolbar">
+                <button class="btn btn-primary" id="run_button">Execute</button>
+                <button class="btn btn-success">Save</button>
+                <button class="btn btn-secondary">Fork</button>
+                <button class="btn btn-secondary">Share</button>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-6">
+                <textarea id="code_models"></textarea>
+            </div>
+            <div class="col-md-6">
+                <textarea id="code_transactions"></textarea>
+            </div>
+        </div>
+    </div>
 
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.2.1.min.js"><\/script>')</script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
-
-        <script type="text/javascript">
-        $(document).ready(function() {
-            var models_editor = CodeMirror.fromTextArea($('#code_models')[0], {
-                mode: "python",
-                lineNumbers: true,
-                
-            }).setValue("from django.db import models\n\n\nclass Driver(models.Model):\n    name = models.CharField(max_length=50)\n\n\nclass Location(models.Model):\n    driver = models.ForeignKey(Driver)\n    latitude = models.IntegerField()\n    longitude = models.IntegerField()\n    some = models.BooleanField(default=True)\n");
-
-            var transactions_editor = CodeMirror.fromTextArea($('#code_transactions')[0], {
-                mode: "python",
-                lineNumbers: true,
-                
-            }).setValue("from core.models import Driver\n\n\ndef run():\n\n    Driver.objects.bulk_create([\n        Driver(name='john'),\n        Driver(name='doe'),\n        Driver(name='jane'),\n        Driver(name='smith'),\n    ])\n\n    qs = Driver.objects.all()\n    names = list(qs.values_list('name', flat=True))\n\n    print('Available Drivers:', names)\n");
-
-            $('#run_button').click(function(){
-                $.post({
-                    url: "/invoke/",
-                    // data: {
-                    //     models: models_editor.getValue(),
-                    //     transactions: transactions_editor.getValue()
-                    // }
-                }).done(function() {
-                    $( this ).addClass( "done" );
-                });
-            });            
-        });
-        </script>
-    </body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+</body>
 </html>
