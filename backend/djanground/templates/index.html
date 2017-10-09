@@ -12,24 +12,26 @@
     <title>Djanground</title>
 
     <style>
-    .margin {
-        margin-top: 20px;
-        margin-bottom: 20px;
+    .push-top-bottom {
+        margin-top: 15px;
+        margin-bottom: 15px;
     }
+
+    .header {
+        background-color: #EFEFEF;
+        padding-left: 30px;
+    }
+
     </style>
 
 </head>
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 margin">
+        <div class="row header">
+            <div class="col-md-12 push-top-bottom">
                 <button class="btn btn-primary" id="run_button">Execute</button>
                 <button class="btn btn-success">Save</button>
                 <button class="btn btn-secondary">Fork</button>
                 <button class="btn btn-secondary">Share</button>
-            </div>
-            <div class="col-md-6 margin">
-                <div style="vertical-align:middle;font-weight:normal;color:#4F699E;letter-spacing:1pt;word-spacing:2pt;font-size:30px;text-align:right;font-family:sans-serif;line-height:1.5;" class="pull-right">DJANGROUND</div>
             </div>
         </div>
         <div class="row">
@@ -40,7 +42,7 @@
                 <textarea id="code_transactions"></textarea>
             </div>
         </div>
-        <div class="row margin">
+        <div class="row ">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
@@ -58,10 +60,10 @@
                     </div>
                     <div class="card-body">
                         <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active margin" id="output" role="tabpanel" aria-labelledby="output-tab">
+                            <div class="tab-pane fade show active push-top-bottom" id="output" role="tabpanel" aria-labelledby="output-tab">
                                 <pre id="result_output"></pre>
                             </div>
-                            <div class="tab-pane fade margin" id="queries" role="tabpanel" aria-labelledby="queries-tab">
+                            <div class="tab-pane fade push-top-bottom" id="queries" role="tabpanel" aria-labelledby="queries-tab">
                                 <ul class="list-group" id="result_queries"></ul>
                             </div>
                         </div>
@@ -69,7 +71,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
