@@ -19,6 +19,6 @@ class Command(BaseCommand):
 
         combined = dict(
             output=out.getvalue(),
-            queries=connection.queries)
+            queries=[q for q in connection.queries if q['sql'] != 'BEGIN'])
 
         self.stdout.write(json.dumps(combined, indent=2))

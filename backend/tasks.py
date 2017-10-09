@@ -21,7 +21,12 @@ def run_django(channel, models_file, transactions_file):
             os.path.join('/Users/xterm/repos/djanground/backend/snips/', transactions_file): trans_target
         })
 
-    connection = redis.Redis('redis', 6379)
-    connection.publish(channel, result)
-
-    return result
+    if result:
+        decoded = result.decode('utf-8')
+        connection = redis.Redis('redis')
+        connection.publish(channel, decoded)
+        return decoded
+    else:
+        # TODO: NO! NOT! NEIN! this should return a dictionary or json
+        # with the appropriate information as to what/why it failed
+        return None
