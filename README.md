@@ -39,7 +39,7 @@ There's also an [example](./example) available, you can run it using
 ```shell
 docker run \
     -v /path/to/host/example/models.py:/app/core/models.py \
-    -v /path/to/host/example/sample_script.py:/app/core/scripts/sample_script.py \
+    -v /path/to/host/example/transaction.py:/app/core/scripts/transaction.py \
     djanground
 
 {

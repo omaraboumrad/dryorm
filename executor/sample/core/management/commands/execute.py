@@ -5,7 +5,7 @@ import json
 from django.core.management.base import BaseCommand
 from django.db import connection
 
-from core.scripts.sample_script import run
+from core.scripts.transaction import run
 
 
 class Command(BaseCommand):

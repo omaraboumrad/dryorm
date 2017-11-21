@@ -17,38 +17,40 @@
         margin-bottom: 15px;
     }
 
-    .header {
-        background-color: #EFEFEF;
-        padding-left: 30px;
+    .card-body {
+        padding: 1px 0px 0px 0px;
     }
 
+    .card-header {
+        padding-top: 0.3rem;
+    }
+
+    #output, #queries {
+        padding-left: 5px;
+    }
     </style>
 
 </head>
 <body>
-        <div class="row header">
+    <div class="container">
+        <div class="row">
             <div class="col-md-12 push-top-bottom">
-                <button class="btn btn-primary" id="run_button">Execute</button>
-                <button class="btn btn-success">Save</button>
-                <button class="btn btn-secondary">Fork</button>
-                <button class="btn btn-secondary">Share</button>
+                <button class="btn btn-primary btn-sm" id="run_button">Execute</button>
+                <button class="btn btn-success btn-sm">Save</button>
+                <button class="btn btn-secondary btn-sm">Fork</button>
+                <button class="btn btn-secondary btn-sm">Share</button>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6">
-                <textarea id="code_models"></textarea>
-            </div>
-            <div class="col-md-6">
-                <textarea id="code_transactions"></textarea>
-            </div>
-        </div>
-        <div class="row ">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
                             <li class="nav-item">
-                                <a class="nav-link active" id="output-tab" data-toggle="tab" href="#output" role="tab" aria-controls="output" aria-expanded="true">Output</a>
+                                <a class="nav-link active" id="code-tab" data-toggle="tab" href="#code" role="tab" aria-controls="code" aria-expanded="true">Code</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="output-tab" data-toggle="tab" href="#output" role="tab" aria-controls="output" aria-expanded="true">Output</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="queries-tab" data-toggle="tab" href="#queries" role="tab" aria-controls="queries">Queries</a>
@@ -60,7 +62,17 @@
                     </div>
                     <div class="card-body">
                         <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active push-top-bottom" id="output" role="tabpanel" aria-labelledby="output-tab">
+                            <div class="tab-pane fade show active" id="code" role="tabpanel" aria-labelledby="code-tab">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <textarea id="code_models"></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <textarea id="code_transactions"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade push-top-bottom" id="output" role="tabpanel" aria-labelledby="output-tab">
                                 <pre id="result_output"></pre>
                             </div>
                             <div class="tab-pane fade push-top-bottom" id="queries" role="tabpanel" aria-labelledby="queries-tab">
@@ -71,7 +83,7 @@
                 </div>
             </div>
         </div>
-
+    </div>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>

@@ -1,6 +1,23 @@
 version: '2.1'
 
+volumes:
+  media: {}
+  static: {}
+
 services:
+
+    nginx:
+        build: ./webserver/
+        image: djanground/nginx
+        volumes:
+            - static:/opt/root/static
+            - media:/opt/root/media
+        ports:
+            - 80:80
+        depends_on:
+            - backend
+        links:
+            - backend
 
     redis:
         image: redis:4.0.2-alpine

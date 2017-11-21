@@ -1,10 +1,6 @@
-import contextlib
 import json
-import os
 import pickle
-import uuid
 
-from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -32,24 +28,16 @@ def invoke(request):
     queue = rq.Queue(connection=connection)
     models_code = request.POST.get('models')
     trans_code = request.POST.get('transactions')
+    trans_code = SCRIPT_PREPEND + indent(trans_code)
 
-    models_file_name = uuid.uuid4().hex
-    trans_file_name = uuid.uuid4().hex
-    full_models_file_name = os.path.join(settings.SNIPS_DIR, models_file_name)
-    full_trans_file_name = os.path.join(settings.SNIPS_DIR, trans_file_name)
+    job = queue.enqueue(
+        tasks.run_django,
+        'back-channel',
+        models_code,
+        trans_code)
 
-    with contextlib.ExitStack() as stack:
-        models_file = stack.enter_context(open(full_models_file_name, 'w'))
-        trans_file = stack.enter_context(open(full_trans_file_name, 'w'))
-
-        models_file.write(models_code)
-        trans_file.write(SCRIPT_PREPEND + indent(trans_code))
-
-        job = queue.enqueue(
-            tasks.run_django,
-            'back-channel',
-            models_file_name,
-            trans_file_name)
+    print(models_code)
+    print(trans_code)
 
     return JsonResponse(dict(key=job.key.decode('utf-8')))
 
@@ -64,6 +52,5 @@ def check(request):
         value = dict(success=True, result=json.loads(pickle.loads(result)))
     else:
         value = dict(success=False)
-
 
     return JsonResponse(value)
