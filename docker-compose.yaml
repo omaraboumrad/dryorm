@@ -38,7 +38,7 @@ services:
         ports:
             - 5000
 
-    worker:
+    rq_worker:
         image: djanground/backend
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
@@ -49,3 +49,24 @@ services:
         links:
             - redis
         command: rq worker --url redis://redis:6379
+
+    daphne:
+        image: djanground/backend
+        volumes:
+            - ./backend:/app
+        depends_on:
+            - backend
+        ports:
+            - 5001
+        command: daphne -b 0.0.0.0 -p 5001 djanground.asgi:channel_layer
+
+    channels_worker:
+        image: djanground/backend
+        volumes:
+            - ./backend:/app
+        depends_on:
+            - redis
+            - backend
+        links:
+            - redis
+        command: python manage.py runworker

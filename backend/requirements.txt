@@ -3,3 +3,4 @@ docker
 django
 gunicorn
 channels
+asgi_redis

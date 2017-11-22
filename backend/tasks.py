@@ -1,5 +1,12 @@
+import json
+import os
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'djanground.settings'
+
+import channels
 import docker
-import redis
+
+from djanground import constants
 
 
 def run_django(channel, models, transaction):
@@ -15,8 +22,15 @@ def run_django(channel, models, transaction):
 
     if result:
         decoded = result.decode('utf-8')
-        connection = redis.Redis('redis')
-        connection.publish(channel, decoded)
+
+
+        # TODO: too much encoding/decoding, should revisit
+        reply = json.dumps(dict(
+            event=constants.JOB_DONE_EVENT,
+            result=json.loads(decoded)
+        ))
+
+        channels.Channel(channel).send(dict(text=reply))
         return decoded
     else:
         # TODO: NO! NOT! NEIN! this should return a dictionary or json
