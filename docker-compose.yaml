@@ -1,7 +1,6 @@
 version: '2.1'
 
 volumes:
-  media: {}
   static: {}
 
 services:
@@ -10,8 +9,7 @@ services:
         build: ./webserver/
         image: djanground/nginx
         volumes:
-            - static:/opt/root/static
-            - media:/opt/root/media
+            - static:/app/static
         ports:
             - 80:80
         depends_on:
@@ -32,13 +30,13 @@ services:
         image: djanground/backend
         volumes:
             - ./backend:/app
+            - static:/app/static
         depends_on:
             - redis
         links:
             - redis
         ports:
-            - 8000:8000
-        command: python manage.py runserver 0.0.0.0:8000
+            - 5000
 
     worker:
         image: djanground/backend
@@ -51,13 +49,3 @@ services:
         links:
             - redis
         command: rq worker --url redis://redis:6379
-
-    # In this iteration, we'll poll. LIKE A BAWS!
-    # monitor:
-    #     image: djanground/backend
-    #     depends_on:
-    #         - redis
-    #         - backend
-    #     links:
-    #         - redis
-    #     command: python manage.py monitor

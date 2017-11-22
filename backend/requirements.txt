@@ -1,3 +1,5 @@
 rq
 docker
 django
+gunicorn
+channels
