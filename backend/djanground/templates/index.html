@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
+
     <title>Djanground</title>
 
     <style>
@@ -22,79 +22,134 @@
         padding: 1px 0px 0px 0px;
     }
 
-    .card-header {
-        padding-top: 0.3rem;
+    .navbar {
+        margin-bottom: 5px;
+    }
+
+    .row {
+        padding: 5px;
+        margin-bottom: 5px;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     #output, #queries {
         padding-left: 5px;
     }
 
-    .card-header {
-        padding-left: 39px;
-        margin-bottom: -1px;
+    .form-inline > button {
+        margin-right: 5px;
+    }
+
+    #job {
+        color: #FFFFFF;
+    }
+
+    .models { height: 500px; }
+    .transactions { height: 500px; }
+    .output { height: 200px; }
+    .queries { height: 200px; }
+
+    #result_output {
+        font-size: 16px;
+        font-family: monospace;
+        padding-left: 5px;
+    }
+
+    .card.output > .card-body {
+        background: #fff8ed;
+    }
+
+    .card.queries > .card-body > .CodeMirror {
+        margin-top: -1px;
+        background: #fff8ed;
+    }
+
+    .CodeMirror {
+        font-size: 16px;
+        height: 450px;
+    }
+
+    #result_queries + .CodeMirror {
+        font-size: 16px;
+        height: 150px;
+    }
+
+    * {
+        -webkit-border-radius: 0 !important;
+        -moz-border-radius: 0 !important;
+        border-radius: 0 !important;
     }
     </style>
 
 </head>
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12 push-top-bottom">
-                <button class="btn btn-primary btn-sm" id="run_button">Execute</button>
-                <button class="btn btn-success btn-sm">Save</button>
-                <button class="btn btn-secondary btn-sm">Fork</button>
-                <button class="btn btn-secondary btn-sm">Share</button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand pull-right" href="#">Dry ORM</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="form-inline">
+            <button class="btn btn-primary" id="run_button">Execute</button>
+            <button class="btn btn-success">Save</button>
+            <button class="btn btn-secondary">Fork</button>
+            <button class="btn btn-secondary">Share</button>
+            <span id="job"></span>
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card models">
+                <h5 class="card-header">
+                    Models
+                </h5>
+                <div class="card-body">
+                    <textarea id="code_models"></textarea>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="code-tab" data-toggle="tab" href="#code" role="tab" aria-controls="code" aria-expanded="true">Code</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="output-tab" data-toggle="tab" href="#output" role="tab" aria-controls="output" aria-expanded="true">Output</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="queries-tab" data-toggle="tab" href="#queries" role="tab" aria-controls="queries">Queries</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link disabled" id="job"></a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active" id="code" role="tabpanel" aria-labelledby="code-tab">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <textarea id="code_models"></textarea>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <textarea id="code_transactions"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tab-pane fade push-top-bottom" id="output" role="tabpanel" aria-labelledby="output-tab">
-                                <pre id="result_output"></pre>
-                            </div>
-                            <div class="tab-pane fade push-top-bottom" id="queries" role="tabpanel" aria-labelledby="queries-tab">
-                                <ul class="list-group" id="result_queries"></ul>
-                            </div>
-                        </div>
-                    </div>
+        <div class="col-sm-6">
+            <div class="card transactions">
+                <h5 class="card-header">
+                    Transactions
+                </h5>
+                <div class="card-body">
+                    <textarea id="code_transactions"></textarea>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card output">
+                <h5 class="card-header">
+                    Output
+                </h5>
+                <div class="card-body">
+                    <pre id="result_output"></pre>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card queries">
+                <h5 class="card-header">
+                    Queries
+                </h5>
+                <div class="card-body">
+                    <textarea id="result_queries"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 </body>
 </html>
