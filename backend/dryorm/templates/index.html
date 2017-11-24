@@ -13,24 +13,18 @@
     <title>dryorm</title>
 
     <style>
-    .push-top-bottom {
-        margin-top: 15px;
-        margin-bottom: 15px;
+    .row {
+        padding: 0;
+        margin: 0;
+    }
+
+    .col-sm-6 {
+        padding:0 !important;
+        margin:0 !important;
     }
 
     .card-body {
         padding: 1px 0px 0px 0px;
-    }
-
-    .navbar {
-        margin-bottom: 5px;
-    }
-
-    .row {
-        padding: 5px;
-        margin-bottom: 5px;
-        margin-left: 0;
-        margin-right: 0;
     }
 
     #output, #queries {
@@ -57,12 +51,12 @@
     }
 
     .card.output > .card-body {
-        background: #fff8ed;
+        background: #F6FBFC;
     }
 
     .card.queries > .card-body > .CodeMirror {
         margin-top: -1px;
-        background: #fff8ed;
+        background: #F6FBFC;
     }
 
     .CodeMirror {
@@ -86,9 +80,6 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand pull-right" href="#">Dry ORM</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
         <div class="form-inline">
             <button class="btn btn-primary" id="run_button">Execute</button>
             <button class="btn btn-success">Save</button>
