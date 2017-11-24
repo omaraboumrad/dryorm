@@ -1,0 +1,63 @@
+.row {
+    padding: 0;
+    margin: 0;
+}
+
+.col-sm-6 {
+    padding:0 !important;
+    margin:0 !important;
+}
+
+.card-body {
+    padding: 1px 0px 0px 0px;
+}
+
+#output, #queries {
+    padding-left: 5px;
+}
+
+.form-inline > button {
+    margin-right: 5px;
+}
+
+#job {
+    color: #FFFFFF;
+}
+
+.models { height: 350px; }
+.transactions { height: 350px; }
+.output { height: 350px; }
+.queries { height: 350px; }
+
+#result_output {
+    font-size: 16px;
+    font-family: monospace;
+    padding-left: 5px;
+}
+
+.card.output > .card-body {
+    background: #F6FBFC;
+}
+
+.card.queries > .card-body > .CodeMirror {
+    margin-top: -1px;
+    background: #F6FBFC;
+}
+
+.CodeMirror {
+    font-size: 16px;
+    height: 320px;
+}
+
+.navbar-nav > button {
+    margin: 0 2px 0 2px;
+}
+
+* {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+}
+
+h5 { font-size: 1rem; }
+.card-header { padding: 5px; }

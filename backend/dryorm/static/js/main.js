@@ -7,6 +7,7 @@ var default_models_code = "from django.db import models\n\n\nclass Driver(models
 var default_transactions_code = "Driver.objects.bulk_create([\n    Driver(name='john'),\n    Driver(name='doe'),\n    Driver(name='jane'),\n    Driver(name='smith'),\n])\n\nqs = Driver.objects.all()\nnames = list(qs.values_list('name', flat=True))\n\nprint('Available Drivers:', names)\n";
 
 $(document).ready(function() {
+    $('#run_button').attr('disabled', 'disabled')
 
     // Setup CodeMirror
 
