@@ -51,6 +51,13 @@ $(document).ready(function() {
                 }
 
                 queries_editor.setValue(queries.join('\n\n'));
+                $('#run_button').removeAttr('disabled')
+                break;
+
+            case 'job-internal-error':
+            case 'job-code-error':
+                queries_editor.setValue(data.error);
+                $('#run_button').removeAttr('disabled')
                 break;
         }
 
@@ -68,5 +75,7 @@ $(document).ready(function() {
         });
 
         socket.send(payload);
+
+        $('#run_button').attr('disabled', 'disabled')
     });
 });

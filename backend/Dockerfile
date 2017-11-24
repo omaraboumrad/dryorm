@@ -17,4 +17,4 @@ RUN pip install -r /app/requirements.txt
 
 ADD ./ /app/
 WORKDIR /app/
-CMD ["gunicorn", "--workers=2", "-b", "0.0.0.0:5000", "dryorm.wsgi:application"]
+CMD ["gunicorn", "--workers=3", "-b", "0.0.0.0:5000", "dryorm.wsgi:application"]
