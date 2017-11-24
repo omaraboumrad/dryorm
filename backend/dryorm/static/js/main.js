@@ -32,36 +32,54 @@ $(document).ready(function() {
 
     // Setup Websocket
 
-    var socket = new WebSocket("ws://" + window.location.host + "/ws/");
+    var socket = null;
 
-    socket.onmessage = function(e) {
-        var data = JSON.parse(e.data);
+    var connect = function(){
+        socket= new WebSocket("ws://" + window.location.host + "/ws/");
 
-        switch(data.event){
-            case 'job-fired':
-                $("#job").html(data.key);
-                break;
+        socket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
 
-            case 'job-done':
-                $('#result_output').html(data.result.output);
-                var queries = [];
+            switch(data.event){
+                case 'job-fired':
+                    $("#job").html(data.key);
+                    break;
 
-                for(var i=0;i<data.result.queries.length;i++){
-                    queries.push(data.result.queries[i].sql)
-                }
+                case 'job-done':
+                    $('#result_output').html(data.result.output);
+                    var queries = [];
 
-                queries_editor.setValue(queries.join('\n\n'));
-                $('#run_button').removeAttr('disabled')
-                break;
+                    for(var i=0;i<data.result.queries.length;i++){
+                        queries.push(data.result.queries[i].sql)
+                    }
 
-            case 'job-internal-error':
-            case 'job-code-error':
-                queries_editor.setValue(data.error);
-                $('#run_button').removeAttr('disabled')
-                break;
+                    queries_editor.setValue(queries.join('\n\n'));
+                    $('#run_button').removeAttr('disabled')
+                    break;
+
+                case 'job-internal-error':
+                case 'job-code-error':
+                    queries_editor.setValue(data.error);
+                    $('#run_button').removeAttr('disabled')
+                    break;
+            }
         }
 
+        socket.onopen = function(e) {
+            $('#job').html('connected aloha!');
+            $('#run_button').removeAttr('disabled')
+        }
+
+        socket.onclose = function(e) {
+            $('#job').html('connection died');
+            setTimeout(function(){
+                $('#job').html('reconnecting');
+                connect();
+            }, 2000);
+        }
     }
+
+    connect();
 
     // Handle button events
 
