@@ -7,7 +7,7 @@ services:
 
     nginx:
         build: ./webserver/
-        image: djanground/nginx
+        image: dryorm/nginx
         volumes:
             - static:/app/static
         ports:
@@ -22,12 +22,12 @@ services:
 
     executor:
         build: ./executor/
-        image: djanground/executor
+        image: dryorm/executor
         command: /bin/true
 
     backend:
         build: ./backend/
-        image: djanground/backend
+        image: dryorm/backend
         volumes:
             - ./backend:/app
             - static:/app/static
@@ -39,7 +39,7 @@ services:
             - 5000
 
     rq_worker:
-        image: djanground/backend
+        image: dryorm/backend
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./backend:/app
@@ -51,17 +51,17 @@ services:
         command: rq worker --url redis://redis:6379
 
     daphne:
-        image: djanground/backend
+        image: dryorm/backend
         volumes:
             - ./backend:/app
         depends_on:
             - backend
         ports:
             - 5001
-        command: daphne -b 0.0.0.0 -p 5001 djanground.asgi:channel_layer
+        command: daphne -b 0.0.0.0 -p 5001 dryorm.asgi:channel_layer
 
     channels_worker:
-        image: djanground/backend
+        image: dryorm/backend
         volumes:
             - ./backend:/app
         depends_on:

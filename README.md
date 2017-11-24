@@ -1,4 +1,4 @@
-# Djanground
+# dryorm
 
 Quickly test out model configurations and ORM calls.
 
@@ -7,7 +7,7 @@ Quickly test out model configurations and ORM calls.
 Clone the repository
 
 ```shell
-$ git clone https://github.com/omaraboumrad/djanground
+$ git clone https://github.com/omaraboumrad/dryorm
 ```
 
 Build the stack
@@ -21,7 +21,7 @@ $ docker-compose build
 You can confirm that the container is working by simply running
 
 ```shell
-% docker run djanground/executor
+% docker run dryorm/executor
 
 {
   "output": "starting script\n<QuerySet []>\nending script\n",
@@ -40,7 +40,7 @@ There's also an [example](./example) available, you can run it using
 docker run \
     -v /path/to/host/example/models.py:/app/core/models.py \
     -v /path/to/host/example/transaction.py:/app/core/scripts/transaction.py \
-    djanground
+    dryorm
 
 {
   "output": "Available Drivers: ['john', 'doe', 'jane', 'smith']\n",

@@ -1,19 +1,19 @@
 import json
 import os
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'djanground.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'dryorm.settings'
 
 import channels
 import docker
 
-from djanground import constants
+from dryorm import constants
 
 
 def run_django(channel, models, transaction):
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
     result = client.containers.run(
-        "djanground/executor",
+        "dryorm/executor",
         remove=True,
         environment=[
             'MODELS={}'.format(models),

@@ -4,7 +4,7 @@ import channels
 import redis
 import rq
 
-from djanground import constants
+from dryorm import constants
 import tasks
 
 
