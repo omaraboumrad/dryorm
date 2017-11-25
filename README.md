@@ -1,6 +1,6 @@
 # dryorm
 
-Quickly test out model configurations and ORM calls.
+Quickly test out model configurations and transactions
 
 ## Build Instructions
 
@@ -18,37 +18,29 @@ $ docker-compose build
 
 ## How to run
 
-You can confirm that the container is working by simply running
-
 ```shell
-% docker run dryorm/executor
-
-{
-  "output": "starting script\n<QuerySet []>\nending script\n",
-  "queries": [
-    {
-      "sql": "SELECT \"core_question\".\"id\", \"core_question\".\"name\" FROM \"core_question\" LIMIT 21",
-      "time": "0.000"
-    }
-  ]
-}
+$docker-compose up -d
 ```
 
-There's also an [example](./example) available, you can run it using
+## Specification for Executors
+
+In order to contribute an executor, you need to deliver the following:
+
+- a self-sufficient container (preferably light)
+- that takes `MODELS` and `TRANSACTION` env variables
+- either fails with a none-zero error (stderr)
+- or succeeds with a json result
+
+The following example shows a sample of how the container will be called:
 
 ```shell
-docker run \
-    -v /path/to/host/example/models.py:/app/core/models.py \
-    -v /path/to/host/example/transaction.py:/app/core/scripts/transaction.py \
-    dryorm
-
+% docker run --rm\
+    -e MODELS="$(cat executor/example/models.py)" \
+    -e TRANSACTION="$(cat executor/example/transaction.py)" \
+    dryorm/executor
 {
   "output": "Available Drivers: ['john', 'doe', 'jane', 'smith']\n",
   "queries": [
-    {
-      "sql": "BEGIN",
-      "time": "0.000"
-    },
     {
       "sql": "INSERT INTO \"core_driver\" (\"name\") SELECT 'john' UNION ALL SELECT 'doe' UNION ALL SELECT 'jane' UNION ALL SELECT 'smith'",
       "time": "0.000"
@@ -59,5 +51,4 @@ docker run \
     }
   ]
 }
-
 ```
