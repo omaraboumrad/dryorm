@@ -36,7 +36,8 @@ $(document).ready(function() {
     var socket = null;
 
     var connect = function(){
-        socket= new WebSocket("ws://" + window.location.host + "/ws/");
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        socket = new WebSocket(ws_scheme + '://' + window.location.host + window.location.pathname + '/ws/');
 
         socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
