@@ -19,14 +19,14 @@ $ docker-compose build
 ## How to run
 
 ```shell
-$docker-compose up -d
+$ docker-compose up -d
 ```
 
 ## Specification for Executors
 
 In order to contribute an executor, you need to deliver the following:
 
-- a self-sufficient container (preferably light)
+- a self-sufficient image (preferably light)
 - that takes `MODELS` and `TRANSACTION` env variables
 - either fails with a none-zero error (stderr)
 - or succeeds with a json result
