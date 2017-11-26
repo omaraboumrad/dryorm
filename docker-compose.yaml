@@ -1,7 +1,10 @@
 version: '2.1'
 
 volumes:
-  static: {}
+    static: {}
+    certs: {}
+    certs-data: {}
+
 
 services:
 
@@ -10,8 +13,11 @@ services:
         image: dryorm/nginx
         volumes:
             - static:/app/static
+            - certs:/etc/letsencrypt
+            - certs-data:/data/letsencrypt
         ports:
             - 80:80
+            - 443:443
         depends_on:
             - backend
         links:
