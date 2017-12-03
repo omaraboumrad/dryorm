@@ -21,4 +21,6 @@ from core import views
 
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html')),
+    url(r'^save', views.save, name='save'),
+    url(r'^(?P<pk>[0-9a-zA-Z\-]+)', views.detail, name='detail'),
 ]

@@ -8,6 +8,9 @@ volumes:
 
 services:
 
+    db:
+        image: postgres:alpine
+
     nginx:
         build: ./webserver/
         image: dryorm/nginx
@@ -26,11 +29,6 @@ services:
     redis:
         image: redis:4.0.2-alpine
 
-    executor:
-        build: ./executor/
-        image: dryorm/executor
-        command: /bin/true
-
     backend:
         build: ./backend/
         image: dryorm/backend
@@ -39,6 +37,7 @@ services:
             - static:/app/static
         depends_on:
             - redis
+            - db
         links:
             - redis
         ports:
@@ -76,3 +75,10 @@ services:
         links:
             - redis
         command: python manage.py runworker
+
+    # Executors
+
+    executor-python-django:
+        build: ./executors/python-django
+        image: dryorm-executor/python-django
+        command: /bin/true

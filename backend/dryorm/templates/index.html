@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
+
 
     <title>Dry ORM</title>
 
@@ -23,16 +25,19 @@
         <div class="collapse navbar-collapse" id="navbarText">
             <div class="navbar-nav mr-auto">
                 <button class="btn btn-primary" id="run_button">Execute</button>
-                <button class="btn btn-success">Save</button>
-                <button class="btn btn-secondary">Fork</button>
-                <button class="btn btn-secondary">Share</button>
-                <select class="form-control">
-                      <option>Python - Django</option>
-                      <option>Python - Peewee</option>
-                      <option>Python - SQLAlchemy</option>
-                      <option>Ruby - Active Record</option>
-                      <option>C# - Entity Framework</option>
-                      <option>PHP - Laravel</option>
+                <button class="btn btn-success" id="save_button">Save</button>
+                <button class="btn btn-secondary" disabled>Fork</button>
+                <button class="btn btn-secondary" disabled>Share</button>
+                <select id="framework" class="form-control">
+                    {% for executor in executors %}
+                        <option value="{{executor.key}}">{{executor.verbose}}</option>
+                    {% endfor %}
+                </select>
+
+                <select id="keymap" class="form-control">
+                    <option>Standard</option>
+                    <option value="vim">VIM</option>
+                    <option value="emacs">Emacs - lol</option>
                 </select>
             </div>
             <span class="navbar-text" id="job">
@@ -47,7 +52,7 @@
                     Models
                 </h5>
                 <div class="card-body">
-                    <textarea id="code_models"></textarea>
+                    <textarea id="code_models">{{ object.models_code }}</textarea>
                 </div>
             </div>
         </div>
@@ -57,7 +62,7 @@
                     Transactions
                 </h5>
                 <div class="card-body">
-                    <textarea id="code_transactions"></textarea>
+                    <textarea id="code_transactions">{{ object.transactions_code }}</textarea>
                 </div>
             </div>
         </div>
@@ -92,6 +97,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/vim.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/emacs.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

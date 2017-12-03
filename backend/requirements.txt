@@ -4,3 +4,11 @@ django
 gunicorn
 channels
 asgi_redis
+
+psycopg2
+
+django-reversion
+django-extensions
+
+# dev
+bpython

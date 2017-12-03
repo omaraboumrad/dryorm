@@ -5,11 +5,14 @@ ENV PYTHONUNBUFFERED 1
 RUN apk add --no-cache --virtual .build-deps \
         build-base \
         python-dev \
+        postgresql-dev \
         libev-dev \
      && apk add --no-cache \
         libstdc++ \
         libev \
+        libpq \
         zlib \
+        openssl \
         pcre
 
 ADD ./requirements.txt /app/requirements.txt
