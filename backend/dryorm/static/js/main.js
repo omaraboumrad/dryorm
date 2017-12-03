@@ -71,6 +71,9 @@ $(document).ready(function() {
                     queries_editor.setValue(data.error);
                     $('#run_button').removeAttr('disabled')
                     break;
+                case 'job-image-not-found-error':
+                    $('#job').html('image not found!')
+                    break;
             }
         }
 
