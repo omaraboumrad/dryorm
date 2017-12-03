@@ -73,6 +73,7 @@ $(document).ready(function() {
                     break;
                 case 'job-image-not-found-error':
                     $('#job').html('image not found!')
+                    $('#run_button').removeAttr('disabled')
                     break;
             }
         }

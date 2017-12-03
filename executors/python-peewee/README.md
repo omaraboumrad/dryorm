@@ -1,6 +1,6 @@
-# Dry ORM Executor - Django
+# Dry ORM Executor - Peewee
 
-An executor for [Dry ORM](http://github.com/omaraboumrad/dryorm) focused on executing [Django](http://djangoproject.com/) ORM calls.
+An executor for [Dry ORM](http://github.com/omaraboumrad/dryorm) focused on executing [Peewee](http://docs.peewee-orm.com/en/latest/index.html) ORM calls.
 
 ## Build Instructions
 
@@ -13,7 +13,7 @@ $ git clone https://github.com/omaraboumrad/dryorm
 Build the stack
 
 ```shell
-$ docker build -t dryorm-executor/python-django .
+$ docker build -t dryorm-executor/python-peewee .
 ```
 
 ## How to run
@@ -22,7 +22,7 @@ $ docker build -t dryorm-executor/python-django .
 % docker run --rm \
     -e MODELS="$(cat example/models.py)" \
     -e TRANSACTION="$(cat example/transaction.py)" \
-    dryorm-executor/python-django
+    dryorm-executor/python-peewee
 {
   "output": "Available Drivers: ['john', 'doe', 'jane', 'smith']\n",
   "queries": [
@@ -37,4 +37,3 @@ $ docker build -t dryorm-executor/python-django .
   ]
 }
 ```
-
