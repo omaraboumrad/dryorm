@@ -110,7 +110,7 @@ $(document).ready(function() {
     $('#save_button').click(function(){
         $.post('/save', {
             transactions_code: transactions_editor.getValue(),
-            models_code: transactions_editor.getValue(),
+            models_code: models_editor.getValue(),
             framework: $('#framework :selected').val(),
             csrfmiddlewaretoken: csrftoken
         }).done(function(data) {
