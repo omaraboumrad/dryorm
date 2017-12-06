@@ -82,3 +82,8 @@ services:
         build: ./executors/python-django
         image: dryorm-executor/python-django
         command: /bin/true
+
+    executor-python-peewee:
+        build: ./executors/python-peewee
+        image: dryorm-executor/python-peewee
+        command: /bin/true

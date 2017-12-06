@@ -1,5 +1,4 @@
 SAMPLE_ONE_MODELS = """\
-# ---- Models Definition ----
 
 from django.db import models
 
@@ -14,49 +13,15 @@ class Item(models.Model):
     acquired = models.BooleanField(default=False)
 """
 
-SAMPLE_ONE_BAD = """\
-# ---- Create Data ----
-
-cart = ShoppingCart.objects.create(name='Bassems baby shower')
-
-cart.items.create(name='diapers')
-cart.items.create(name='breast pump')
-cart.items.create(name='baby armani shirt')
-cart.items.create(name='tramadol')
-cart.items.create(name='kam shaghle')
-cart.items.create(name='kam shaghle')
-cart.items.create(name='kam shaghle')
-cart.items.create(name='kam shaghle')
-cart.items.create(name='a', acquired=True)
-cart.items.create(name='b', acquired=True)
-cart.items.create(name='c', acquired=True)
-
-# ---- Query Data ----
-
-for item in Item.objects.filter(acquired=False):
-    print(f'[{item.cart.name}] - {item.name}')
-"""
-
 SAMPLE_ONE_GOOD = """\
-# ---- Create Data ----
-
-cart = ShoppingCart.objects.create(name='Bassems baby shower')
+cart = ShoppingCart.objects.create(name='Jaina baby shower')
 
 Item.objects.bulk_create([
     Item(cart=cart, name='diapers'),
     Item(cart=cart, name='breast pump'),
     Item(cart=cart, name='baby armani shirt'),
-    Item(cart=cart, name='tramadol'),
-    Item(cart=cart, name='kam shaghle'),
-    Item(cart=cart, name='kam shaghle'),
-    Item(cart=cart, name='kam shaghle'),
-    Item(cart=cart, name='kam shaghle'),
-    Item(cart=cart, name='a', acquired=True),
-    Item(cart=cart, name='b', acquired=True),
-    Item(cart=cart, name='c', acquired=True),
+    Item(cart=cart, name='other', acquired=True),
 ])
-
-# ---- Query Data ----
 
 pending = Item.objects.select_related('cart').filter(acquired=False)
 

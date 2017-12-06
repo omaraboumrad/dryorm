@@ -10,29 +10,44 @@ Clone the repository
 $ git clone https://github.com/omaraboumrad/dryorm
 ```
 
-Build the stack
+Build the image
 
 ```shell
+$ cd executors/python-peewee
 $ docker build -t dryorm-executor/python-peewee .
+```
+
+or alternatively build the entire stack
+
+```shell
+$ docker-compose build
 ```
 
 ## How to run
 
 ```shell
 % docker run --rm \
-    -e MODELS="$(cat example/models.py)" \
-    -e TRANSACTION="$(cat example/transaction.py)" \
-    dryorm-executor/python-peewee
+-e MODELS="$(cat example/models.py)" \
+-e TRANSACTION="$(cat example/transaction.py)" \
+dryorm-executor/python-peewee
 {
-  "output": "Available Drivers: ['john', 'doe', 'jane', 'smith']\n",
+  "output": "Newsboys\n",
   "queries": [
     {
-      "sql": "INSERT INTO \"core_driver\" (\"name\") SELECT 'john' UNION ALL SELECT 'doe' UNION ALL SELECT 'jane' UNION ALL SELECT 'smith'",
-      "time": "0.000"
+      "sql": [
+        "INSERT INTO \"artist\" (\"name\") VALUES (?)",
+        [
+          "Newsboys"
+        ]
+      ],
+      "time": 0.0
     },
     {
-      "sql": "SELECT \"core_driver\".\"name\" FROM \"core_driver\"",
-      "time": "0.000"
+      "sql": [
+        "SELECT \"t1\".\"id\", \"t1\".\"name\" FROM \"artist\" AS t1 LIMIT 1 OFFSET 0",
+        []
+      ],
+      "time": 0.0
     }
   ]
 }

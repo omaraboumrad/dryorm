@@ -10,10 +10,17 @@ Clone the repository
 $ git clone https://github.com/omaraboumrad/dryorm
 ```
 
-Build the stack
+Build the image
 
 ```shell
+$ cd executors/python-django
 $ docker build -t dryorm-executor/python-django .
+```
+
+or alternatively build the entire stack
+
+```shell
+$ docker-compose build
 ```
 
 ## How to run

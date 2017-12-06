@@ -1,8 +1,6 @@
 import peewee
 
-
 database = peewee.SqliteDatabase("db.sqlite3")
-
 
 class Artist(peewee.Model):
 
@@ -11,6 +9,5 @@ class Artist(peewee.Model):
     class Meta:
         database = database
 
-if __name__ == '__main__':
-
+def init():
     Artist.create_table()

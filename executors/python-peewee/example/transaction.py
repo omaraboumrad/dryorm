@@ -1,9 +1,8 @@
-import peewee
+from models import *
 
-from models import Artist
+def execute():
+    Artist.create(name="Newsboys")
 
-Artist.create(name="Newsboys")
+    artist = Artist.select().get()
 
-artist = Artist.select().get()
-
-print(artist.name)
+    print(artist.name)

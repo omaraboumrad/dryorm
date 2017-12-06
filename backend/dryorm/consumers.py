@@ -8,18 +8,6 @@ from dryorm import constants
 import tasks
 
 
-SCRIPT_PREPEND = """\
-from core.models import *
-
-
-def run():
-"""
-
-
-def indent(text):
-    return '\n'.join('    {}'.format(t) for t in text.split('\n'))
-
-
 def ws_message(message):
     connection = redis.Redis('redis')
     queue = rq.Queue(connection=connection)
@@ -28,7 +16,6 @@ def ws_message(message):
     framework = payload['framework']
     models_code = payload['models']
     trans_code = payload['transactions']
-    trans_code = SCRIPT_PREPEND + indent(trans_code)
 
     job = queue.enqueue(
         tasks.run_django,
