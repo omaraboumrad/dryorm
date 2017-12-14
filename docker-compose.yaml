@@ -87,3 +87,13 @@ services:
         build: ./executors/python-peewee
         image: dryorm-executor/python-peewee
         command: /bin/true
+
+    executor-python-sqlalchemy:
+        build: ./executors/python-sqlalchemy
+        image: dryorm-executor/python-sqlalchemy
+        command: /bin/true
+
+    executor-php-laravel:
+        build: ./executors/php-laravel
+        image: dryorm-executor/php-laravel
+        command: /bin/true
