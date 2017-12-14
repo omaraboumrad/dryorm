@@ -93,7 +93,7 @@ services:
         image: dryorm-executor/python-sqlalchemy
         command: /bin/true
 
-    executor-php-laravel:
-        build: ./executors/php-laravel
-        image: dryorm-executor/php-laravel
-        command: /bin/true
+    # executor-php-eloquent:
+    #     build: ./executors/php-eloquent
+    #     image: dryorm-executor/php-eloquent
+    #     command: /bin/true
