@@ -20,6 +20,8 @@ $(document).ready(function() {
 
     $('#run_button').attr('disabled', 'disabled')
 
+    $('#myModal').modal('show');
+
     // Setup CodeMirror
 
     var models_editor = CodeMirror.fromTextArea($('#code_models')[0], {

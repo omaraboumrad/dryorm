@@ -30,7 +30,11 @@
                 <button class="btn btn-secondary" disabled>Share</button>
                 <select id="framework" class="form-control">
                     {% for executor in executors %}
-                        <option value="{{executor.key}}">{{executor.verbose}}</option>
+                        <option
+                            {% if executor.key == object.framework %}
+                                selected
+                            {% endif %}
+                            value="{{executor.key}}">{{executor.verbose}}</option>
                     {% endfor %}
                 </select>
 
@@ -41,6 +45,7 @@
                 </select>
             </div>
             <span class="navbar-text" id="job">
+                test
             </span>
         </div>
     </nav>
@@ -86,6 +91,27 @@
                 </h5>
                 <div class="card-body">
                     <textarea id="result_queries"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade in" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Warning!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Dear Devs,</p>
+                    <p>this tool is in its early stages. Please do not abuse it.</p>
+                    <p>Thanks!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
