@@ -28,12 +28,13 @@
     <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
         <div class="flex flex-wrap items-center justify-between">
             <a class="text-xl font-bold" href="#">Dry ORM</a>
-            <div class="flex items-center space-x-4">
-                <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" id="run_button">Execute</button>
-                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" id="save_button">Save</button>
-                <button class="bg-gray-500 text-white px-4 py-2 rounded opacity-50 cursor-not-allowed" disabled>Fork</button>
-                <button class="bg-gray-500 text-white px-4 py-2 rounded opacity-50 cursor-not-allowed" disabled>Share</button>
-                <select id="framework" class="bg-white text-gray-800 px-4 py-2 rounded">
+            <div class="flex items-center space-x-2">
+                <span id="job" class="text-gray-300">test</span>
+                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
+                <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
+                <button class="bg-gray-500 text-white px-4 py-2 rounded-sm opacity-50 cursor-not-allowed" disabled>Fork</button>
+                <button class="bg-gray-500 text-white px-4 py-2 rounded-sm opacity-50 cursor-not-allowed" disabled>Share</button>
+                <select id="framework" class="bg-white text-gray-800 px-4 py-2 rounded-sm">
                     {% for executor in executors %}
                         <option
                             {% if executor.key == object.framework %}
@@ -43,12 +44,11 @@
                     {% endfor %}
                 </select>
 
-                <select id="keymap" class="bg-white text-gray-800 px-4 py-2 rounded">
+                <select id="keymap" class="bg-white text-gray-800 px-4 py-2 rounded-sm">
                     <option>Standard</option>
                     <option value="vim">VIM</option>
                     <option value="emacs">Emacs</option>
                 </select>
-                <span id="job" class="text-gray-300">test</span>
             </div>
         </div>
     </nav>
