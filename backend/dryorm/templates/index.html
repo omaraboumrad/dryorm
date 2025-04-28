@@ -53,58 +53,37 @@
         </div>
     </nav>
 
-    <div class="flex-1 p-4 grid grid-cols-1 md:grid-cols-2 gap-4 h-[calc(100vh-4rem)]">
-        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+    <div class="flex-1 p-1 grid grid-cols-1 md:grid-cols-2 gap-0.5 h-[calc(100vh-4rem)]">
+        <div class="bg-white  flex flex-col h-full">
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Models</h5>
             </div>
-            <div class="p-4 flex-1 overflow-hidden">
+            <div class=" flex-1 overflow-hidden">
                 <textarea id="code_models" class="w-full h-full">{{ object.models_code }}</textarea>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+        <div class="bg-white  flex flex-col h-full">
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Transactions</h5>
             </div>
-            <div class="p-4 flex-1 overflow-hidden">
+            <div class=" flex-1 overflow-hidden">
                 <textarea id="code_transactions" class="w-full h-full">{{ object.transactions_code }}</textarea>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+        <div class="bg-white  flex flex-col h-full">
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Output</h5>
             </div>
-            <div class="p-4 flex-1 overflow-auto">
+            <div class=" flex-1 overflow-auto">
                 <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+        <div class="bg-white  flex flex-col h-full">
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Queries</h5>
             </div>
-            <div class="p-4 flex-1 overflow-hidden">
+            <div class=" flex-1 overflow-hidden">
                 <textarea id="result_queries" class="w-full h-full"></textarea>
-            </div>
-        </div>
-    </div>
-
-    <div class="fixed inset-0 bg-black bg-opacity-50 hidden" id="myModal">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg max-w-md w-full">
-                <div class="p-4 border-b flex justify-between items-center">
-                    <h5 class="font-bold">Warning!</h5>
-                    <button type="button" class="text-gray-500 hover:text-gray-700" id="closeModal">
-                        <span class="text-2xl">&times;</span>
-                    </button>
-                </div>
-                <div class="p-4">
-                    <p>Dear Devs,</p>
-                    <p>this tool is in its early stages. Please do not abuse it.</p>
-                    <p>Thanks!</p>
-                </div>
-                <div class="p-4 border-t">
-                    <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" id="closeModalBtn">Close</button>
-                </div>
             </div>
         </div>
     </div>

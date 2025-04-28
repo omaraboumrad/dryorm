@@ -22,14 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var resultOutput = document.getElementById('result_output');
     var frameworkSelect = document.getElementById('framework');
     var keymapSelect = document.getElementById('keymap');
-    var modal = document.getElementById('myModal');
-    var closeModalBtn = document.getElementById('closeModalBtn');
-    var closeModalX = document.getElementById('closeModal');
 
     runButton.disabled = true;
-
-    // Show modal
-    modal.classList.remove('hidden');
 
     // Setup CodeMirror
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
@@ -162,12 +156,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
         }
     });
-
-    // Modal close handlers
-    function closeModal() {
-        modal.classList.add('hidden');
-    }
-
-    closeModalBtn.addEventListener('click', closeModal);
-    closeModalX.addEventListener('click', closeModal);
 });
