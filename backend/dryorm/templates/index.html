@@ -21,6 +21,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
 
+<style>
+.CodeMirror {
+    font-size: 1rem;
+    overflow: auto;
+}
+</style>
+
     <title>Dry ORM</title>
 
 </head>
@@ -55,11 +62,8 @@
 
     <div class="flex-1 p-1 grid grid-cols-2 gap-0.5 h-[calc(100vh-4rem)]">
         <div class="row-span-2 bg-white flex flex-col h-full">
-            <div class="p-4 border-b flex-shrink-0">
-                <h5 class="font-bold">Models</h5>
-            </div>
             <div class="flex-1 overflow-hidden">
-                <textarea id="code_models" class="w-full h-full">{{ object.models_code }}</textarea>
+                <textarea id="code_models">{{ object.models_code }}</textarea>
             </div>
         </div>
         <div class="bg-white flex flex-col h-full">
