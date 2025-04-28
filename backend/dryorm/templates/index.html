@@ -20,6 +20,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/prism.min.css" integrity="sha512-/mZ1FHPkg6EKcxo0fKXF51ak6Cr2ocgDi5ytaTBjsQZIH/RNs6GF6+oId/vPe3eJB836T36nXwVh/WBl/cWT4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
 <style>
 .CodeMirror {
@@ -78,17 +80,32 @@
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Queries</h5>
             </div>
-            <div class="flex-1 overflow-hidden">
-                <textarea id="result_queries" class="w-full h-full"></textarea>
+            <div class="flex-1 overflow-hidden" id="queries">
             </div>
         </div>
     </div>
+
+    <template id="query_template">
+        <details open class="rounded-sm p-4 bg-white group transition-all duration-300">
+            <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg text-gray-800 list-none">
+                <span>{short_query}</span>
+                <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </summary>
+            <div class="mt-2 text-gray-600">
+                <pre><code class="language-sql">{long_query}</code></pre>
+            </div>
+        </details>
+    </template>
 
     {% csrf_token %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-core.min.js" integrity="sha512-x0aNx8s5fNTSk7iaTiSuUtz6vbT7gtGjk+Dotp17u4TmUEbJUwNMUFKxMBlnMQ1+N8E5exPHvRcF1yoxJ8b/iA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-sql.min.js" integrity="sha512-fmx2W52F+6sZ8IYcsuKsFV0PjADeu32K3PdJGhxCKB+5VRVXpmuKgkfzTsW/B8cy/FPnEOlZX4fP/ZQk057tPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript" src="{% static 'js/vim.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/emacs.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
