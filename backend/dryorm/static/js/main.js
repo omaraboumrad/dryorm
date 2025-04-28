@@ -30,17 +30,20 @@ document.addEventListener('DOMContentLoaded', function() {
         mode: "python",
         lineNumbers: true,
     });
+    models_editor.setSize("100%", "100%");
 
     var transactions_editor = CodeMirror.fromTextArea(document.getElementById('code_transactions'), {
         mode: "python",
         lineNumbers: true,
     });
+    transactions_editor.setSize("100%", "100%");
 
     var queries_editor = CodeMirror.fromTextArea(document.getElementById('result_queries'), {
         mode: "text/x-sql",
         lineWrapping: true,
         readOnly: true
     });
+    queries_editor.setSize("100%", "100%");
 
     // Setup Websocket
     var socket = null;
