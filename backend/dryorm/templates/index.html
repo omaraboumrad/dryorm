@@ -1,21 +1,13 @@
 {% load static %}
 <!doctype html>
-<html class="no-js h-full" lang="">
+<html class="no-js h-full" lang="en">
 <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
-    <script>
-  window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-        gtag('config', 'UA-44612863-2');
-    </script>
 
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dry ORM</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
@@ -24,14 +16,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-light.min.css">
 
 
-<style>
-.CodeMirror {
-    font-size: 1rem;
-    overflow: auto;
-}
-</style>
+    <style>
+    .CodeMirror {
+        font-size: 1rem;
+        overflow: auto;
+    }
+    </style>
 
-    <title>Dry ORM</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
+    <script>
+  window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+        gtag('config', 'UA-44612863-2');
+    </script>
 
 </head>
 <body class="bg-gray-100 h-full flex flex-col">
@@ -42,8 +41,6 @@
                 <span id="job" class="text-gray-300">test</span>
                 <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
                 <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
-                <button class="bg-gray-500 text-white px-4 py-2 rounded-sm opacity-50 cursor-not-allowed" disabled>Fork</button>
-                <button class="bg-gray-500 text-white px-4 py-2 rounded-sm opacity-50 cursor-not-allowed" disabled>Share</button>
                 <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm">
                     {% for executor in executors %}
                         <option
@@ -52,12 +49,6 @@
                             {% endif %}
                             value="{{executor.key}}">{{executor.verbose}}</option>
                     {% endfor %}
-                </select>
-
-                <select id="keymap" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm">
-                    <option>Standard</option>
-                    <option value="vim">VIM</option>
-                    <option value="emacs">Emacs</option>
                 </select>
             </div>
         </div>
@@ -93,8 +84,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
-    <script type="text/javascript" src="{% static 'js/vim.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/emacs.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

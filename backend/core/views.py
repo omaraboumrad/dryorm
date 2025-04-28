@@ -19,7 +19,7 @@ def save(request):
 
     if form.is_valid():
         instance = form.save()
-        return http.HttpResponse(instance.pk)
+        return http.HttpResponse(f'"{instance.pk}"')
 
 
 detail = SnippetDetailView.as_view()

@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var queriesContainer = document.getElementById('queries');
     runButton.disabled = true;
 
-    // Setup CodeMirror
+    // --- Code Area ---
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
         lineNumbers: true,
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     models_editor.setSize("100%", "100%");
 
-    // Setup Websocket
+    // --- Websocket ---
     var socket = null;
 
     var connect = function(){
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     connect();
 
-    // Handle button events
+    // --- Button Handlers ---
     runButton.addEventListener('click', function(){
         resultOutput.textContent = '';
         queriesContainer.innerHTML = '';
@@ -115,30 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             jobElement.textContent = 'new snippet saved';
+            console.log(data)
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
     });
-
-    // Handle Codemirror Keymap
-    keymapSelect.addEventListener('change', function(){
-        var selected = this.value;
-
-        switch(selected){
-            case 'vim':
-                models_editor.setOption("emacsMode", false);
-                models_editor.setOption("vimMode", true);
-                break;
-            case 'emacs':
-                models_editor.setOption("vimMode", false);
-                models_editor.setOption("emacsMode", true);
-                break;
-            default:
-                models_editor.setOption("vimMode", false);
-                models_editor.setOption("emacsMode", false);
-                break;
-        }
-    });
-
 
 });
 
@@ -147,10 +127,7 @@ function addQuery(query) {
     const queriesContainer = document.getElementById('queries');
 
     const clone = template.content.cloneNode(true);
-
-    // Optionally, modify the cloned element if needed
-    // clone.querySelector('span').textContent = 'Query Title';
-    const codeElement = clone.querySelector('pre:first-child code.language-sql');
+    const codeElement = clone.querySelector('pre code.language-sql');
     codeElement.textContent = query;
 
     queriesContainer.appendChild(clone);
