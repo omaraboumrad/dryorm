@@ -15,6 +15,7 @@ function getCookie(name) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    hljs.highlightAll();
     var csrftoken = getCookie('csrftoken');
     var runButton = document.getElementById('run_button');
     var saveButton = document.getElementById('save_button');
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
         lineNumbers: true,
+        indentUnit: 4,
     });
     models_editor.setSize("100%", "100%");
 
@@ -152,5 +154,5 @@ function addQuery(query) {
     codeElement.textContent = query;
 
     queriesContainer.appendChild(clone);
-    Prism.highlightAll();
+    hljs.highlightAll();
 }

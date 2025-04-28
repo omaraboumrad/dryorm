@@ -20,7 +20,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/prism.min.css" integrity="sha512-/mZ1FHPkg6EKcxo0fKXF51ak6Cr2ocgDi5ytaTBjsQZIH/RNs6GF6+oId/vPe3eJB836T36nXwVh/WBl/cWT4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-light.min.css">
 
 
 <style>
@@ -63,34 +64,26 @@
     </nav>
 
     <div class="flex-1 p-1 grid grid-cols-2 gap-0.5 h-[calc(100vh-4rem)]">
-        <div class="row-span-2 bg-white flex flex-col h-full">
-            <div class="flex-1 overflow-hidden">
-                <textarea id="code_models">{{ object.models_code }}</textarea>
+        <div class="bg-white flex flex-col h-full">
+            <div class="p-2 border-b">
+                <h5 class="font-bold">Code</h5>
             </div>
+            <textarea id="code_models">{{ object.models_code }}</textarea>
         </div>
         <div class="bg-white flex flex-col h-full">
-            <div class="p-2 border-b flex-shrink-0">
-                <h5 class="font-bold">Output</h5>
+            <div class="p-2 border-b">
+                <h5 class="font-bold">Output & Queries</h5>
             </div>
-            <div class="flex-1 overflow-auto">
+            <div class="p-3 overflow-auto">
                 <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
             </div>
-        </div>
-        <div class="bg-white flex flex-col h-full">
-            <div class="p-2 border-b flex-shrink-0">
-                <h5 class="font-bold">Queries</h5>
-            </div>
-            <div class="flex-1 flex flex-col gap-0 p-4" id="queries">
-        <pre class="text-xs max-w-full"><code class="language-sql whitespace-pre-wrap break-all">SELECT * FROM FOO  SELECT * FROM FOO SELECT * FROM FOO SELECT * FROM FOO SELECT * FROM FOO SELECT * FROM FOO SELECT * FROM FOO SELECT * FROM FOO SELECT * FROM FOO SELECT * FROM FOO           </code></pre>
-        <pre class="text-xs max-w-full"><code class="language-sql whitespace-pre-wrap break-all">SELECT * FROM FOO</code></pre>
-        <pre class="text-xs max-w-full"><code class="language-sql whitespace-pre-wrap break-all">SELECT * FROM FOO</code></pre>
-        <pre class="text-xs max-w-full"><code class="language-sql whitespace-pre-wrap break-all">SELECT * FROM FOO</code></pre>
+            <div class="flex flex-col" id="queries">
             </div>
         </div>
     </div>
 
     <template id="query_template">
-        <pre class="text-xs max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
+        <pre class="text-sm max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
     </template>
 
     {% csrf_token %}
@@ -98,8 +91,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-core.min.js" integrity="sha512-x0aNx8s5fNTSk7iaTiSuUtz6vbT7gtGjk+Dotp17u4TmUEbJUwNMUFKxMBlnMQ1+N8E5exPHvRcF1yoxJ8b/iA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-sql.min.js" integrity="sha512-fmx2W52F+6sZ8IYcsuKsFV0PjADeu32K3PdJGhxCKB+5VRVXpmuKgkfzTsW/B8cy/FPnEOlZX4fP/ZQk057tPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
     <script type="text/javascript" src="{% static 'js/vim.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/emacs.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
