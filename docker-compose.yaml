@@ -1,7 +1,6 @@
 volumes:
     static: {}
-    certs: {}
-    certs-data: {}
+    postgres_data: {}
 
 networks:
     default:
@@ -17,6 +16,8 @@ services:
             POSTGRES_USER: dryorm
             POSTGRES_PASSWORD: dryorm
             POSTGRES_DB: dryorm
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
 
     nginx:
         build: ./webserver/
@@ -44,8 +45,8 @@ services:
             - database
             - redis
         ports:
-            - 5000:5000
-        command: python manage.py runserver 0.0.0.0:5000
+            - 8000
+        # command: python manage.py runserver 0.0.0.0:8000
         env_file: .env
 
     rq_worker:

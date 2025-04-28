@@ -9,9 +9,9 @@ PROJECT = env('PROJECT')
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = BASE_DIR / PROJECT
 SECRET_KEY = 'django-insecure-k9gt04n@$+w!k7_=%%q51-9jswas&y=pvv^)&)8!7xg7-#06q9'
-DEBUG = True
-ALLOWED_HOSTS = ["localhost", "webserver"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8060"]
+DEBUG = env('DEBUG') == 'True'
+ALLOWED_HOSTS = ["localhost", "webserver", "dryorm.d.xterm.info", "dryorm.xterm.info"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8060", "http://webserver:8060", "http://dryorm.d.xterm.info", "https://dryorm.xterm.info"]
 
 
 INSTALLED_APPS = [
@@ -99,7 +99,11 @@ STATIC_ROOT = BASE_DIR / "static"
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
+}
 
 CHANNEL_LAYERS = {
     'default': {

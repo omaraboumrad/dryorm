@@ -26,4 +26,4 @@ RUN pip install -r /app/requirements.txt
 ADD ./ /app/
 WORKDIR /app/
 VOLUME ["/app/"]
-CMD ["gunicorn", "--reload", "--workers=3", "-b", "0.0.0.0:5000", "dryorm.wsgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "dryorm.asgi:application"]

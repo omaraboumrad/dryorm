@@ -1,89 +1,89 @@
 {% load static %}
 <!doctype html>
 <html class="no-js h-full" lang="en">
-<head>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Dry ORM</title>
 
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dry ORM</title>
+        <!-- Who cares... /shrug -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Boohoo -->
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
+        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css">
 
+        <style>
+            .CodeMirror {
+                font-size: 1rem;
+                overflow: auto;
+            }
+        </style>
 
-    <style>
-    .CodeMirror {
-        font-size: 1rem;
-        overflow: auto;
-    }
-    </style>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-44612863-2');
+        </script>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
-    <script>
-  window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-        gtag('config', 'UA-44612863-2');
-    </script>
-
-</head>
-<body class="bg-gray-100 h-full flex flex-col">
-    <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
-        <div class="flex flex-wrap items-center justify-between">
-            <a class="text-xl font-bold" href="#">Dry ORM</a>
-            <div class="flex items-center space-x-2">
-                <span id="job" class="text-gray-300">test</span>
-                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
-                <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
-                <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
-                    {% for executor in executors %}
+    </head>
+    <body class="bg-gray-100 h-full flex flex-col">
+        <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
+            <div class="flex flex-wrap items-center justify-between">
+                <a class="text-xl font-bold" href="#">Dry ORM</a>
+                <div class="flex items-center space-x-2">
+                    <span id="job" class="text-gray-300">test</span>
+                    <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
+                    <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
+                        {% for executor in executors %}
                         <option
-                            {% if executor.key == object.framework %}
+                                {% if executor.key == object.framework %}
                                 selected
-                            {% endif %}
-                            value="{{executor.key}}">{{executor.verbose}}</option>
-                    {% endfor %}
-                </select>
+                                {% endif %}
+                                value="{{executor.key}}">{{executor.verbose}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </nav>
+
+        <div id="main_grid" class="flex-1 p-1 grid grid-cols-1 gap-0.5">
+            <div class="bg-white flex flex-col h-full">
+                <textarea id="code_models">{{ object.models_code }}</textarea>
+            </div>
+            <div id="right_column" class="bg-white flex flex-col h-full hidden">
+                <div class="p-2">
+                    <h5 class="font-bold">Output:</h5>
+                </div>
+                <div class="p-3 overflow-auto">
+                    <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
+                </div>
+                <div class="p-2">
+                    <h5 class="font-bold">Queries:</h5>
+                </div>
+                <div class="flex flex-col" id="queries">
+                </div>
             </div>
         </div>
-    </nav>
 
-<div id="main_grid" class="flex-1 p-1 grid grid-cols-1 gap-0.5">
-    <div class="bg-white flex flex-col h-full">
-        <textarea id="code_models">{{ object.models_code }}</textarea>
-    </div>
-    <div id="right_column" class="bg-white flex flex-col h-full hidden">
-        <div class="p-2">
-            <h5 class="font-bold">Output:</h5>
-        </div>
-        <div class="p-3 overflow-auto">
-            <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
-        </div>
-        <div class="p-2">
-            <h5 class="font-bold">Queries:</h5>
-        </div>
-        <div class="flex flex-col" id="queries">
-        </div>
-    </div>
-</div>
+        <template id="query_template">
+            <pre class="text-md max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
+        </template>
 
-    <template id="query_template">
-        <pre class="text-md max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
-    </template>
+        {% csrf_token %}
 
-    {% csrf_token %}
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
-    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
-</body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+        <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+    </body>
 </html>
