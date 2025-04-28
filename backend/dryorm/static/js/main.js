@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
             switch(data.event){
                 case 'job-fired':
                     jobElement.textContent = data.key;
+
                     break;
 
                 case 'job-done':
@@ -70,6 +71,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     runButton.disabled = false;
                     break;
             }
+
+
+            showRightColumn();
         }
 
         socket.onopen = function(e) {
@@ -132,4 +136,15 @@ function addQuery(query) {
 
     queriesContainer.appendChild(clone);
     hljs.highlightAll();
+}
+
+function showRightColumn() {
+    const rightColumn = document.getElementById('right_column');
+    const grid = document.getElementById('main_grid');
+
+    if (rightColumn.classList.contains('hidden')) {
+        rightColumn.classList.remove('hidden');
+        grid.classList.remove('grid-cols-1');
+        grid.classList.add('grid-cols-2');
+    }
 }

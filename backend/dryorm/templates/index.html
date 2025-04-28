@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/a11y-light.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css">
 
 
     <style>
@@ -41,7 +41,7 @@
                 <span id="job" class="text-gray-300">test</span>
                 <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
                 <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
-                <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm">
+                <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
                     {% for executor in executors %}
                         <option
                             {% if executor.key == object.framework %}
@@ -54,27 +54,27 @@
         </div>
     </nav>
 
-    <div class="flex-1 p-1 grid grid-cols-2 gap-0.5 h-[calc(100vh-4rem)]">
-        <div class="bg-white flex flex-col h-full">
-            <div class="p-2 border-b">
-                <h5 class="font-bold">Code</h5>
-            </div>
-            <textarea id="code_models">{{ object.models_code }}</textarea>
+<div id="main_grid" class="flex-1 p-1 grid grid-cols-1 gap-0.5">
+    <div class="bg-white flex flex-col h-full">
+        <textarea id="code_models">{{ object.models_code }}</textarea>
+    </div>
+    <div id="right_column" class="bg-white flex flex-col h-full hidden">
+        <div class="p-2">
+            <h5 class="font-bold">Output:</h5>
         </div>
-        <div class="bg-white flex flex-col h-full">
-            <div class="p-2 border-b">
-                <h5 class="font-bold">Output & Queries</h5>
-            </div>
-            <div class="p-3 overflow-auto">
-                <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
-            </div>
-            <div class="flex flex-col" id="queries">
-            </div>
+        <div class="p-3 overflow-auto">
+            <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
+        </div>
+        <div class="p-2">
+            <h5 class="font-bold">Queries:</h5>
+        </div>
+        <div class="flex flex-col" id="queries">
         </div>
     </div>
+</div>
 
     <template id="query_template">
-        <pre class="text-sm max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
+        <pre class="text-md max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
     </template>
 
     {% csrf_token %}
