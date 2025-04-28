@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html class="no-js" lang="">
+<html class="no-js h-full" lang="">
 <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
@@ -17,28 +17,23 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
-    <link rel="stylesheet" href="{% static 'css/site.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-
 
     <title>Dry ORM</title>
 
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand pull-right" href="#">Dry ORM</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarText">
-            <div class="navbar-nav mr-auto">
-                <button class="btn btn-primary" id="run_button">Execute</button>
-                <button class="btn btn-success" id="save_button">Save</button>
-                <button class="btn btn-secondary" disabled>Fork</button>
-                <button class="btn btn-secondary" disabled>Share</button>
-                <select id="framework" class="form-control">
+<body class="bg-gray-100 h-full flex flex-col">
+    <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
+        <div class="flex flex-wrap items-center justify-between">
+            <a class="text-xl font-bold" href="#">Dry ORM</a>
+            <div class="flex items-center space-x-4">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" id="run_button">Execute</button>
+                <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" id="save_button">Save</button>
+                <button class="bg-gray-500 text-white px-4 py-2 rounded opacity-50 cursor-not-allowed" disabled>Fork</button>
+                <button class="bg-gray-500 text-white px-4 py-2 rounded opacity-50 cursor-not-allowed" disabled>Share</button>
+                <select id="framework" class="bg-white text-gray-800 px-4 py-2 rounded">
                     {% for executor in executors %}
                         <option
                             {% if executor.key == object.framework %}
@@ -48,80 +43,67 @@
                     {% endfor %}
                 </select>
 
-                <select id="keymap" class="form-control">
+                <select id="keymap" class="bg-white text-gray-800 px-4 py-2 rounded">
                     <option>Standard</option>
                     <option value="vim">VIM</option>
                     <option value="emacs">Emacs</option>
                 </select>
+                <span id="job" class="text-gray-300">test</span>
             </div>
-            <span class="navbar-text" id="job">
-                test
-            </span>
         </div>
     </nav>
 
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="card models">
-                <h5 class="card-header">
-                    Models
-                </h5>
-                <div class="card-body">
-                    <textarea id="code_models">{{ object.models_code }}</textarea>
-                </div>
+    <div class="flex-1 p-4 grid grid-cols-1 md:grid-cols-2 gap-4 h-[calc(100vh-4rem)]">
+        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+            <div class="p-4 border-b flex-shrink-0">
+                <h5 class="font-bold">Models</h5>
+            </div>
+            <div class="p-4 flex-1 overflow-hidden">
+                <textarea id="code_models" class="w-full h-full">{{ object.models_code }}</textarea>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="card transactions">
-                <h5 class="card-header">
-                    Transactions
-                </h5>
-                <div class="card-body">
-                    <textarea id="code_transactions">{{ object.transactions_code }}</textarea>
-                </div>
+        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+            <div class="p-4 border-b flex-shrink-0">
+                <h5 class="font-bold">Transactions</h5>
+            </div>
+            <div class="p-4 flex-1 overflow-hidden">
+                <textarea id="code_transactions" class="w-full h-full">{{ object.transactions_code }}</textarea>
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="card output">
-                <h5 class="card-header">
-                    Output
-                </h5>
-                <div class="card-body">
-                    <pre id="result_output"></pre>
-                </div>
+        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+            <div class="p-4 border-b flex-shrink-0">
+                <h5 class="font-bold">Output</h5>
+            </div>
+            <div class="p-4 flex-1 overflow-auto">
+                <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="card queries">
-                <h5 class="card-header">
-                    Queries
-                </h5>
-                <div class="card-body">
-                    <textarea id="result_queries"></textarea>
-                </div>
+        <div class="bg-white rounded-lg shadow flex flex-col h-full">
+            <div class="p-4 border-b flex-shrink-0">
+                <h5 class="font-bold">Queries</h5>
+            </div>
+            <div class="p-4 flex-1 overflow-hidden">
+                <textarea id="result_queries" class="w-full h-full"></textarea>
             </div>
         </div>
     </div>
 
-    <div class="modal fade in" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Warning!</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+    <div class="fixed inset-0 bg-black bg-opacity-50 hidden" id="myModal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h5 class="font-bold">Warning!</h5>
+                    <button type="button" class="text-gray-500 hover:text-gray-700" id="closeModal">
+                        <span class="text-2xl">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="p-4">
                     <p>Dear Devs,</p>
                     <p>this tool is in its early stages. Please do not abuse it.</p>
                     <p>Thanks!</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <div class="p-4 border-t">
+                    <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" id="closeModalBtn">Close</button>
                 </div>
             </div>
         </div>
@@ -129,9 +111,6 @@
 
     {% csrf_token %}
 
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>

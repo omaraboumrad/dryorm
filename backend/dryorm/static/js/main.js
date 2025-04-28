@@ -3,7 +3,7 @@ function getCookie(name) {
     if (document.cookie && document.cookie !== '') {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
+            var cookie = cookies[i].trim();
             // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
@@ -14,34 +14,41 @@ function getCookie(name) {
     return cookieValue;
 }
 
-
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var csrftoken = getCookie('csrftoken');
+    var runButton = document.getElementById('run_button');
+    var saveButton = document.getElementById('save_button');
+    var jobElement = document.getElementById('job');
+    var resultOutput = document.getElementById('result_output');
+    var frameworkSelect = document.getElementById('framework');
+    var keymapSelect = document.getElementById('keymap');
+    var modal = document.getElementById('myModal');
+    var closeModalBtn = document.getElementById('closeModalBtn');
+    var closeModalX = document.getElementById('closeModal');
 
-    $('#run_button').attr('disabled', 'disabled')
+    runButton.disabled = true;
 
-    $('#myModal').modal('show');
+    // Show modal
+    modal.classList.remove('hidden');
 
     // Setup CodeMirror
-
-    var models_editor = CodeMirror.fromTextArea($('#code_models')[0], {
+    var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
         lineNumbers: true,
     });
 
-    var transactions_editor = CodeMirror.fromTextArea($('#code_transactions')[0], {
+    var transactions_editor = CodeMirror.fromTextArea(document.getElementById('code_transactions'), {
         mode: "python",
         lineNumbers: true,
     });
 
-    var queries_editor = CodeMirror.fromTextArea($('#result_queries')[0], {
+    var queries_editor = CodeMirror.fromTextArea(document.getElementById('result_queries'), {
         mode: "text/x-sql",
         lineWrapping: true,
         readOnly: true
     });
 
     // Setup Websocket
-
     var socket = null;
 
     var connect = function(){
@@ -53,12 +60,12 @@ $(document).ready(function() {
 
             switch(data.event){
                 case 'job-fired':
-                    $("#job").html(data.key);
+                    jobElement.textContent = data.key;
                     break;
 
                 case 'job-done':
                     console.log(data.result.output);
-                    $('#result_output').text(data.result.output);
+                    resultOutput.textContent = data.result.output;
                     var queries = [];
 
                     for(var i=0;i<data.result.queries.length;i++){
@@ -66,30 +73,30 @@ $(document).ready(function() {
                     }
 
                     queries_editor.setValue(queries.join('\n\n'));
-                    $('#run_button').removeAttr('disabled')
+                    runButton.disabled = false;
                     break;
 
                 case 'job-internal-error':
                 case 'job-code-error':
                     queries_editor.setValue(data.error);
-                    $('#run_button').removeAttr('disabled')
+                    runButton.disabled = false;
                     break;
                 case 'job-image-not-found-error':
-                    $('#job').html('image not found!')
-                    $('#run_button').removeAttr('disabled')
+                    jobElement.textContent = 'image not found!'
+                    runButton.disabled = false;
                     break;
             }
         }
 
         socket.onopen = function(e) {
-            $('#job').html('connected aloha!');
-            $('#run_button').removeAttr('disabled')
+            jobElement.textContent = 'connected aloha!';
+            runButton.disabled = false;
         }
 
         socket.onclose = function(e) {
-            $('#job').html('connection died');
+            jobElement.textContent = 'connection died';
             setTimeout(function(){
-                $('#job').html('reconnecting');
+                jobElement.textContent = 'reconnecting';
                 connect();
             }, 2000);
         }
@@ -98,38 +105,41 @@ $(document).ready(function() {
     connect();
 
     // Handle button events
-
-    $('#run_button').click(function(){
-        $('#result_output').empty()
+    runButton.addEventListener('click', function(){
+        resultOutput.textContent = '';
         queries_editor.setValue('');
 
         var payload = JSON.stringify({
             models: models_editor.getValue(),
             transactions: transactions_editor.getValue(),
-            framework: $('#framework :selected').val()
+            framework: frameworkSelect.value
         });
 
         socket.send(payload);
-
-        $('#run_button').attr('disabled', 'disabled')
+        runButton.disabled = true;
     });
 
-    $('#save_button').click(function(){
-        $.post('/save', {
-            transactions_code: transactions_editor.getValue(),
-            models_code: models_editor.getValue(),
-            framework: $('#framework :selected').val(),
-            csrfmiddlewaretoken: csrftoken
-        }).done(function(data) {
-            $("#job").html('new snippet saved');
+    saveButton.addEventListener('click', function(){
+        var formData = new FormData();
+        formData.append('transactions_code', transactions_editor.getValue());
+        formData.append('models_code', models_editor.getValue());
+        formData.append('framework', frameworkSelect.value);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+
+        fetch('/save', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            jobElement.textContent = 'new snippet saved';
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
     });
 
     // Handle Codemirror Keymap
-
-    $('#keymap').change(function(){
-        var selected = $('#keymap :selected').val();
+    keymapSelect.addEventListener('change', function(){
+        var selected = this.value;
 
         switch(selected){
             case 'vim':
@@ -151,7 +161,13 @@ $(document).ready(function() {
                 transactions_editor.setOption("emacsMode", false);
                 break;
         }
-
     });
 
+    // Modal close handlers
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    closeModalX.addEventListener('click', closeModal);
 });
