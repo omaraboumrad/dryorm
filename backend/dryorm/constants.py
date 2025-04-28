@@ -13,12 +13,12 @@ EXECUTORS = (
         image='dryorm-executor/python-django',
         key='python/django',
         verbose='Python - Django'),
-    Executor(
-        image='dryorm-executor/python-sqlalchemy',
-        key='python/sqlalchemy',
-        verbose='Python - SQLAlchemy'),
-    Executor(
-        image='dryorm-executor/python-peewee',
-        key='python/peewee',
-        verbose='Python - Peewee')
+    # Executor(
+    #     image='dryorm-executor/python-sqlalchemy',
+    #     key='python/sqlalchemy',
+    #     verbose='Python - SQLAlchemy'),
+    # Executor(
+    #     image='dryorm-executor/python-peewee',
+    #     key='python/peewee',
+    #     verbose='Python - Peewee')
 )

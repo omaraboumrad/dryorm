@@ -34,7 +34,7 @@
                 <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
                 <button class="bg-gray-500 text-white px-4 py-2 rounded-sm opacity-50 cursor-not-allowed" disabled>Fork</button>
                 <button class="bg-gray-500 text-white px-4 py-2 rounded-sm opacity-50 cursor-not-allowed" disabled>Share</button>
-                <select id="framework" class="bg-white text-gray-800 px-4 py-2 rounded-sm">
+                <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm">
                     {% for executor in executors %}
                         <option
                             {% if executor.key == object.framework %}
@@ -44,7 +44,7 @@
                     {% endfor %}
                 </select>
 
-                <select id="keymap" class="bg-white text-gray-800 px-4 py-2 rounded-sm">
+                <select id="keymap" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm">
                     <option>Standard</option>
                     <option value="vim">VIM</option>
                     <option value="emacs">Emacs</option>
@@ -53,36 +53,28 @@
         </div>
     </nav>
 
-    <div class="flex-1 p-1 grid grid-cols-1 md:grid-cols-2 gap-0.5 h-[calc(100vh-4rem)]">
-        <div class="bg-white  flex flex-col h-full">
+    <div class="flex-1 p-1 grid grid-cols-2 gap-0.5 h-[calc(100vh-4rem)]">
+        <div class="row-span-2 bg-white flex flex-col h-full">
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Models</h5>
             </div>
-            <div class=" flex-1 overflow-hidden">
+            <div class="flex-1 overflow-hidden">
                 <textarea id="code_models" class="w-full h-full">{{ object.models_code }}</textarea>
             </div>
         </div>
-        <div class="bg-white  flex flex-col h-full">
-            <div class="p-4 border-b flex-shrink-0">
-                <h5 class="font-bold">Transactions</h5>
-            </div>
-            <div class=" flex-1 overflow-hidden">
-                <textarea id="code_transactions" class="w-full h-full">{{ object.transactions_code }}</textarea>
-            </div>
-        </div>
-        <div class="bg-white  flex flex-col h-full">
+        <div class="bg-white flex flex-col h-full">
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Output</h5>
             </div>
-            <div class=" flex-1 overflow-auto">
+            <div class="flex-1 overflow-auto">
                 <pre id="result_output" class="whitespace-pre-wrap h-full"></pre>
             </div>
         </div>
-        <div class="bg-white  flex flex-col h-full">
+        <div class="bg-white flex flex-col h-full">
             <div class="p-4 border-b flex-shrink-0">
                 <h5 class="font-bold">Queries</h5>
             </div>
-            <div class=" flex-1 overflow-hidden">
+            <div class="flex-1 overflow-hidden">
                 <textarea id="result_queries" class="w-full h-full"></textarea>
             </div>
         </div>

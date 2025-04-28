@@ -17,7 +17,7 @@ from docker.errors import (
 from dryorm import constants
 
 
-def run_django(channel, models, transaction, framework):
+def run_django(channel, models, framework):
     client = docker.from_env()
 
     executor = [e for e in constants.EXECUTORS if e.key == framework][0]
@@ -28,7 +28,6 @@ def run_django(channel, models, transaction, framework):
             remove=True,
             environment=[
                 'MODELS={}'.format(models),
-                'TRANSACTION={}'.format(transaction)
             ])
     except ContainerError as error: # Do some logging
         reply = json.dumps(dict(
@@ -54,11 +53,6 @@ def run_django(channel, models, transaction, framework):
             result=json.loads(decoded)
         ))
     finally:
-        print(channel)
-        print(models)
-        print(transaction)
-        print(framework)
-        print(reply)
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.send)(channel, {
             "type": "websocket.send",

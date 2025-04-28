@@ -21,13 +21,11 @@ class WSConsumer(AsyncWebsocketConsumer):
         payload = json.loads(text_data)
         framework = payload['framework']
         models_code = payload['models']
-        trans_code = payload['transactions']
 
         job = queue.enqueue(
             tasks.run_django,
             self.channel_name,
             models_code,
-            trans_code,
             framework)
 
         reply = json.dumps(dict(

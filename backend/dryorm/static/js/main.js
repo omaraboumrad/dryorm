@@ -32,12 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     models_editor.setSize("100%", "100%");
 
-    var transactions_editor = CodeMirror.fromTextArea(document.getElementById('code_transactions'), {
-        mode: "python",
-        lineNumbers: true,
-    });
-    transactions_editor.setSize("100%", "100%");
-
     var queries_editor = CodeMirror.fromTextArea(document.getElementById('result_queries'), {
         mode: "text/x-sql",
         lineWrapping: true,
@@ -108,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var payload = JSON.stringify({
             models: models_editor.getValue(),
-            transactions: transactions_editor.getValue(),
             framework: frameworkSelect.value
         });
 
@@ -118,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveButton.addEventListener('click', function(){
         var formData = new FormData();
-        formData.append('transactions_code', transactions_editor.getValue());
         formData.append('models_code', models_editor.getValue());
         formData.append('framework', frameworkSelect.value);
         formData.append('csrfmiddlewaretoken', csrftoken);
@@ -141,21 +133,15 @@ document.addEventListener('DOMContentLoaded', function() {
         switch(selected){
             case 'vim':
                 models_editor.setOption("emacsMode", false);
-                transactions_editor.setOption("emacsMode", false);
                 models_editor.setOption("vimMode", true);
-                transactions_editor.setOption("vimMode", true);
                 break;
             case 'emacs':
                 models_editor.setOption("vimMode", false);
-                transactions_editor.setOption("vimMode", false);
                 models_editor.setOption("emacsMode", true);
-                transactions_editor.setOption("emacsMode", true);
                 break;
             default:
                 models_editor.setOption("vimMode", false);
-                transactions_editor.setOption("vimMode", false);
                 models_editor.setOption("emacsMode", false);
-                transactions_editor.setOption("emacsMode", false);
                 break;
         }
     });

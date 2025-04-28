@@ -3,15 +3,11 @@ import uuid
 from django.db import models
 from django.urls import reverse
 
-# import reversion
 
-
-# @reversion.register()
 class Snippet(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     models_code = models.TextField()
-    transactions_code = models.TextField()
     framework = models.CharField(max_length=100)
 
     created = models.DateField(auto_now=True)

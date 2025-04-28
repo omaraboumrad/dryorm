@@ -10,6 +10,5 @@ class SnippetForm(ModelForm):
 
         fields = [
             'models_code',
-            'transactions_code',
             'framework'
         ]
