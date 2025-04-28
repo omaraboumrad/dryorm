@@ -1,19 +1,24 @@
-FROM python:alpine3.6
+FROM python:3.12-slim-bullseye
 
 ENV PYTHONUNBUFFERED 1
 
-RUN apk add --no-cache --virtual .build-deps \
-        build-base \
-        python-dev \
-        postgresql-dev \
-        libev-dev \
-     && apk add --no-cache \
-        libstdc++ \
-        libev \
-        libpq \
-        zlib \
-        openssl \
-        pcre
+RUN apt-get update
+RUN apt-get install -y \
+  build-essential \
+  python-dev \
+  libpq-dev \
+  zlib1g \
+  zlib1g-dev \
+  libev4 \
+  libev-dev \
+  linux-libc-dev \
+  libpcre3 \
+  libssl-dev \
+  libffi-dev \
+  libldap2-dev \
+  libsasl2-dev \
+  wget \
+  && rm -rf /var/lib/apt/lists/*
 
 ADD ./requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt

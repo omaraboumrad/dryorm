@@ -1,6 +1,21 @@
 import os
-from channels.asgi import get_channel_layer
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dryorm.settings')
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
+from django.core.asgi import get_asgi_application
 
-channel_layer = get_channel_layer()
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dryorm.settings")
+
+django_asgi_app = get_asgi_application()
+
+from dryorm.routing import websocket_urlpatterns
+
+application = ProtocolTypeRouter(
+    {
+        "http": django_asgi_app,
+        "websocket": AllowedHostsOriginValidator(
+            AuthMiddlewareStack(URLRouter(websocket_urlpatterns))
+        ),
+    }
+)

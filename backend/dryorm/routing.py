@@ -1,7 +1,6 @@
-from channels.routing import route
+from django.urls import re_path
+from dryorm.consumers import WSConsumer
 
-from dryorm.consumers import ws_message
-
-channel_routing = [
-    route('websocket.receive', ws_message),
+websocket_urlpatterns = [
+    re_path(r'ws/$', WSConsumer.as_asgi()),
 ]

@@ -1,33 +1,38 @@
-version: '2.1'
-
 volumes:
     static: {}
     certs: {}
     certs-data: {}
 
+networks:
+    default:
+        external: true
+        name: web
+
 
 services:
 
-    db:
+    database:
         image: postgres:alpine
+        environment:
+            POSTGRES_USER: dryorm
+            POSTGRES_PASSWORD: dryorm
+            POSTGRES_DB: dryorm
 
     nginx:
         build: ./webserver/
         image: dryorm/nginx
         volumes:
             - static:/app/static
-            - certs:/etc/letsencrypt
-            - certs-data:/data/letsencrypt
         ports:
-            - 80:80
-            - 443:443
+            - 80
         depends_on:
             - backend
-        links:
-            - backend
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.nginx.rule=Host(`dryorm.d.xterm.info`)"
 
     redis:
-        image: redis:4.0.2-alpine
+        image: redis:7.4-alpine
 
     backend:
         build: ./backend/
@@ -36,12 +41,12 @@ services:
             - ./backend:/app
             - static:/app/static
         depends_on:
-            - redis
-            - db
-        links:
+            - database
             - redis
         ports:
-            - 5000
+            - 5000:5000
+        command: python manage.py runserver 0.0.0.0:5000
+        env_file: .env
 
     rq_worker:
         image: dryorm/backend
@@ -51,30 +56,19 @@ services:
         depends_on:
             - redis
             - backend
-        links:
-            - redis
         command: rq worker --url redis://redis:6379
+        env_file: .env
 
-    daphne:
-        image: dryorm/backend
-        volumes:
-            - ./backend:/app
+    rq_dashboard:
+        build: ./rq-dashboard/
+        image: dryorm/rq-dashboard
         depends_on:
-            - backend
+            - redis
         ports:
-            - 5001
-        command: daphne -b 0.0.0.0 -p 5001 dryorm.asgi:channel_layer
-
-    channels_worker:
-        image: dryorm/backend
-        volumes:
-            - ./backend:/app
-        depends_on:
-            - redis
-            - backend
-        links:
-            - redis
-        command: python manage.py runworker
+            - 9181:9181
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.rq-dashboard.rule=Host(`rq.dryorm.d.xterm.info`)"
 
     # Executors
 
@@ -83,15 +77,15 @@ services:
         image: dryorm-executor/python-django
         command: /bin/true
 
-    executor-python-peewee:
-        build: ./executors/python-peewee
-        image: dryorm-executor/python-peewee
-        command: /bin/true
+            # executor-python-peewee:
+            #     build: ./executors/python-peewee
+            #     image: dryorm-executor/python-peewee
+            #     command: /bin/true
 
-    executor-python-sqlalchemy:
-        build: ./executors/python-sqlalchemy
-        image: dryorm-executor/python-sqlalchemy
-        command: /bin/true
+            # executor-python-sqlalchemy:
+            #     build: ./executors/python-sqlalchemy
+            #     image: dryorm-executor/python-sqlalchemy
+            #     command: /bin/true
 
     # executor-php-eloquent:
     #     build: ./executors/php-eloquent

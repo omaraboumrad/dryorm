@@ -1,14 +1,11 @@
-rq
-docker
-django
-gunicorn
-channels
-asgi_redis
+rq==2.3.2
+docker==7.1.0
+gunicorn==23.0.0
+channels==4.2.2
+channels-redis==4.2.1
+psycopg2-binary==2.9.10
 
-psycopg2
-
-django-reversion
-django-extensions
-
-# dev
-bpython
+django-reversion==5.1.0
+Django==5.2
+django-extensions==4.1
+daphne==4.1.2

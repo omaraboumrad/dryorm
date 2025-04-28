@@ -57,7 +57,8 @@ $(document).ready(function() {
                     break;
 
                 case 'job-done':
-                    $('#result_output').html(data.result.output);
+                    console.log(data.result.output);
+                    $('#result_output').text(data.result.output);
                     var queries = [];
 
                     for(var i=0;i<data.result.queries.length;i++){

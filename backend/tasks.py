@@ -5,6 +5,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'dryorm.settings'
 
 import channels
 import docker
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from docker.errors import (
     APIError,
@@ -52,4 +54,13 @@ def run_django(channel, models, transaction, framework):
             result=json.loads(decoded)
         ))
     finally:
-        channels.Channel(channel).send(dict(text=reply))
+        print(channel)
+        print(models)
+        print(transaction)
+        print(framework)
+        print(reply)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)(channel, {
+            "type": "websocket.send",
+            "text": reply
+        })
