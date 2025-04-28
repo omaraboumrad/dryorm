@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var resultOutput = document.getElementById('result_output');
     var frameworkSelect = document.getElementById('framework');
     var keymapSelect = document.getElementById('keymap');
-
+    var queriesContainer = document.getElementById('queries');
     runButton.disabled = true;
 
     // Setup CodeMirror
@@ -31,13 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
         lineNumbers: true,
     });
     models_editor.setSize("100%", "100%");
-
-    var queries_editor = CodeMirror.fromTextArea(document.getElementById('result_queries'), {
-        mode: "text/x-sql",
-        lineWrapping: true,
-        readOnly: true
-    });
-    queries_editor.setSize("100%", "100%");
 
     // Setup Websocket
     var socket = null;
@@ -57,19 +50,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'job-done':
                     console.log(data.result.output);
                     resultOutput.textContent = data.result.output;
-                    var queries = [];
 
                     for(var i=0;i<data.result.queries.length;i++){
-                        queries.push(data.result.queries[i].sql)
+                        addQuery(data.result.queries[i].sql);
                     }
 
-                    queries_editor.setValue(queries.join('\n\n'));
                     runButton.disabled = false;
                     break;
 
                 case 'job-internal-error':
                 case 'job-code-error':
-                    queries_editor.setValue(data.error);
+                    resultOutput.textContent = data.error;
                     runButton.disabled = false;
                     break;
                 case 'job-image-not-found-error':
@@ -98,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle button events
     runButton.addEventListener('click', function(){
         resultOutput.textContent = '';
-        queries_editor.setValue('');
+        queriesContainer.innerHTML = '';
 
         var payload = JSON.stringify({
             models: models_editor.getValue(),
@@ -157,8 +148,8 @@ function addQuery(query) {
 
     // Optionally, modify the cloned element if needed
     // clone.querySelector('span').textContent = 'Query Title';
-    clone.querySelector('pre:first-child code.language-sql').textContent = query
-    clone.querySelector('pre:last-child code.language-sql').textContent = query
+    const codeElement = clone.querySelector('pre:first-child code.language-sql');
+    codeElement.textContent = query;
 
     queriesContainer.appendChild(clone);
     Prism.highlightAll();
