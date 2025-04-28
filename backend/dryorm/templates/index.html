@@ -86,15 +86,15 @@
     </div>
 
     <template id="query_template">
-        <details open class="rounded-sm p-4 bg-white group transition-all duration-300">
-            <summary class="flex items-center justify-between cursor-pointer font-semibold text-lg text-gray-800 list-none">
-                <span>{short_query}</span>
+        <details class="rounded-sm p-1 bg-white group transition-all duration-300">
+            <summary class="flex items-center justify-between cursor-pointer font-semibold text-sm text-gray-800 list-none">
+                <pre class="overflow-hidden whitespace-nowrap text-ellipsis"><code class="language-sql"></code></pre>
                 <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </summary>
             <div class="mt-2 text-gray-600">
-                <pre><code class="language-sql">{long_query}</code></pre>
+                <pre><code class="language-sql"></code></pre>
             </div>
         </details>
     </template>

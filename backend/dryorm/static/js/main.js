@@ -145,4 +145,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
         }
     });
+
+
 });
+
+function addQuery(query) {
+    const template = document.getElementById('query_template');
+    const queriesContainer = document.getElementById('queries');
+
+    const clone = template.content.cloneNode(true);
+
+    // Optionally, modify the cloned element if needed
+    // clone.querySelector('span').textContent = 'Query Title';
+    clone.querySelector('pre:first-child code.language-sql').textContent = query
+    clone.querySelector('pre:last-child code.language-sql').textContent = query
+
+    queriesContainer.appendChild(clone);
+    Prism.highlightAll();
+}
