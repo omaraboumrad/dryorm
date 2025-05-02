@@ -39,11 +39,10 @@
                 <div class="flex items-center space-x-2">
                     <a class="text-xl font-bold" href="#">Dry ORM</a>
                 </div>
-                <span id="job" class="text-gray-200 opacity-50"></span>
                 <div class="flex items-center space-x-2">
                     <div id="loader" class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin hidden"></div>
-                    <button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
-                    <button class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
+                    <button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
+                    <button class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-sm" id="save">Save</button>
                     <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
                         {% for executor in executors %}
                         <option
@@ -66,7 +65,7 @@
                     <h5 class="font-bold">Output:</h5>
                 </div>
                 <div class="p-3 overflow-auto bg-yellow-50">
-                    <pre id="result_output" class="whitespace-pre-wrap h-full">No output.</pre>
+                    <pre id="output" class="whitespace-pre-wrap h-full">No output.</pre>
                 </div>
                 <div class="p-4 border-b border-t">
                     <h5 class="font-bold">Queries:</h5>
@@ -89,5 +88,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
         <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+
+        <span id="job" class="fixed bottom-4 right-4 text-amber-800 px-3 py-1 rounded opacity-70"></span>
     </body>
 </html>

@@ -18,15 +18,13 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('starting')
     hljs.highlightAll();
     var csrftoken = getCookie('csrftoken');
-    var runButton = document.getElementById('run_button');
-    var saveButton = document.getElementById('save_button');
-    var jobElement = document.getElementById('job');
+    var run = document.getElementById('run');
+    var save = document.getElementById('save');
+    var job = document.getElementById('job');
     var loader = document.getElementById('loader');
-    var resultOutput = document.getElementById('result_output');
-    var frameworkSelect = document.getElementById('framework');
-    var keymapSelect = document.getElementById('keymap');
-    var queriesContainer = document.getElementById('queries');
-    runButton.disabled = true;
+    var output = document.getElementById('output');
+    var framework = document.getElementById('framework');
+    var queries = document.getElementById('queries');
 
     // --- Code Area ---
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
@@ -50,18 +48,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             switch(data.event){
                 case 'job-fired':
-                    jobElement.textContent = data.key;
+                    job.textContent = data.key;
                     break;
 
                 case 'job-done':
-                    resultOutput.textContent = data.result.output;
+                    output.textContent = data.result.output;
 
                     for(var i=0;i<data.result.queries.length;i++){
                         addQuery(data.result.queries[i].sql);
                     }
 
                     loader.classList.add('hidden');
-                    runButton.disabled = false;
+                    run.disabled = false;
                     break;
                 case 'job-timeout':
                 case 'job-oom-killed':
@@ -69,8 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'job-internal-error':
                 case 'job-code-error':
                 case 'job-image-not-found-error':
-                    resultOutput.textContent = data.error;
-                    runButton.disabled = false;
+                    output.textContent = data.error;
+                    run.disabled = false;
                     loader.classList.add('hidden');
                     break;
                 default:
@@ -83,14 +81,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         socket.onopen = function(e) {
-            jobElement.textContent = 'connected';
-            runButton.disabled = false;
+            job.textContent = 'connected';
+            run.disabled = false;
         }
 
         socket.onclose = function(e) {
-            jobElement.textContent = 'connection died';
+            job.textContent = 'connection died';
+            run.disabled = true;
             setTimeout(function(){
-                jobElement.textContent = 'reconnecting';
+                job.textContent = 'reconnecting';
                 connect();
             }, 2000);
         }
@@ -99,24 +98,24 @@ document.addEventListener('DOMContentLoaded', function() {
     connect();
 
     // --- Button Handlers ---
-    runButton.addEventListener('click', function(){
-        resultOutput.textContent = '';
-        queriesContainer.innerHTML = '';
+    run.addEventListener('click', function(){
+        output.textContent = '';
+        queries.innerHTML = '';
 
         var payload = JSON.stringify({
             code: models_editor.getValue(),
-            framework: frameworkSelect.value
+            framework: framework.value
         });
 
         socket.send(payload);
         loader.classList.remove('hidden');
-        runButton.disabled = true;
+        run.disabled = true;
     });
 
-    saveButton.addEventListener('click', function(){
+    save.addEventListener('click', function(){
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
-        formData.append('framework', frameworkSelect.value);
+        formData.append('framework', framework.value);
         formData.append('csrfmiddlewaretoken', csrftoken);
 
         fetch('/save', {
@@ -125,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            jobElement.textContent = 'new snippet saved';
+            job.textContent = 'new snippet saved';
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
     });
@@ -134,13 +133,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function addQuery(query) {
     const template = document.getElementById('query_template');
-    const queriesContainer = document.getElementById('queries');
+    const queries = document.getElementById('queries');
 
     const clone = template.content.cloneNode(true);
     const codeElement = clone.querySelector('pre code.language-sql');
     codeElement.textContent = query;
 
-    queriesContainer.appendChild(clone);
+    queries.appendChild(clone);
     hljs.highlightAll();
 }
 
