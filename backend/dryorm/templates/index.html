@@ -1,101 +1,57 @@
-{% load static %}
-<!doctype html>
-<html class="no-js h-full" lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Dry ORM</title>
+{% extends 'base.html' %}
+{% block title %}Dry ORM{% endblock %}
 
-        <!-- Who cares... /shrug -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <!-- Boohoo -->
+{% block actions %}
+<label class="flex items-center space-x-1">
+    <span class="text-md text-gray-400">Private ?</span>
+    <input type="checkbox" id="isPrivate"
+                           class="w-4 h-4 rounded-sm accent-gray-800 border-2 border-yellow-500 text-yellow-500 focus:ring-yellow-500 focus:ring-2">
+</label>
+<input type="text" id="name" placeholder="Name" class="bg-gray-800 text-white px-2 py-2 rounded-sm border border-gray-600 focus:outline-none focus:border-yellow-500">
+<button class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-sm" id="save">Save</button>
+<button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
+<select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
+    {% for executor in executors %}
+    <option
+            {% if executor.key == object.framework %}
+            selected
+            {% endif %}
+            value="{{executor.key}}">{{executor.verbose}}</option>
+    {% endfor %}
+</select>
+{% endblock %}
 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
-        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css">
-
-        <style>
-            .CodeMirror {
-                font-size: 1rem;
-                overflow: auto;
-            }
-        </style>
-
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-44612863-2');
-        </script>
-
-    </head>
-    <body class="bg-gray-100 h-full flex flex-col">
-        <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
-            <div class="flex flex-wrap items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <a class="text-xl font-bold text-yellow-400" href="#">Dry ORM</a>
-                </div>
-                <div id="loader" class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin hidden"></div>
-                <div class="flex items-center space-x-2">
-                    <label class="flex items-center space-x-1">
-                        <input type="checkbox" id="isPrivate"
-                                               class="w-4 h-4 rounded-sm accent-gray-800 border-2 border-yellow-500 text-yellow-500 focus:ring-yellow-500 focus:ring-2">
-                        <span class="text-md text-gray-400">Private</span>
-                    </label>
-                    <input type="text" id="name" placeholder="Name" class="bg-gray-800 text-white px-2 py-2 rounded-sm border border-gray-600 focus:outline-none focus:border-yellow-500">
-                    <button class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-sm" id="save">Save</button>
-                    <button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
-                    <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
-                        {% for executor in executors %}
-                        <option
-                            {% if executor.key == object.framework %}
-                            selected
-                            {% endif %}
-                            value="{{executor.key}}">{{executor.verbose}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-        </nav>
-
-
-        <div id="main_grid" class="flex-1 p-1 grid grid-cols-1 gap-0.5">
-            <div class="bg-white flex flex-col h-full">
-                <textarea id="code_models">{{ object.code }}</textarea>
-            </div>
-            <div id="right_column" class="bg-white flex flex-col h-full hidden">
-                <div class="p-4 border-b">
-                    <h5 class="font-bold">Output:</h5>
-                </div>
-                <div class="p-3 overflow-auto bg-yellow-50">
-                    <pre id="output" class="whitespace-pre-wrap h-full">No output.</pre>
-                </div>
-                <div class="p-4 border-b border-t">
-                    <h5 class="font-bold">Queries:</h5>
-                </div>
-                <div class="flex flex-col" id="queries">
-                    <pre class="whitespace-pre-wrap h-full p-2">No queries.</pre>
-                </div>
-            </div>
+{% block content %}
+<div id="main_grid" class="flex-1 p-1 grid grid-cols-1 gap-0.5">
+    <div class="bg-white flex flex-col h-full">
+        <textarea id="code_models">{{ object.code }}</textarea>
+    </div>
+    <div id="right_column" class="bg-white flex flex-col h-full hidden">
+        <div class="p-4 border-b">
+            <h5 class="font-bold">Output:</h5>
         </div>
+        <div class="p-3 overflow-auto bg-yellow-50">
+            <pre id="output" class="whitespace-pre-wrap h-full">No output.</pre>
+        </div>
+        <div class="p-4 border-b border-t">
+            <h5 class="font-bold">Queries:</h5>
+        </div>
+        <div class="flex flex-col" id="queries">
+            <pre class="whitespace-pre-wrap h-full p-2">No queries.</pre>
+        </div>
+    </div>
+</div>
 
-        <template id="query_template">
-            <pre class="text-md max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
-        </template>
+<template id="query_template">
+    <pre class="text-md max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
+</template>
 
-        {% csrf_token %}
+{% csrf_token %}
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
-        <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
 
-        <span id="job" class="fixed bottom-4 right-4 text-gray-800 px-3 py-1 rounded"></span>
-    </body>
-</html>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="no-js h-full" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Dry ORM</title>
+        <!-- Who cares... /shrug -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Boohoo -->
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static 'images/favicon.ico' %}" />
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nnfx-light.min.css">
+        <style>
+            .CodeMirror {
+                font-size: 1rem;
+                overflow: auto;
+            }
+        </style>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-44612863-2');
+        </script>
+    </head>
+    <body class="bg-gray-100 h-full flex flex-col">
+        <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
+            <div class="flex flex-wrap items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a class="text-xl font-bold text-yellow-400" href="#">Dry ORM</a>
+                </div>
+                <span id="job" class="fixed top-[88px] z-10 right-4 bg-yellow-400 text-gray-800 px-3 py-1 rounded opacity-50"></span>
+                <div class="flex items-center space-x-2">
+                <div id="loader"
+                     class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin hidden">
+                </div>
+                    {% block actions %}{% endblock %}
+                </div>
+            </div>
+        </nav>
+        {% block content %}{% endblock %}
+        <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+    </body>
+</html>
