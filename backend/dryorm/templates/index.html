@@ -39,22 +39,29 @@
                 <div class="flex items-center gap-4">
                     <a class="text-xl font-bold text-yellow-400" href="#">Dry ORM</a>
                 </div>
-                    <div id="loader" class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin hidden"></div>
+                <div id="loader" class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin hidden"></div>
                 <div class="flex items-center space-x-2">
+                    <label class="flex items-center space-x-1">
+                        <input type="checkbox" id="isPrivate"
+                                               class="w-4 h-4 rounded-sm accent-gray-800 border-2 border-yellow-500 text-yellow-500 focus:ring-yellow-500 focus:ring-2">
+                        <span class="text-md text-gray-400">Private</span>
+                    </label>
+                    <input type="text" id="name" placeholder="Name" class="bg-gray-800 text-white px-2 py-2 rounded-sm border border-gray-600 focus:outline-none focus:border-yellow-500">
                     <button class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-sm" id="save">Save</button>
                     <button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
                     <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
                         {% for executor in executors %}
                         <option
-                                {% if executor.key == object.framework %}
-                                selected
-                                {% endif %}
-                                value="{{executor.key}}">{{executor.verbose}}</option>
+                            {% if executor.key == object.framework %}
+                            selected
+                            {% endif %}
+                            value="{{executor.key}}">{{executor.verbose}}</option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
         </nav>
+
 
         <div id="main_grid" class="flex-1 p-1 grid grid-cols-1 gap-0.5">
             <div class="bg-white flex flex-col h-full">

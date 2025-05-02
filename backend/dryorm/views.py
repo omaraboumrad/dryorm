@@ -15,11 +15,13 @@ def save(request):
     if request.method != 'POST':
         return http.HttpResponseNotAllowed('nope!')
 
-    form = forms.SnippetForm(request.POST)
+    instance = models.Snippet.objects.create_snippet(
+        name=request.POST.get('name'),
+        code=request.POST.get('code'),
+        framework=request.POST.get('framework'),
+        private=request.POST.get('private') == 'on'
+    )
 
-    if form.is_valid():
-        instance = form.save()
-        return http.HttpResponse(f'"{instance.pk}"')
-
+    return http.HttpResponse(f'"{instance.slug}"')
 
 detail = SnippetDetailView.as_view()

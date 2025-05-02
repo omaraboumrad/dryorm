@@ -23,8 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var job = document.getElementById('job');
     var loader = document.getElementById('loader');
     var output = document.getElementById('output');
-    var framework = document.getElementById('framework');
     var queries = document.getElementById('queries');
+    var framework = document.getElementById('framework');
+    var name = document.getElementById('name');
+    var isPrivate = document.getElementById('isPrivate');
 
     // --- Code Area ---
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
@@ -106,6 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
         output.textContent = '';
         queries.innerHTML = '';
 
+        if (models_editor.getValue().trim() === '') {
+            alert('Please enter some code to run');
+            return;
+        }
+
         var payload = JSON.stringify({
             code: models_editor.getValue(),
             framework: framework.value
@@ -120,6 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
         formData.append('framework', framework.value);
+        formData.append('name', name.value);
+        formData.append('private', isPrivate.value);
         formData.append('csrfmiddlewaretoken', csrftoken);
 
         fetch('/save', {
@@ -129,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             job.textContent = 'new snippet saved';
+            name.value = '';
+            isPrivate.checked = false;
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
     });
