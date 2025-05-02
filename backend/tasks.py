@@ -25,15 +25,24 @@ def run_django(channel, code, framework):
     try:
         result = client.containers.run(
             executor.image,
+            mem_limit=executor.memory,
+            memswap_limit=executor.memory,
+            network_disabled=True,
             remove=True,
             environment=[
                 'CODE={}'.format(code),
             ])
     except ContainerError as error: # Do some logging
-        reply = json.dumps(dict(
-            event=constants.JOB_CODE_ERROR_EVENT,
-            error=error.stderr.decode('utf-8')
-        ))
+        if error.exit_status == 137:
+            reply = json.dumps(dict(
+                event=constants.JOB_OOM_KILLED_EVENT,
+                error="OOM! Please use less memory. Thanks!"
+            ))
+        else:
+            reply = json.dumps(dict(
+                event=constants.JOB_CODE_ERROR_EVENT,
+                error=error.stderr.decode('utf-8') if error.stderr else str(error)
+            ))
     except ImageNotFound as error:
         reply = json.dumps(dict(
             event=constants.JOB_IMAGE_NOT_FOUND_ERROR_EVENT,
@@ -53,7 +62,6 @@ def run_django(channel, code, framework):
             result=json.loads(decoded)
         ))
     finally:
-        print(reply)
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.send)(channel, {
             "type": "websocket.send",

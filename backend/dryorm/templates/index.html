@@ -39,7 +39,7 @@
                 <a class="text-xl font-bold" href="#">Dry ORM</a>
                 <div class="flex items-center space-x-2">
                     <span id="job" class="text-gray-300">test</span>
-                    <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
+                    <button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
                     <button class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
                     <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">
                         {% for executor in executors %}

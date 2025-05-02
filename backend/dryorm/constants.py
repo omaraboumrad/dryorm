@@ -1,17 +1,25 @@
-from collections import namedtuple
+from dataclasses import dataclass
 
-Executor = namedtuple('Executor', 'image key verbose')
+@dataclass
+class Executor:
+    image: str
+    key: str
+    verbose: str
+    memory: str
+
 
 JOB_FIRED_EVENT = 'job-fired'
 JOB_DONE_EVENT = 'job-done'
 JOB_INTERNAL_ERROR_EVENT = 'job-internal-error'
 JOB_CODE_ERROR_EVENT = 'job-code-error'
 JOB_IMAGE_NOT_FOUND_ERROR_EVENT = 'job-image-not-found-error'
+JOB_OOM_KILLED_EVENT = 'job-oom-killed'
 
 EXECUTORS = (
     Executor(
         image='dryorm-executor/python-django',
         key='python/django',
+        memory='50m',
         verbose='Python - Django'),
     # Executor(
     #     image='dryorm-executor/python-sqlalchemy',

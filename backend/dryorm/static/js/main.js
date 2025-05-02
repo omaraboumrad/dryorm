@@ -15,6 +15,7 @@ function getCookie(name) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('starting')
     hljs.highlightAll();
     var csrftoken = getCookie('csrftoken');
     var runButton = document.getElementById('run_button');
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         mode: "python",
         lineNumbers: true,
         indentUnit: 4,
+        insertSoftTabs: true
     });
     models_editor.setSize("100%", "100%");
 
@@ -43,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
+            console.log(JSON.stringify(data));
 
             switch(data.event){
                 case 'job-fired':
@@ -59,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     runButton.disabled = false;
                     break;
-
+                case 'job-oom-killed':
                 case 'job-internal-error':
                 case 'job-code-error':
                     resultOutput.textContent = data.error;
@@ -68,6 +71,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'job-image-not-found-error':
                     jobElement.textContent = 'image not found!'
                     runButton.disabled = false;
+                    break;
+                default:
+                    console.warn('Unhandled event:', data);
                     break;
             }
 
