@@ -1,2 +1,0 @@
-Django==5.2
-django-extensions==4.1

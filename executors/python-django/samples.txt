@@ -1,5 +1,3 @@
-SAMPLE_ONE_MODELS = """\
-
 from django.db import models
 
 
@@ -8,23 +6,22 @@ class ShoppingCart(models.Model):
 
 
 class Item(models.Model):
-    cart = models.ForeignKey(ShoppingCart, related_name='items')
+    cart = models.ForeignKey(ShoppingCart)
     name = models.CharField(max_length=50)
-    acquired = models.BooleanField(default=False)
-"""
+    archived = models.BooleanField(default=False)
 
-SAMPLE_ONE_GOOD = """\
-cart = ShoppingCart.objects.create(name='Jaina baby shower')
 
-Item.objects.bulk_create([
-    Item(cart=cart, name='diapers'),
-    Item(cart=cart, name='breast pump'),
-    Item(cart=cart, name='baby armani shirt'),
-    Item(cart=cart, name='other', acquired=True),
-])
+def run():
+    cart = ShoppingCart.objects.create(name='Jaina baby shower')
 
-pending = Item.objects.select_related('cart').filter(acquired=False)
+    Item.objects.bulk_create([
+        Item(cart=cart, name='diapers'),
+        Item(cart=cart, name='breast pump'),
+        Item(cart=cart, name='baby armani shirt'),
+        Item(cart=cart, name='other', acquired=True),
+    ])
 
-for item in pending:
-    print('{}: {}'.format(item.name, item.cart.name))
-"""
+    pending = Item.objects.select_related('cart').filter(archived=False)
+
+    for item in pending:
+        print('{}: {}'.format(item.name, item.cart.name))

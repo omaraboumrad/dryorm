@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 
-from core import models
+from . import models
 
 
 class SnippetForm(ModelForm):
@@ -9,6 +9,8 @@ class SnippetForm(ModelForm):
         model = models.Snippet
 
         fields = [
-            'models_code',
-            'framework'
+            'name',
+            'code',
+            'framework',
+            'private',
         ]

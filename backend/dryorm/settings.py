@@ -24,10 +24,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django_extensions',
-    'reversion',
     'channels',
 
-    'core',
+    'dryorm',
 ]
 
 

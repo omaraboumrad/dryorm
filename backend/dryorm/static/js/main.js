@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
 
                 case 'job-done':
-                    console.log(data.result.output);
                     resultOutput.textContent = data.result.output;
 
                     for(var i=0;i<data.result.queries.length;i++){
@@ -98,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         queriesContainer.innerHTML = '';
 
         var payload = JSON.stringify({
-            models: models_editor.getValue(),
+            code: models_editor.getValue(),
             framework: frameworkSelect.value
         });
 
@@ -108,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveButton.addEventListener('click', function(){
         var formData = new FormData();
-        formData.append('models_code', models_editor.getValue());
+        formData.append('code', models_editor.getValue());
         formData.append('framework', frameworkSelect.value);
         formData.append('csrfmiddlewaretoken', csrftoken);
 
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             jobElement.textContent = 'new snippet saved';
-            console.log(data)
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
     });

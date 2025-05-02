@@ -20,12 +20,12 @@ class WSConsumer(AsyncWebsocketConsumer):
 
         payload = json.loads(text_data)
         framework = payload['framework']
-        models_code = payload['models']
+        code = payload['code']
 
         job = queue.enqueue(
             tasks.run_django,
             self.channel_name,
-            models_code,
+            code,
             framework)
 
         reply = json.dumps(dict(

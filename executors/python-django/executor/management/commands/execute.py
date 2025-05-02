@@ -5,7 +5,7 @@ import json
 from django.core.management.base import BaseCommand
 from django.db import connection
 
-from core.models import run
+from executor.models import run
 
 
 class Command(BaseCommand):
@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
         combined = dict(
             output=out.getvalue(),
-            queries=[q for q in connection.queries if q['sql'] not in excluded]
+            queries=[q for q in connection.queries if q['sql'] not in excluded],
         )
 
         self.stdout.write(json.dumps(combined, indent=2))
