@@ -52,7 +52,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
 
                 case 'job-done':
-                    output.textContent = data.result.output;
+                    output.textContent = data.result.output === '' ? 'No output' : data.result.output;
+
+                    if(data.result.queries.length === 0){
+                        queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
+                    }
 
                     for(var i=0;i<data.result.queries.length;i++){
                         addQuery(data.result.queries[i].sql);
