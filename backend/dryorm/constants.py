@@ -14,6 +14,8 @@ JOB_INTERNAL_ERROR_EVENT = 'job-internal-error'
 JOB_CODE_ERROR_EVENT = 'job-code-error'
 JOB_IMAGE_NOT_FOUND_ERROR_EVENT = 'job-image-not-found-error'
 JOB_OOM_KILLED_EVENT = 'job-oom-killed'
+JOB_NETWORK_DISABLED_EVENT = 'job-network-disabled'
+JOB_TIMEOUT_EVENT = 'job-timeout'
 
 EXECUTORS = (
     Executor(

@@ -36,9 +36,12 @@
     <body class="bg-gray-100 h-full flex flex-col">
         <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
             <div class="flex flex-wrap items-center justify-between">
-                <a class="text-xl font-bold" href="#">Dry ORM</a>
                 <div class="flex items-center space-x-2">
-                    <span id="job" class="text-gray-300">test</span>
+                    <a class="text-xl font-bold" href="#">Dry ORM</a>
+                </div>
+                <span id="job" class="text-gray-200 opacity-50"></span>
+                <div class="flex items-center space-x-2">
+                    <div id="loader" class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin hidden"></div>
                     <button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm" id="run_button">Execute</button>
                     <button class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-sm" id="save_button">Save</button>
                     <select id="framework" class="bg-gray-800 text-white border border-gray-500 px-4 py-2 rounded-sm hidden">

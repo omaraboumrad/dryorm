@@ -33,16 +33,42 @@ def run_django(channel, code, framework):
                 'CODE={}'.format(code),
             ])
     except ContainerError as error: # Do some logging
-        if error.exit_status == 137:
-            reply = json.dumps(dict(
-                event=constants.JOB_OOM_KILLED_EVENT,
-                error="OOM! Please use less memory. Thanks!"
-            ))
-        else:
-            reply = json.dumps(dict(
-                event=constants.JOB_CODE_ERROR_EVENT,
-                error=error.stderr.decode('utf-8') if error.stderr else str(error)
-            ))
+        match error.exit_status:
+            case 137:
+                # OOM killed
+                reply = json.dumps(dict(
+                    event=constants.JOB_OOM_KILLED_EVENT,
+                    error="OOM! Please use less memory. Sorry!"
+                ))
+            case 101:
+                # Network Error
+                reply = json.dumps(dict(
+                    event=constants.JOB_NETWORK_DISABLED_EVENT,
+                    error="Network is disabled! Sorry!"
+                ))
+            case 124:
+                # Network Error
+                reply = json.dumps(dict(
+                    event=constants.JOB_TIMEOUT_EVENT,
+                    error="Timed out! Maximum allowed is 10 seconds. Sorry!"
+                ))
+            case _:
+                if error.stderr:
+                    error_message = error.stderr.decode('utf-8')
+                else:
+                    error_message = str(error)
+
+                if error.exit_status == 1 and 'Network is unreachable' in error_message:
+                    # Network Error
+                    reply = json.dumps(dict(
+                        event=constants.JOB_NETWORK_DISABLED_EVENT,
+                        error="Network is unreachable! Sorry!"
+                    ))
+                else:
+                    reply = json.dumps(dict(
+                        event=constants.JOB_CODE_ERROR_EVENT,
+                        error=error_message
+                    ))
     except ImageNotFound as error:
         reply = json.dumps(dict(
             event=constants.JOB_IMAGE_NOT_FOUND_ERROR_EVENT,

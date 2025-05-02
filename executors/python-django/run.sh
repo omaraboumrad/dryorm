@@ -3,4 +3,4 @@
 echo "$CODE" > /app/executor/models.py \
 && ./manage.py makemigrations --verbosity 0 \
 && ./manage.py migrate --verbosity 0 \
-&& ./manage.py execute
+&& timeout 10 ./manage.py execute

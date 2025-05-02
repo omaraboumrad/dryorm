@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var runButton = document.getElementById('run_button');
     var saveButton = document.getElementById('save_button');
     var jobElement = document.getElementById('job');
+    var loader = document.getElementById('loader');
     var resultOutput = document.getElementById('result_output');
     var frameworkSelect = document.getElementById('framework');
     var keymapSelect = document.getElementById('keymap');
@@ -50,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
             switch(data.event){
                 case 'job-fired':
                     jobElement.textContent = data.key;
-
                     break;
 
                 case 'job-done':
@@ -60,17 +60,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         addQuery(data.result.queries[i].sql);
                     }
 
+                    loader.classList.add('hidden');
                     runButton.disabled = false;
                     break;
+                case 'job-timeout':
                 case 'job-oom-killed':
+                case 'job-network-disabled':
                 case 'job-internal-error':
                 case 'job-code-error':
+                case 'job-image-not-found-error':
                     resultOutput.textContent = data.error;
                     runButton.disabled = false;
-                    break;
-                case 'job-image-not-found-error':
-                    jobElement.textContent = 'image not found!'
-                    runButton.disabled = false;
+                    loader.classList.add('hidden');
                     break;
                 default:
                     console.warn('Unhandled event:', data);
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         socket.onopen = function(e) {
-            jobElement.textContent = 'connected aloha!';
+            jobElement.textContent = 'connected';
             runButton.disabled = false;
         }
 
@@ -108,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         socket.send(payload);
+        loader.classList.remove('hidden');
         runButton.disabled = true;
     });
 
