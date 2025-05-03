@@ -8,7 +8,7 @@ env = os.environ.get
 PROJECT = env('PROJECT')
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = BASE_DIR / PROJECT
-SECRET_KEY = 'django-insecure-k9gt04n@$+w!k7_=%%q51-9jswas&y=pvv^)&)8!7xg7-#06q9'
+SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG') == 'True'
 ALLOWED_HOSTS = ["localhost", "webserver", "dryorm.d.xterm.info", "dryorm.xterm.info"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost:8060", "http://webserver:8060", "http://dryorm.d.xterm.info", "https://dryorm.xterm.info"]
@@ -114,3 +114,12 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = f'{PROJECT}.asgi.application'
+
+import sentry_sdk
+
+print(repr(env('ENVIRONMENT')))
+sentry_sdk.init(
+    dsn=env('SENTRY_DSN'),
+    environment=env('ENVIRONMENT'),
+    send_default_pii=True,
+)
