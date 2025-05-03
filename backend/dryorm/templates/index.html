@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Dry ORM{% endblock %}
 
-{% block actions %}
+{% block right-actions %}
 <label class="flex items-center space-x-1">
     <span class="text-md text-gray-400 whitespace-nowrap">Private ?</span>
     <input type="checkbox" id="isPrivate"
@@ -12,10 +12,16 @@
 <button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
 {% endblock %}
 
+{% block center-actions %}
+{% endblock %}
+
 {% block content %}
-<span id="job" class="fixed top-[88px] z-10 right-4 bg-yellow-400 text-gray-800 px-3 py-1 rounded opacity-50"></span>
-<div id="main_grid" class="flex-1 p-1 grid grid-cols-1 gap-0.5">
+<div id="main_grid" class="flex-1 grid grid-cols-1 gap-0.5">
     <div class="bg-white flex flex-col h-full">
+        <div class="flex items-center justify-between p-4 border-b">
+            <h5 class="font-bold">Code</h5>
+            <span id="job" class="text-gray-600 px-3 rounded"></span>
+        </div>
         <textarea id="code_models">{{ object.code }}</textarea>
     </div>
     <div id="right_column" class="bg-white flex flex-col h-full hidden">

@@ -32,7 +32,15 @@ document.addEventListener('DOMContentLoaded', function() {
         mode: "python",
         lineNumbers: true,
         indentUnit: 4,
-        insertSoftTabs: true
+        insertSoftTabs: true,
+        indentWithTabs: false,
+        indentUnit: 4,
+        extraKeys: {
+            Tab: function(cm) {
+                const spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+                cm.replaceSelection(spaces);
+            }
+        }
     });
     models_editor.setSize("100%", "100%");
 
@@ -125,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
         formData.append('name', name.value);
-        formData.append('private', isPrivate.value);
+        formData.append('private', isPrivate.checked);
         formData.append('csrfmiddlewaretoken', csrftoken);
 
         fetch('/save', {
