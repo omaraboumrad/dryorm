@@ -40,7 +40,7 @@
                     <a class="p-2 text-xl font-bold text-yellow-400 whitespace-nowrap" href="{% url 'index' %}">Dry ORM</a>
                     <div class="flex items-center gap-2">
                         <a class="text-md text-yellow-200 hover:underline" href="{% url 'list' %}">View</a>
-                        <a class="text-md text-yellow-200 hover:underline" href="#">About</a>
+                        <a class="text-md text-yellow-200 hover:underline cursor-pointer" onclick="document.getElementById('about-dialog').showModal()">About</a>
                     </div>
                 </div>
                 {% block center-actions %}{% endblock %}
@@ -51,6 +51,39 @@
             </div>
         </nav>
         {% block content %}{% endblock %}
+
+<dialog id="about-dialog" class="rounded-xl p-6 shadow-xl max-w-xl w-full text-gray-800 backdrop:bg-black/50 backdrop:backdrop-blur-sm">
+  <form method="dialog" class="space-y-4">
+    <h2 class="text-2xl font-bold text-gray-900">DryORM</h2>
+    <p>Hi! DryORM allows you to run Django ORM code against SQLite. The technologies used to power this webapp are:</p>
+    <ul class="list-disc list-inside">
+        <li><strong>Frameworks & Libraries:</strong> <a class="text-yellow-600" href="https://wwww.djangoproject.com">Django</a> / <a class="text-yellow-600" href="https://channels.readthedocs.io/en/latest/index.html">Channels</a> / <a class="text-yellow-600" href="https://python-rq.org/">Python RQ</a></li>
+      <li><strong>DB / Broker:</strong> Postgres / SQLite / Redis</li>
+      <li><strong>Infra:</strong> Docker / Compose</li>
+      <li><strong>Frontend:</strong> Django Templates / Vanilla JS / Tailwindcss</li>
+    </ul>
+    <p>
+    The project is built primarily to provide <a class="text-yellow-600" href="https://discord.com/invite/xcRH6mN4fa">Django's Discord Community</a> Staff with a medium to assist users with their ORM questions rather quickly.
+      The implementation is in fact framework-agnostic, however Django will remain the primary purpose for the foreseeable future.
+    </p>
+    <p>
+      Since I'm not forcing anyone to login, there are several safeguards in place. Nevertheless, I urge you not to cause harm. The limitations are as follows:
+    </p>
+    <ul class="list-disc list-inside">
+      <li>Rate limits</li>
+      <li>10 active executors cycled</li>
+      <li>No network</li>
+      <li>50MB limit</li>
+      <li>10s timeout</li>
+    </ul>
+    <p>Major thanks to everyone that has helped test and provide feedback on the project.</p>
+    <div class="flex justify-between items-center">
+    <p><a class="font-bold text-yellow-600" href="https://xterm.info">Xterm</a></p>
+      <button class="bg-yellow-600 hover:bg-yellow-700 focus:border-yellow-600 text-white px-4 py-2 rounded">Close</button>
+    </div>
+  </form>
+</dialog>
         <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+
     </body>
 </html>
