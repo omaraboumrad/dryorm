@@ -117,7 +117,6 @@ ASGI_APPLICATION = f'{PROJECT}.asgi.application'
 
 import sentry_sdk
 
-print(repr(env('ENVIRONMENT')))
 sentry_sdk.init(
     dsn=env('SENTRY_DSN'),
     environment=env('ENVIRONMENT'),

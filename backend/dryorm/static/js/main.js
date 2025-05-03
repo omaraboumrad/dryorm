@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var queries = document.getElementById('queries');
     var name = document.getElementById('name');
     var isPrivate = document.getElementById('isPrivate');
-    var templates = document.getElementById('templates');
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
 
@@ -158,7 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var template_text = templates[template_name] || '';
         models_editor.setValue(template_text);
     });
-
 
 });
 
