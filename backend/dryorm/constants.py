@@ -17,18 +17,18 @@ JOB_OOM_KILLED_EVENT = 'job-oom-killed'
 JOB_NETWORK_DISABLED_EVENT = 'job-network-disabled'
 JOB_TIMEOUT_EVENT = 'job-timeout'
 
-EXECUTORS = (
-    Executor(
-        image='dryorm-executor/python-django',
-        key='python/django',
-        memory='50m',
-        verbose='Python - Django'),
-    # Executor(
-    #     image='dryorm-executor/python-sqlalchemy',
-    #     key='python/sqlalchemy',
-    #     verbose='Python - SQLAlchemy'),
-    # Executor(
-    #     image='dryorm-executor/python-peewee',
-    #     key='python/peewee',
-    #     verbose='Python - Peewee')
+EXECUTOR = Executor(
+    image='dryorm-executor/python-django',
+    key='python/django',
+    memory='50m',
+    verbose='Python - Django'
 )
+
+# Executor(
+#     image='dryorm-executor/python-sqlalchemy',
+#     key='python/sqlalchemy',
+#     verbose='Python - SQLAlchemy'),
+# Executor(
+#     image='dryorm-executor/python-peewee',
+#     key='python/peewee',
+#     verbose='Python - Peewee')

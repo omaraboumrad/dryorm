@@ -2,7 +2,11 @@ from django.views import generic
 from django import http
 
 from . import models
-from . import forms
+
+
+class SnippetListView(generic.ListView):
+    model = models.Snippet
+    template_name = 'snippet_list.html'
 
 
 class SnippetDetailView(generic.DetailView):
@@ -18,10 +22,10 @@ def save(request):
     instance = models.Snippet.objects.create_snippet(
         name=request.POST.get('name'),
         code=request.POST.get('code'),
-        framework=request.POST.get('framework'),
         private=request.POST.get('private') == 'on'
     )
 
     return http.HttpResponse(f'"{instance.slug}"')
 
 detail = SnippetDetailView.as_view()
+list_snippets = SnippetListView.as_view()

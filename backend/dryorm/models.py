@@ -15,7 +15,7 @@ def generate_random_string(length=8):
 
 class SnippetManager(models.Manager):
 
-    def create_snippet(self, name, code, framework, private):
+    def create_snippet(self, name, code, private):
 
         if not name:
             name = generate_random_string()
@@ -25,7 +25,6 @@ class SnippetManager(models.Manager):
             name=name,
             slug=slug,
             code=code,
-            framework=framework,
             private=private
         )
 
@@ -35,7 +34,6 @@ class Snippet(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
     code = models.TextField()
-    framework = models.CharField(max_length=100)
     result = models.TextField(blank=True)
     created = models.DateField(auto_now=True)
     private = models.BooleanField(default=False)

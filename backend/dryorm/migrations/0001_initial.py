@@ -18,7 +18,6 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100)),
                 ('slug', models.SlugField(max_length=100, unique=True)),
                 ('code', models.TextField()),
-                ('framework', models.CharField(max_length=100)),
                 ('result', models.TextField(blank=True)),
                 ('created', models.DateField(auto_now=True)),
                 ('private', models.BooleanField(default=False)),

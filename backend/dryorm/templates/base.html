@@ -34,12 +34,15 @@
         </script>
     </head>
     <body class="bg-gray-100 h-full flex flex-col">
-        <nav class="bg-gray-800 text-white p-4 flex-shrink-0">
-            <div class="flex flex-wrap items-center justify-between">
+        <nav class="bg-gray-800 text-white p-4">
+            <div class="flex items-center justify-between no-wrap">
                 <div class="flex items-center gap-4">
-                    <a class="text-xl font-bold text-yellow-400" href="#">Dry ORM</a>
+                    <a class="p-2 text-xl font-bold text-yellow-400 whitespace-nowrap" href="{% url 'index' %}">Dry ORM</a>
+                <div class="flex items-center gap-2">
+                    <a class="text-md text-yellow-200 hover:underline" href="{% url 'list' %}">View</a>
+                    <a class="text-md text-yellow-200 hover:underline" href="#">About</a>
                 </div>
-                <span id="job" class="fixed top-[88px] z-10 right-4 bg-yellow-400 text-gray-800 px-3 py-1 rounded opacity-50"></span>
+                </div>
                 <div class="flex items-center space-x-2">
                 <div id="loader"
                      class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin hidden">

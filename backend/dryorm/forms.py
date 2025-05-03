@@ -11,6 +11,5 @@ class SnippetForm(ModelForm):
         fields = [
             'name',
             'code',
-            'framework',
             'private',
         ]

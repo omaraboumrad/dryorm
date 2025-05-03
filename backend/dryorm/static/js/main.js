@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var loader = document.getElementById('loader');
     var output = document.getElementById('output');
     var queries = document.getElementById('queries');
-    var framework = document.getElementById('framework');
     var name = document.getElementById('name');
     var isPrivate = document.getElementById('isPrivate');
 
@@ -115,7 +114,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var payload = JSON.stringify({
             code: models_editor.getValue(),
-            framework: framework.value
         });
 
         socket.send(payload);
@@ -126,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
     save.addEventListener('click', function(){
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
-        formData.append('framework', framework.value);
         formData.append('name', name.value);
         formData.append('private', isPrivate.value);
         formData.append('csrfmiddlewaretoken', csrftoken);

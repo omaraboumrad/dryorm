@@ -17,10 +17,10 @@ from docker.errors import (
 from dryorm import constants
 
 
-def run_django(channel, code, framework):
+def run_django(channel, code):
     client = docker.from_env()
 
-    executor = [e for e in constants.EXECUTORS if e.key == framework][0]
+    executor = constants.EXECUTOR
 
     try:
         result = client.containers.run(

@@ -19,14 +19,9 @@ class WSConsumer(AsyncWebsocketConsumer):
         queue = rq.Queue(connection=connection)
 
         payload = json.loads(text_data)
-        framework = payload['framework']
         code = payload['code']
 
-        job = queue.enqueue(
-            tasks.run_django,
-            self.channel_name,
-            code,
-            framework)
+        job = queue.enqueue(tasks.run_django, self.channel_name, code)
 
         reply = json.dumps(dict(
             event=constants.JOB_FIRED_EVENT,
@@ -36,7 +31,4 @@ class WSConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=reply)
 
     async def websocket_send(self, event):
-        """
-        Handle websocket.send messages from the channel layer.
-        """
         await self.send(text_data=event["text"])
