@@ -19,8 +19,16 @@
 <div id="main_grid" class="flex-1 grid grid-cols-1 gap-0.5">
     <div class="bg-white flex flex-col h-full">
         <div class="flex items-center justify-between p-4 border-b">
-            <h5 class="font-bold">Code</h5>
-            <span id="job" class="text-gray-600 px-3 rounded"></span>
+            <div class="flex items-center space-x-4">
+                <h5 class="font-bold">Code</h5>
+                <span id="job" class="text-gray-600 px-3 rounded opacity-50"></span>
+            </div>
+            <select id="template-select" class="px-2 rounded-sm border border-gray-800 focus:outline-none">
+                <option value="">Select a template</option>
+                {% for key, _ in templates.items %}
+                    <option value="{{key}}">{{key}}</option>
+                {% endfor %}
+            </select>
         </div>
         <textarea id="code_models">{{ object.code }}</textarea>
     </div>
@@ -46,10 +54,10 @@
 
 {% csrf_token %}
 
+{{ templates|json_script:'templates' }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/sql/sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
-
 {% endblock %}

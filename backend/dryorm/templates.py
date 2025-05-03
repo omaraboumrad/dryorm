@@ -1,0 +1,165 @@
+BASIC = '''from django.db import models
+
+class Person(models.Model):
+    name = models.CharField()
+
+    def __str__(self):
+        return self.name
+
+def run():
+    instance = Person.objects.create(name='John Doe')
+    print(f'Created: {instance}')
+'''
+
+BULK = '''from django.db import models
+from tabulate import tabulate
+
+class Person(models.Model):
+    name = models.CharField()
+
+def run():
+    Person.objects.bulk_create([
+        Person(name='John Doe'),
+        Person(name='Jane Doe'),
+        Person(name='Jim Doe'),
+    ])
+
+    print(tabulate(
+        Person.objects.all().values(),
+        headers='keys',
+        tablefmt='psql'
+    ))
+'''
+
+BULK_FAKE = '''from django.db import models
+from tabulate import tabulate
+from faker import Faker
+
+class Person(models.Model):
+    class Role(models.TextChoices):
+        ADMIN = 'admin'
+        USER = 'user'
+        GUEST = 'guest'
+
+    name = models.CharField()
+    role = models.CharField(choices=Role.choices)
+
+def run():
+    fake = Faker()
+
+    Person.objects.bulk_create([
+        Person(name=fake.name(), role=fake.random_element(Person.Role.choices))
+        for _ in range(100)
+    ])
+
+    print(tabulate(
+        Person.objects.all().values('role').annotate(models.Count('id')),
+        headers='keys',
+        tablefmt='psql'
+    ))
+'''
+
+CSV_IMPORT = '''\
+import csv
+from io import StringIO
+
+from django.db import models
+from tabulate import tabulate
+
+class Person(models.Model):
+    name = models.CharField()
+    country = models.CharField()
+
+data = """\
+name,country
+John Doe,USA
+Jane Doe,Canada
+Jim Doe,UK
+"""
+
+def run():
+    reader = csv.DictReader(StringIO(data))
+    Person.objects.bulk_create([
+        Person(**row) for row in reader
+    ])
+
+    print(tabulate(
+        Person.objects.values(),
+        headers='keys',
+        tablefmt='psql'
+    ))
+'''
+
+BASIC_FK = '''from django.db import models
+
+class Category(models.Model):
+    name = models.CharField()
+
+class Product(models.Model):
+    name = models.CharField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+def run():
+    electronics = Category.objects.create(name='Electronics')
+    clothing = Category.objects.create(name='Clothing')
+
+    Product.objects.create(name='Laptop', category=electronics)
+    Product.objects.create(name='T-Shirt', category=clothing)
+    Product.objects.create(name='Smartphone', category=electronics)
+    Product.objects.create(name='Jeans', category=clothing)
+    Product.objects.create(name='Headphones', category=electronics)
+
+    print('Products per category:')
+    for category in Category.objects.prefetch_related('product_set'):
+        print(f'{category.name}: {category.product_set.count()} products')
+'''
+
+SELF_FK = '''from django.db import models
+
+class Employee(models.Model):
+    name = models.CharField()
+    manager = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+def run():
+    alice = Employee.objects.create(name='Alice')
+    bob = Employee.objects.create(name='Bob', manager=alice)
+    charlie = Employee.objects.create(name='Charlie', manager=bob)
+
+    print('Employees and their managers:')
+    for employee in Employee.objects.select_related('manager'):
+        manager_name = employee.manager.name if employee.manager else 'None'
+        print(f'{employee.name} -> {manager_name}')
+'''
+
+USER_PROFILE = '''from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField()
+
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+def run():
+    user = User.objects.create_user(username='john.doe', password='password')
+    profile = UserProfile.objects.create(user=user, bio='Hello, I am John Doe!')
+
+    print(f'User: {user.username}, Profile: {profile.bio}')
+'''
+
+
+TEMPLATES = {
+    'basic': BASIC,
+    'bulk create': BULK,
+    'bulk fake': BULK_FAKE,
+    'csv import': CSV_IMPORT,
+    'basic fk': BASIC_FK,
+    'self fk': SELF_FK,
+    'user profile': USER_PROFILE,
+}

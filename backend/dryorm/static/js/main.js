@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var queries = document.getElementById('queries');
     var name = document.getElementById('name');
     var isPrivate = document.getElementById('isPrivate');
+    var templates = document.getElementById('templates');
+    var templates = JSON.parse(document.getElementById('templates').textContent);
+    var template_select = document.getElementById('template-select');
 
     // --- Code Area ---
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
@@ -116,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         queries.innerHTML = '';
 
         if (models_editor.getValue().trim() === '') {
-            alert('Please enter some code to run');
+            alert('Please enter some code to run or select a template');
             return;
         }
 
@@ -148,6 +151,14 @@ document.addEventListener('DOMContentLoaded', function() {
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
     });
+
+    template_select.addEventListener('change', function(event) {
+        var template_name = event.target.value;
+        console.log(template_name);
+        var template_text = templates[template_name] || '';
+        models_editor.setValue(template_text);
+    });
+
 
 });
 

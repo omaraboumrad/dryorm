@@ -1,7 +1,9 @@
 from django.views import generic
 from django import http
+from django.http import JsonResponse
 
 from . import models
+from . import templates
 
 
 class SnippetListView(generic.ListView):
@@ -15,9 +17,22 @@ class SnippetListView(generic.ListView):
 
 
 class SnippetDetailView(generic.DetailView):
-
     model = models.Snippet
     template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['templates'] = templates.TEMPLATES
+        return context
+
+
+class SnippetHomeView(generic.TemplateView):
+    template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['templates'] = templates.TEMPLATES
+        return context
 
 
 def save(request):
@@ -32,5 +47,9 @@ def save(request):
 
     return http.HttpResponse(f'"{instance.slug}"')
 
+
+# Define templates as a dictionary
+
+home = SnippetHomeView.as_view()
 detail = SnippetDetailView.as_view()
 list_snippets = SnippetListView.as_view()
