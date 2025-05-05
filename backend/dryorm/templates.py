@@ -12,7 +12,7 @@ def run():
 '''
 
 BULK = '''from django.db import models
-from tabulate import tabulate
+from django.db import models
 
 class Person(models.Model):
     name = models.CharField()
@@ -24,11 +24,7 @@ def run():
         Person(name='Jim Doe'),
     ])
 
-    print(tabulate(
-        Person.objects.all().values(),
-        headers='keys',
-        tablefmt='psql'
-    ))
+    return list(Person.objects.all().values())
 '''
 
 BULK_FAKE = '''from django.db import models

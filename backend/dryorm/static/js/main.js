@@ -14,62 +14,6 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function formatReturnedData(returned) {
-    if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
-        
-        // Get all unique keys from all dictionaries
-        const headers = new Set();
-        returned.forEach(item => {
-            Object.keys(item).forEach(key => headers.add(key));
-        });
-        const sortedHeaders = Array.from(headers).sort();
-
-        // Get the template
-        const template = document.getElementById('returned_data_template');
-        const table = template.content.cloneNode(true);
-        const thead = table.querySelector('thead');
-        const tbody = table.querySelector('tbody');
-
-        // Add headers
-        const headerRow = document.createElement('tr');
-        headerRow.className = 'bg-gray-100';
-        sortedHeaders.forEach(header => {
-            const th = document.createElement('th');
-            th.className = 'border-b border-t border-gray-300 p-2 text-left';
-            th.textContent = header;
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-
-        // Add rows
-        returned.forEach(item => {
-            const row = document.createElement('tr');
-            sortedHeaders.forEach(header => {
-                const td = document.createElement('td');
-                td.className = 'border-b border-gray-300 p-2';
-                td.textContent = item[header] !== undefined ? item[header] : '';
-                row.appendChild(td);
-            });
-            tbody.appendChild(row);
-        });
-
-        return table;
-    }
-    return null;
-}
-
-function handleReturnedData(returned) {
-    const returnedContainer = document.getElementById('returned-data');
-    returnedContainer.innerHTML = '';
-    
-    if (!returned) return;
-    
-    const table = formatReturnedData(returned);
-    if (table) {
-        returnedContainer.appendChild(table);
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     console.log('starting')
     hljs.highlightAll();
@@ -238,5 +182,80 @@ function showRightColumn() {
         rightColumn.classList.remove('hidden');
         grid.classList.remove('grid-cols-1');
         grid.classList.add('grid-cols-2');
+    }
+}
+
+// --- AI Generated Code ---
+
+function formatReturnedData(returned) {
+    if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
+        
+        // Get all unique keys from all dictionaries
+        const headers = new Set();
+        returned.forEach(item => {
+            Object.keys(item).forEach(key => headers.add(key));
+        });
+        const sortedHeaders = Array.from(headers).sort();
+
+        // Get the template
+        const template = document.getElementById('returned_data_template');
+        const table = template.content.cloneNode(true);
+        const thead = table.querySelector('thead');
+        const tbody = table.querySelector('tbody');
+
+        // Add headers
+        const headerRow = document.createElement('tr');
+        headerRow.className = '';
+        sortedHeaders.forEach(header => {
+            const th = document.createElement('th');
+            th.className = 'p-2 text-left';
+            th.textContent = header;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        // Add rows
+        returned.forEach(item => {
+            const row = document.createElement('tr');
+            sortedHeaders.forEach(header => {
+                const td = document.createElement('td');
+                td.className = 'p-2';
+                td.textContent = item[header] !== undefined ? item[header] : '';
+                row.appendChild(td);
+            });
+            tbody.appendChild(row);
+        });
+
+        return table;
+    }
+    return null;
+}
+
+function handleReturnedData(returned) {
+    const returnedContainer = document.getElementById('returned-data');
+    returnedContainer.innerHTML = '';
+    
+    if (!returned) return;
+    
+    if (Array.isArray(returned)) {
+        // Case 1: List of dictionaries
+        const table = formatReturnedData(returned);
+        if (table) {
+            const h3 = table.querySelector('h3');
+            h3.textContent = 'Data';
+            returnedContainer.appendChild(table);
+        }
+    } else if (typeof returned === 'object') {
+        // Case 2: Dictionary with keys
+        Object.entries(returned).forEach(([key, value]) => {
+            if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+                const table = formatReturnedData(value);
+                if (table) {
+                    const h3 = table.querySelector('h3');
+                    h3.textContent = key;
+                    returnedContainer.appendChild(table);
+                }
+            }
+        });
     }
 }
