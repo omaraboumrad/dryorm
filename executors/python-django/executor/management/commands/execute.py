@@ -15,7 +15,7 @@ class Command(BaseCommand):
         out = io.StringIO()
 
         with contextlib.redirect_stdout(out):
-            run()
+            returned = run()
 
         excluded = [
             'BEGIN',
@@ -26,6 +26,7 @@ class Command(BaseCommand):
         combined = dict(
             output=out.getvalue(),
             queries=[q for q in connection.queries if q['sql'] not in excluded],
+            returned=returned,
         )
 
         self.stdout.write(json.dumps(combined, indent=2))

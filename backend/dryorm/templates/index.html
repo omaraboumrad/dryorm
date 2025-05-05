@@ -34,12 +34,13 @@
         </div>
         <textarea id="code_models">{{ object.code }}</textarea>
     </div>
-    <div id="right_column" class="bg-white flex flex-col h-full collapsed">
+    <div id="right_column" class="bg-white flex flex-col h-full">
         <div class="p-4 border-b">
             <h5 class="font-bold">Output:</h5>
         </div>
-        <div class="p-3 overflow-auto bg-yellow-50">
-            <pre id="output" class="whitespace-pre-wrap h-full">No output.</pre>
+        <div class="flex flex-col bg-yellow-50">
+            <pre id="output" class="whitespace-pre-wrap h-full bg-yellow-50 p-3">No output.</pre>
+            <div id="returned-data" class="mt-4 bg-white rounded shadow"></div>
         </div>
         <div class="p-4 border-b border-t">
             <h5 class="font-bold">Queries:</h5>
@@ -52,6 +53,13 @@
 
 <template id="query_template">
     <pre class="text-md max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
+</template>
+
+<template id="returned_data_template">
+    <table class="border-collapse w-full">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
 </template>
 
 {% csrf_token %}

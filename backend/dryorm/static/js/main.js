@@ -14,6 +14,62 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function formatReturnedData(returned) {
+    if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
+        
+        // Get all unique keys from all dictionaries
+        const headers = new Set();
+        returned.forEach(item => {
+            Object.keys(item).forEach(key => headers.add(key));
+        });
+        const sortedHeaders = Array.from(headers).sort();
+
+        // Get the template
+        const template = document.getElementById('returned_data_template');
+        const table = template.content.cloneNode(true);
+        const thead = table.querySelector('thead');
+        const tbody = table.querySelector('tbody');
+
+        // Add headers
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'bg-gray-100';
+        sortedHeaders.forEach(header => {
+            const th = document.createElement('th');
+            th.className = 'border-b border-t border-gray-300 p-2 text-left';
+            th.textContent = header;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        // Add rows
+        returned.forEach(item => {
+            const row = document.createElement('tr');
+            sortedHeaders.forEach(header => {
+                const td = document.createElement('td');
+                td.className = 'border-b border-gray-300 p-2';
+                td.textContent = item[header] !== undefined ? item[header] : '';
+                row.appendChild(td);
+            });
+            tbody.appendChild(row);
+        });
+
+        return table;
+    }
+    return null;
+}
+
+function handleReturnedData(returned) {
+    const returnedContainer = document.getElementById('returned-data');
+    returnedContainer.innerHTML = '';
+    
+    if (!returned) return;
+    
+    const table = formatReturnedData(returned);
+    if (table) {
+        returnedContainer.appendChild(table);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('starting')
     hljs.highlightAll();
@@ -73,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         addQuery(data.result.queries[i].sql);
                     }
 
+                    handleReturnedData(data.result.returned);
                     loader.classList.add('hidden');
                     run.disabled = false;
                     break;
@@ -116,6 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
     run.addEventListener('click', function(){
         output.textContent = '';
         queries.innerHTML = '';
+        document.getElementById('returned-data').innerHTML = '';
 
         if (models_editor.getValue().trim() === '') {
             alert('Please enter some code to run or select a template');
