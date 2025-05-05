@@ -58,11 +58,11 @@ def run_django(channel, code):
                 else:
                     error_message = str(error)
 
-                if error.exit_status == 1 and 'Network is unreachable' in error_message:
+                if error.exit_status == 1 and ('Network is unreachable' in error_message or 'Temporary failure in name resolution' in error_message):
                     # Network Error
                     reply = json.dumps(dict(
                         event=constants.JOB_NETWORK_DISABLED_EVENT,
-                        error="Network is unreachable! Sorry!"
+                        error="Network is disabled! Sorry!"
                     ))
                 else:
                     reply = json.dumps(dict(
