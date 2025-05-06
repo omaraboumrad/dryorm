@@ -1,3 +1,34 @@
+DRYORM_FEATURES = '''from django.db import models
+
+# Tabulate and Faker are available.
+from tabulate import tabulate
+from faker import Faker
+
+# You can place the models here
+class Person(models.Model):
+    name = models.CharField()
+
+# You need a run function
+def run():
+    # At this point all migrations are created and applied
+    john = Person.objects.create(name='John Doe')
+    jane = Person.objects.create(name='John Doe')
+
+    # Any "print" statements will be displayed in "Output"
+    print(f'Hello, {john.name}!')
+
+    # If you return a Dict[str, List[Dict[str, Any]]], it will be displayed
+    # as a Table below the Output Section and will be given the key as title.
+    return {
+        'People': list(Person.objects.values()),
+        'Other': {'name': 'value', 'other': 'value'},
+    }
+
+    # Alternatively, you can just return a list of dicts
+    # to render a default "Data" table.
+    # return list(Person.objects.all().values())
+'''
+
 BASIC = '''from django.db import models
 
 class Person(models.Model):
@@ -171,6 +202,7 @@ def run():
 
 
 TEMPLATES = {
+    'dryorm features': DRYORM_FEATURES,
     'basic': BASIC,
     'bulk create': BULK,
     'bulk fake': BULK_FAKE,
