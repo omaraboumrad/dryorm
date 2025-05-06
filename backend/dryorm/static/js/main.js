@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'job-internal-error':
                 case 'job-code-error':
                 case 'job-image-not-found-error':
+                case 'job-overloaded':
                     output.textContent = data.error;
                     run.disabled = false;
                     loader.classList.add('hidden');

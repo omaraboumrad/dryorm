@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dryorm.settings'
 
@@ -16,6 +17,14 @@ from docker.errors import (
 
 from dryorm import constants
 
+class OverloadedError(Exception):
+    pass
+
+def find_running_django_containers(client, prefix='django-'):
+    return [
+        container for container in client.containers.list()
+        if container.name.startswith(prefix)
+    ]
 
 def run_django(channel, code):
     client = docker.from_env()
@@ -23,8 +32,15 @@ def run_django(channel, code):
     executor = constants.EXECUTOR
 
     try:
+        running = find_running_django_containers(client, prefix='django-')
+
+        if len(running) >= executor.max_containers:
+            raise OverloadedError
+
+        container_name = f'django-{uuid.uuid4().hex[:6]}'
         result = client.containers.run(
             executor.image,
+            name=container_name,
             mem_limit=executor.memory,
             memswap_limit=executor.memory,
             network_disabled=True,
@@ -78,6 +94,11 @@ def run_django(channel, code):
         reply = json.dumps(dict(
             event=constants.JOB_INTERNAL_ERROR_EVENT,
             error=error.explanation
+        ))
+    except OverloadedError as error:
+        reply = json.dumps(dict(
+            event=constants.JOB_OVERLOADED,
+            error=f"System is currently overloaded (>= {executor.max_containers} instances), please try again in a few! Sorry!"
         ))
     else:
         decoded = result.decode('utf-8')
