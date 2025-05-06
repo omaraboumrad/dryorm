@@ -15,8 +15,6 @@ function getCookie(name) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('starting')
-    hljs.highlightAll();
     var csrftoken = getCookie('csrftoken');
     var run = document.getElementById('run');
     var save = document.getElementById('save');
@@ -55,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
-            console.log(JSON.stringify(data));
 
             switch(data.event){
                 case 'job-fired':
@@ -182,11 +179,10 @@ function addQuery(query) {
     const queries = document.getElementById('queries');
 
     const clone = template.content.cloneNode(true);
-    const codeElement = clone.querySelector('pre code.language-sql');
+    const codeElement = clone.querySelector('div');
     codeElement.textContent = query;
 
     queries.appendChild(clone);
-    hljs.highlightAll();
 }
 
 function showRightColumn() {
@@ -201,10 +197,15 @@ function showRightColumn() {
 }
 
 // --- AI Generated Code ---
+//
+//       ... works ...
+//        ¯\_(ツ)_/¯
+//            o
+//           /\
 
 function formatReturnedData(returned) {
     if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
-        
+
         // Get all unique keys from all dictionaries
         const headers = new Set()
         returned.forEach(item => {
@@ -286,7 +287,7 @@ function handleReturnedData(returned) {
             const sectionId = this.getAttribute('data-section');
             const section = document.getElementById(sectionId);
             const indicator = this.querySelector('.collapse-indicator');
-            
+
             if (section.style.display === 'none') {
                 section.style.display = 'flex';
                 indicator.textContent = '▼';

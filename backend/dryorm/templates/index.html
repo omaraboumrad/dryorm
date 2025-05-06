@@ -4,14 +4,14 @@
 {% block right-actions %}
 <div class="hidden md:flex items-center gap-2">
     <label class="flex items-center space-x-1">
-        <span class="text-md text-gray-400 whitespace-nowrap">Private ?</span>
+        <span class="text-md text-white whitespace-nowrap">Private ?</span>
         <input type="checkbox" id="isPrivate"
-                               class="w-4 h-4 rounded-sm accent-gray-800 border-2 border-yellow-500 text-yellow-500 focus:ring-yellow-500 focus:ring-2">
+                               class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
     </label>
-    <input type="text" id="name" placeholder="Name" class="bg-gray-800 text-white px-2 py-2 rounded-sm border border-gray-600 focus:outline-none focus:border-yellow-500">
-    <button class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-sm" id="save">Save</button>
+    <input type="text" id="name" placeholder="Name" class="bg-django-primary text-white px-2 py-2 rounded-sm border border-django-secondary focus:outline-none focus:border-django-secondary">
+    <button class="bg-django-secondary hover:bg-django-secondary text-white px-4 py-2 rounded-sm" id="save">Save</button>
 </div>
-<button class="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
+<button class="bg-django-secondary hover:bg-django-secondary disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
 {% endblock %}
 
 {% block center-actions %}
@@ -20,12 +20,18 @@
 {% block content %}
 <div id="main_grid" class="flex-1 grid lg:grid-cols-2 md:grid-cols-1 gap-0.5">
     <div class="bg-white flex flex-col h-full">
-        <div class="flex items-center justify-between p-4 border-b">
+        <div class="flex items-center justify-between p-4 border-b border-django-primary/10">
             <div class="flex items-center space-x-4">
-                <h5 class="font-bold">Code</h5>
-                <span id="job" class="text-gray-600 px-3 rounded opacity-50 whitespace-nowrap"></span>
+                <div class="flex items-center gap-2">
+<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 8-4 4 4 4m8 0 4-4-4-4m-2-3-4 14"/>
+</svg>
+
+                <h5 class="font-bold text-django-text">Code</h5>
+                </div>
+                <span id="job" class="text-django-text/60 px-3 rounded opacity-50 whitespace-nowrap"></span>
             </div>
-            <select id="template-select" class="px-2 rounded-sm border border-gray-800 focus:outline-none">
+            <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
                 <option value="">Select a template</option>
                 {% for key, _ in templates.items %}
                     <option value="{{key}}">{{key}}</option>
@@ -34,56 +40,54 @@
         </div>
         <textarea id="code_models">{{ object.code }}</textarea>
     </div>
-    <div id="right_column" class="bg-white flex flex-col h-full">
-        <div class="p-4 border-b cursor-pointer flex items-center justify-between bg-yellow-100" data-section="output-section">
+    <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full">
+        <div class="p-4 border-b border-django-primary/10 cursor-pointer flex items-center justify-between bg-django-secondary/20" data-section="output-section">
             <div class="flex items-center gap-2">
-                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-django-text" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 9 3 3-3 3m5 0h3M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
                 </svg>
-                <h5 class="font-bold">Output:</h5>
+                <h5 class="font-bold text-django-text">Output:</h5>
             </div>
             <span class="collapse-indicator">▼</span>
         </div>
-        <div id="output-section" class="flex flex-col bg-yellow-50 border-b">
-            <pre id="output" class="whitespace-pre-wrap h-full bg-yellow-50 p-3">No output.</pre>
+        <div id="output-section" class="flex flex-col border-b border-django-primary/10">
+            <pre id="output" class="whitespace-pre-wrap h-full p-3 text-django-text">No output.</pre>
         </div>
 
-        <div id="returned-data" class="flex flex-col bg-white"></div>
+        <div id="returned-data" class="flex flex-col"></div>
 
-        <div class="p-4 border-b cursor-pointer flex items-center justify-between bg-indigo-100" data-section="queries">
+        <div class="p-4 border-b border-django-primary/10 cursor-pointer flex items-center justify-between bg-django-secondary/20" data-section="queries">
             <div class="flex items-center gap-2">
-<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 6c0 1.657-3.134 3-7 3S5 7.657 5 6m14 0c0-1.657-3.134-3-7-3S5 4.343 5 6m14 0v6M5 6v6m0 0c0 1.657 3.134 3 7 3s7-1.343 7-3M5 12v6c0 1.657 3.134 3 7 3s7-1.343 7-3v-6"/>
-</svg>
-
-            <h5 class="font-bold">Queries:</h5>
+                <svg class="w-6 h-6 text-django-text" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 6c0 1.657-3.134 3-7 3S5 7.657 5 6m14 0c0-1.657-3.134-3-7-3S5 4.343 5 6m14 0v6M5 6v6m0 0c0 1.657 3.134 3 7 3s7-1.343 7-3M5 12v6c0 1.657 3.134 3 7 3s7-1.343 7-3v-6"/>
+                </svg>
+                <h5 class="font-bold text-django-text">Queries:</h5>
             </div>
             <span class="collapse-indicator">▼</span>
-
         </div>
-        <div class="flex flex-col bg-indigo-50" id="queries">
-            <pre class="whitespace-pre-wrap h-full p-2">No queries.</pre>
+        <div class="flex flex-col" id="queries">
+            <pre class="whitespace-pre-wrap h-full p-2 text-django-text">No queries.</pre>
         </div>
     </div>
 </div>
 
 <template id="query_template">
-    <pre class="text-md max-w-full"><code class="language-sql whitespace-pre-wrap break-all"></code></pre>
+    <div class="p-2 whitespace-pre-wrap break-all"></div>
 </template>
 
 <template id="returned_data_template">
     <div class="collapsible-section">
-        <div class="p-4 bg-yellow-100 border-b cursor-pointer flex items-center justify-between" data-section="returned-data-section">
+        <div class="p-4 bg-django-secondary/20 border-b border-django-primary/20 cursor-pointer flex items-center justify-between" data-section="returned-data-section">
             <div class="flex items-center gap-2">
-            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.143 4H4.857A.857.857 0 0 0 4 4.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 10 9.143V4.857A.857.857 0 0 0 9.143 4Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 20 9.143V4.857A.857.857 0 0 0 19.143 4Zm-10 10H4.857a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286A.857.857 0 0 0 9.143 14Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286a.857.857 0 0 0-.857-.857Z"/>
-            </svg>
-            <h3 class="font-bold"></h3>
+                <svg class="w-6 h-6 text-django-text" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.143 4H4.857A.857.857 0 0 0 4 4.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 10 9.143V4.857A.857.857 0 0 0 9.143 4Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 20 9.143V4.857A.857.857 0 0 0 19.143 4Zm-10 10H4.857a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286A.857.857 0 0 0 9.143 14Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286a.857.857 0 0 0-.857-.857Z"/>
+                </svg>
+                <h3 class="font-bold text-django-text"></h3>
             </div>
             <span class="collapse-indicator">▼</span>
         </div>
-        <div class="returned-data-section bg-yellow-50">
-            <table class="border-b w-full">
+        <div class="returned-data-section">
+            <table class="border-b text-django-text">
                 <thead></thead>
                 <tbody></tbody>
             </table>
