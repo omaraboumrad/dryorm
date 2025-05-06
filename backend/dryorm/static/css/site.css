@@ -61,3 +61,21 @@
 
 h5 { font-size: 1rem; }
 .card-header { padding: 5px; }
+
+/* Collapsible sections */
+.collapse-indicator {
+    transition: transform 0.3s ease;
+}
+
+.collapsed .collapse-indicator {
+    transform: rotate(-90deg);
+}
+
+.collapsed + div {
+    display: none;
+}
+
+/* Ensure proper spacing and transitions */
+#output-section, #queries-section {
+    transition: all 0.3s ease;
+}

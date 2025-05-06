@@ -29,6 +29,23 @@ document.addEventListener('DOMContentLoaded', function() {
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
 
+    // Add click handlers for collapsible sections
+    document.querySelectorAll('[data-section]').forEach(header => {
+        header.addEventListener('click', function() {
+            const sectionId = this.getAttribute('data-section');
+            const section = document.getElementById(sectionId);
+            const indicator = this.querySelector('.collapse-indicator');
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'flex';
+                indicator.textContent = '▼';
+            } else {
+                section.style.display = 'none';
+                indicator.textContent = '▶';
+            }
+        });
+    });
+
     // --- Code Area ---
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
@@ -155,7 +172,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     template_select.addEventListener('change', function(event) {
         var template_name = event.target.value;
-        console.log(template_name);
         var template_text = templates[template_name] || '';
         models_editor.setValue(template_text);
     });

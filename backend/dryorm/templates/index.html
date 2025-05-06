@@ -35,15 +35,18 @@
         <textarea id="code_models">{{ object.code }}</textarea>
     </div>
     <div id="right_column" class="bg-white flex flex-col h-full">
-        <div class="p-4 border-b">
+        <div class="p-4 border-b cursor-pointer flex items-center justify-between" data-section="output-section">
             <h5 class="font-bold">Output:</h5>
+            <span class="collapse-indicator">▼</span>
         </div>
-        <div class="flex flex-col bg-yellow-50">
+        <div id="output-section" class="flex flex-col bg-yellow-50">
             <pre id="output" class="whitespace-pre-wrap h-full bg-yellow-50 p-3">No output.</pre>
             <div id="returned-data" class="mt-4 bg-white rounded shadow"></div>
         </div>
-        <div class="p-4 border-b border-t">
+
+        <div class="p-4 border-b border-t cursor-pointer flex items-center justify-between" data-section="queries">
             <h5 class="font-bold">Queries:</h5>
+            <span class="collapse-indicator">▼</span>
         </div>
         <div class="flex flex-col" id="queries">
             <pre class="whitespace-pre-wrap h-full p-2">No queries.</pre>
