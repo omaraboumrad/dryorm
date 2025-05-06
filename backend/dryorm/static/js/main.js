@@ -29,23 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
 
-    // Add click handlers for collapsible sections
-    document.querySelectorAll('[data-section]').forEach(header => {
-        header.addEventListener('click', function() {
-            const sectionId = this.getAttribute('data-section');
-            const section = document.getElementById(sectionId);
-            const indicator = this.querySelector('.collapse-indicator');
-            
-            if (section.style.display === 'none') {
-                section.style.display = 'flex';
-                indicator.textContent = '▼';
-            } else {
-                section.style.display = 'none';
-                indicator.textContent = '▶';
-            }
-        });
-    });
-
     // --- Code Area ---
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
@@ -176,6 +159,22 @@ document.addEventListener('DOMContentLoaded', function() {
         models_editor.setValue(template_text);
     });
 
+    document.querySelectorAll('[data-section]').forEach(header => {
+        header.addEventListener('click', function() {
+            const sectionId = this.getAttribute('data-section');
+            const section = document.getElementById(sectionId);
+            const indicator = this.querySelector('.collapse-indicator');
+
+            if (section.style.display === 'none') {
+                section.style.display = 'flex';
+                indicator.textContent = '▼';
+            } else {
+                section.style.display = 'none';
+                indicator.textContent = '▶';
+            }
+        });
+    });
+
 });
 
 function addQuery(query) {
@@ -207,11 +206,10 @@ function formatReturnedData(returned) {
     if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
         
         // Get all unique keys from all dictionaries
-        const headers = new Set();
+        const headers = new Set()
         returned.forEach(item => {
             Object.keys(item).forEach(key => headers.add(key));
         });
-        const sortedHeaders = Array.from(headers).sort();
 
         // Get the template
         const template = document.getElementById('returned_data_template');
@@ -229,7 +227,7 @@ function formatReturnedData(returned) {
         // Add headers
         const headerRow = document.createElement('tr');
         headerRow.className = '';
-        sortedHeaders.forEach(header => {
+        headers.forEach(header => {
             const th = document.createElement('th');
             th.className = 'p-2 text-left';
             th.textContent = header;
@@ -240,7 +238,7 @@ function formatReturnedData(returned) {
         // Add rows
         returned.forEach(item => {
             const row = document.createElement('tr');
-            sortedHeaders.forEach(header => {
+            headers.forEach(header => {
                 const td = document.createElement('td');
                 td.className = 'p-2';
                 td.textContent = item[header] !== undefined ? item[header] : '';
