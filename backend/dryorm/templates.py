@@ -149,6 +149,26 @@ def run():
     print(f'User: {user.username}, Profile: {profile.bio}')
 '''
 
+TABULAR_OUTPUT = '''from django.db import models
+from django.db import models
+
+class Person(models.Model):
+    name = models.CharField()
+
+def run():
+    Person.objects.bulk_create([
+        Person(name='John Doe'),
+        Person(name='John Smith'),
+        Person(name='Jane Doe'),
+        Person(name='Jane Smith'),
+    ])
+
+    return {
+        'The Does': list(Person.objects.filter(name__endswith='Doe').values()),
+        'The Smiths': list(Person.objects.filter(name__endswith='Smith').values()),
+    }
+'''
+
 
 TEMPLATES = {
     'basic': BASIC,
@@ -158,4 +178,5 @@ TEMPLATES = {
     'basic fk': BASIC_FK,
     'self fk': SELF_FK,
     'user profile': USER_PROFILE,
+    'dryorm tabular output': TABULAR_OUTPUT
 }
