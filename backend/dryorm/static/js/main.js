@@ -218,6 +218,13 @@ function formatReturnedData(returned) {
         const table = template.content.cloneNode(true);
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
+        const header = table.querySelector('[data-section]');
+        const section = table.querySelector('.returned-data-section');
+
+        // Generate a unique ID for this section
+        const sectionId = `returned-data-${Math.random().toString(36).substr(2, 9)}`;
+        header.setAttribute('data-section', sectionId);
+        section.id = sectionId;
 
         // Add headers
         const headerRow = document.createElement('tr');
@@ -274,4 +281,21 @@ function handleReturnedData(returned) {
             }
         });
     }
+
+    // Attach click handlers to the newly created sections
+    returnedContainer.querySelectorAll('[data-section]').forEach(header => {
+        header.addEventListener('click', function() {
+            const sectionId = this.getAttribute('data-section');
+            const section = document.getElementById(sectionId);
+            const indicator = this.querySelector('.collapse-indicator');
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'flex';
+                indicator.textContent = '▼';
+            } else {
+                section.style.display = 'none';
+                indicator.textContent = '▶';
+            }
+        });
+    });
 }

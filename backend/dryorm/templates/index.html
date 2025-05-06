@@ -41,8 +41,9 @@
         </div>
         <div id="output-section" class="flex flex-col bg-yellow-50">
             <pre id="output" class="whitespace-pre-wrap h-full bg-yellow-50 p-3">No output.</pre>
-            <div id="returned-data" class="mt-4 bg-white rounded shadow"></div>
         </div>
+
+        <div id="returned-data" class="flex flex-col bg-white"></div>
 
         <div class="p-4 border-b border-t cursor-pointer flex items-center justify-between" data-section="queries">
             <h5 class="font-bold">Queries:</h5>
@@ -59,11 +60,18 @@
 </template>
 
 <template id="returned_data_template">
-    <h3 class="bg-gray-100 p-4 font-bold"></h3>
-    <table class="border-collapse w-full">
-        <thead></thead>
-        <tbody></tbody>
-    </table>
+    <div class="collapsible-section">
+        <div class="p-4 border-b cursor-pointer flex items-center justify-between" data-section="returned-data-section">
+            <h3 class="font-bold"></h3>
+            <span class="collapse-indicator">▼</span>
+        </div>
+        <div class="returned-data-section">
+            <table class="border-collapse w-full">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </template>
 
 {% csrf_token %}

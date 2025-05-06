@@ -71,11 +71,28 @@ h5 { font-size: 1rem; }
     transform: rotate(-90deg);
 }
 
-.collapsed + div {
+.collapsed {
     display: none;
 }
 
 /* Ensure proper spacing and transitions */
-#output-section, #queries-section {
+#output-section, #queries-section, .returned-data-section {
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.returned-data-section {
+    overflow-x: auto;
+}
+
+.collapsible-section {
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+}
+
+.collapsible-section h3 {
+    margin: 0;
+    padding: 0;
 }
