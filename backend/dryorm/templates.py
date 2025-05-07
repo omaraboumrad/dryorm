@@ -12,7 +12,7 @@ class Person(models.Model):
 def run():
     # At this point all migrations are created and applied
     john = Person.objects.create(name='John Doe')
-    jane = Person.objects.create(name='John Doe')
+    jane = Person.objects.create(name='Jane Doe')
 
     # Any "print" statements will be displayed in "Output"
     print(f'Hello, {john.name}!')
