@@ -6,7 +6,7 @@
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Dry ORM</title>
+        <title>{% block title %}Dry ORM{% endblock %}</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
@@ -27,10 +27,12 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
         <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}" />
         <style>
-            .CodeMirror {
-                font-size: 1rem;
-                overflow: auto;
-            }
+            .CodeMirror { font-size: 1rem; overflow: auto; }
+            .cm-string { color: #44B78B !important; }
+            .cm-def { color: #0C4B33 !important; font-weight: bold; }
+            .cm-keyword { color: #0C4B33 !important; font-weight: bold; }
+            .cm-builtin { color: black !important;}
+            .cm-comment { color: gray !important;}
         </style>
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44612863-2"></script>
         <script>
@@ -41,55 +43,21 @@
         </script>
     </head>
     <body class="bg-django-bg h-full flex flex-col">
-        <nav class="bg-django-primary text-white p-4 min-w-sm">
-            <div class="flex items-center justify-between no-wrap">
-                <div class="flex items-center gap-4">
-                    <a class="p-2 text-xl font-bold text-white whitespace-nowrap" href="{% url 'index' %}">Dry ORM</a>
-                    <div class="flex items-center gap-2">
-                        <a class="text-md text-white hover:underline" href="{% url 'list' %}">View</a>
-                        <a class="text-md text-white hover:underline cursor-pointer" onclick="document.getElementById('about-dialog').showModal()">About</a>
-                    </div>
-                </div>
+        <c-nav>
+            <c-slot name="links">
+                <a class="text-md text-white hover:underline" href="{% url 'list' %}">View</a>
+                <a class="text-md text-white hover:underline cursor-pointer" onclick="document.getElementById('about-dialog').showModal()">About</a>
+            </c-slot>
+            <c-slot name="center">
                 {% block center-actions %}{% endblock %}
-                <div class="flex items-center space-x-2">
-                    <div id="loader" class="w-8 h-8 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden"></div>
-                    {% block right-actions %}{% endblock %}
-                </div>
-            </div>
-        </nav>
+            </c-slot>
+            <c-slot name="right">
+                {% block right-actions %}{% endblock %}
+            </c-slot>
+        </c-nav>
+
         {% block content %}{% endblock %}
 
-<dialog id="about-dialog" class="rounded-xl p-6 shadow-xl max-w-xl w-full text-django-text backdrop:bg-black/50 backdrop:backdrop-blur-sm">
-  <form method="dialog" class="space-y-4">
-    <h2 class="text-2xl font-bold text-django-text">DryORM</h2>
-    <p>Hi! DryORM allows you to run Django ORM code against SQLite. The technologies used to power this webapp are:</p>
-    <ul class="list-disc list-inside">
-        <li><strong>Frameworks & Libraries:</strong> <a class="text-django-secondary" href="https://wwww.djangoproject.com">Django</a> / <a class="text-django-secondary" href="https://channels.readthedocs.io/en/latest/index.html">Channels</a> / <a class="text-django-secondary" href="https://python-rq.org/">Python RQ</a></li>
-      <li><strong>DB / Broker:</strong> Postgres / SQLite / Redis</li>
-      <li><strong>Infra:</strong> Docker / Compose</li>
-      <li><strong>Frontend:</strong> Django Templates / Vanilla JS / Tailwindcss (<strong>play.*</strong> for now)</li>
-    </ul>
-    <p>
-    The project is built primarily to provide <a class="text-django-secondary" href="https://discord.com/invite/xcRH6mN4fa">Django's Discord Community</a> Staff with a medium to assist users with their ORM questions rather quickly.
-      The implementation is in fact framework-agnostic, however Django will remain the primary purpose for the foreseeable future.
-    </p>
-    <p>
-      Since I'm not forcing anyone to login, there are several safeguards in place. Nevertheless, I urge you not to cause harm. The limitations are as follows:
-    </p>
-    <ul class="list-disc list-inside">
-      <li>Rate limits</li>
-      <li>5 concurrent executions</li>
-      <li>No network</li>
-      <li>50MB limit</li>
-      <li>10s timeout</li>
-    </ul>
-    <p>Major thanks to everyone that has helped test and provide feedback on the project.</p>
-    <div class="flex justify-between items-center">
-    <p><a class="font-bold text-django-secondary" href="https://xterm.info">Xterm</a></p>
-      <button class="bg-django-secondary hover:bg-django-secondary/90 text-white px-4 py-2 rounded">Close</button>
-    </div>
-  </form>
-</dialog>
-        <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+        <c-about />
     </body>
 </html>

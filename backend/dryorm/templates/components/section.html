@@ -1,0 +1,13 @@
+<c-vars background="bg-white" />
+<div class="flex items-center justify-between p-4 border-b border-django-primary/10 cursor-pointer {{ background }}"
+     {% if id %}data-section="{{ id }}"{% endif %}>
+    <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-2">
+            {{ icon }}
+            <h5 class="font-bold text-django-text">{{ title }}</h5>
+        </div>
+        {{ note }}
+    </div>
+    {{ right }}
+</div>
+<div id="{{ id }}" class="flex flex-col border-b border-django-primary/10">{{ slot }}</div>

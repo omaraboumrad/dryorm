@@ -5,8 +5,8 @@ channels==4.2.2
 channels-redis==4.2.1
 psycopg2-binary==2.9.10
 
-django-reversion==5.1.0
 Django==5.2
 django-extensions==4.1
 daphne==4.1.2
 sentry-sdk[django]>=2.25.1
+django-cotton==2.1.1

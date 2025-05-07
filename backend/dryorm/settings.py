@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_cotton',
     'django_extensions',
     'channels',
 
@@ -114,6 +115,9 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = f'{PROJECT}.asgi.application'
+
+COTTON_DIR = "components"
+COTTON_SNAKE_CASED_NAMES = False
 
 import sentry_sdk
 

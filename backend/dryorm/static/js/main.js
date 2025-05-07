@@ -66,8 +66,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
                     }
 
+                    var query_html = []
                     for(var i=0;i<data.result.queries.length;i++){
-                        addQuery(data.result.queries[i].sql);
+                        let query = data.result.queries[i];
+                        let colorized = colorize(query.sql);
+                        query_html.push(`<span class="font-bold text-gray-800">[ ${query.time}s ]</span> ${colorized}\n`);
+                    }
+
+                    if (query_html.length > 0){
+                        queries.innerHTML = query_html.join('');
+                    } else {
+                        queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
                     }
 
                     handleReturnedData(data.result.returned);
@@ -176,14 +185,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function addQuery(query) {
-    const template = document.getElementById('query_template');
     const queries = document.getElementById('queries');
-
-    const clone = template.content.cloneNode(true);
-    const codeElement = clone.querySelector('div');
-    codeElement.textContent = query;
-
-    queries.appendChild(clone);
+    queries.appendChild(document.createquery);
 }
 
 function showRightColumn() {
@@ -196,6 +199,21 @@ function showRightColumn() {
         grid.classList.add('grid-cols-2');
     }
 }
+
+function colorize(query){
+    const keywords = new Set([
+        "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
+    ]);
+
+    const highlighted = query.replace(/\b\w+\b/g, (token) => {
+        return keywords.has(token.toUpperCase())
+            ? `<span class="font-bold text-django-primary">${token}</span>`
+            : token;
+    });
+
+    return highlighted;
+}
+
 
 // --- AI Generated Code ---
 //
@@ -231,7 +249,7 @@ function formatReturnedData(returned) {
         headerRow.className = '';
         headers.forEach(header => {
             const th = document.createElement('th');
-            th.className = 'p-2 text-left';
+            th.className = 'p-1 text-left';
             th.textContent = header;
             headerRow.appendChild(th);
         });
@@ -242,7 +260,7 @@ function formatReturnedData(returned) {
             const row = document.createElement('tr');
             headers.forEach(header => {
                 const td = document.createElement('td');
-                td.className = 'p-2';
+                td.className = 'p-1';
                 td.textContent = item[header] !== undefined ? item[header] : '';
                 row.appendChild(td);
             });
