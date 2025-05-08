@@ -9,10 +9,10 @@
         <input type="checkbox" id="isPrivate"
                                class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
     </label>
-    <input type="text" id="name" placeholder="Name" class="bg-django-primary text-white px-2 py-2 rounded-sm border border-django-secondary focus:outline-none focus:border-django-secondary">
-    <button class="bg-django-secondary hover:bg-django-secondary text-white px-4 py-2 rounded-sm" id="save">Save</button>
+    <input type="text" id="name" placeholder="Name" class="bg-django-primary placeholder:text-white/80 text-white px-2 py-2 rounded-sm border border-django-secondary focus:outline-none focus:border-django-secondary">
+    <button class="bg-django-secondary/80 hover:bg-django-secondary text-white px-4 py-2 rounded-sm font-medium" id="save">Save</button>
 </div>
-<button class="bg-django-secondary hover:bg-django-secondary disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled" id="run">Execute</button>
+<button class="bg-django-secondary/80 hover:bg-django-secondary disabled:opacity-40 text-white px-4 py-2 rounded-sm disabled font-medium" id="run">Execute</button>
 {% endblock %}
 index
 {% block center-actions %}
@@ -23,7 +23,7 @@ index
     <div class="bg-white flex flex-col h-full">
         <c-section title="Code">
             <c-slot name="icon"><c-icons.code /></c-slot>
-            <c-slot name="note"><span id="job" class="text-django-text/60 px-3 rounded opacity-50 whitespace-nowrap"></span></c-slot>
+            <c-slot name="note"><span id="job" class="text-django-primary/80 px-3 rounded  whitespace-nowrap"></span></c-slot>
             <c-slot name="right">
                 <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
                     <option value="">Select a template</option>
