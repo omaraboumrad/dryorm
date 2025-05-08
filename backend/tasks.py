@@ -1,9 +1,11 @@
+import hashlib
 import json
 import os
 import uuid
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dryorm.settings'
 
+from django.core.cache import cache
 import channels
 import docker
 from channels.layers import get_channel_layer
@@ -28,26 +30,36 @@ def find_running_django_containers(client, prefix='django-'):
 
 def run_django(channel, code):
     client = docker.from_env()
+    key = hashlib.md5(code.encode('utf-8')).hexdigest()
 
+    channel_layer = get_channel_layer()
     executor = constants.EXECUTOR
 
     try:
-        running = find_running_django_containers(client, prefix='django-')
+        # Is the result already cached?
+        if reply := cache.get(key):
+            async_to_sync(channel_layer.send)(channel, {
+                "type": "websocket.send",
+                "text": reply
+            })
+            return
+        else:
+            running = find_running_django_containers(client, prefix='django-')
 
-        if len(running) >= executor.max_containers:
-            raise OverloadedError
+            if len(running) >= executor.max_containers:
+                raise OverloadedError
 
-        container_name = f'django-{uuid.uuid4().hex[:6]}'
-        result = client.containers.run(
-            executor.image,
-            name=container_name,
-            mem_limit=executor.memory,
-            memswap_limit=executor.memory,
-            network_disabled=True,
-            remove=True,
-            environment=[
-                'CODE={}'.format(code),
-            ])
+            container_name = f'django-{uuid.uuid4().hex[:6]}'
+            result = client.containers.run(
+                executor.image,
+                name=container_name,
+                mem_limit=executor.memory,
+                memswap_limit=executor.memory,
+                network_disabled=True,
+                remove=True,
+                environment=[
+                    'CODE={}'.format(code),
+                ])
     except ContainerError as error: # Do some logging
         match error.exit_status:
             case 137:
@@ -109,7 +121,7 @@ def run_django(channel, code):
             result=json.loads(decoded)
         ))
     finally:
-        channel_layer = get_channel_layer()
+        cache.set(key, reply)
         async_to_sync(channel_layer.send)(channel, {
             "type": "websocket.send",
             "text": reply

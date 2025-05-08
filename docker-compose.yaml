@@ -1,6 +1,7 @@
 volumes:
     static: {}
     postgres_data: {}
+    django_cache: {}
 
 networks:
     default:
@@ -41,6 +42,7 @@ services:
         volumes:
             - ./backend:/app
             - static:/app/static
+            - django_cache:/app/cache
         depends_on:
             - database
             - redis
@@ -54,6 +56,7 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./backend:/app
+            - django_cache:/app/cache
         depends_on:
             - redis
             - backend
