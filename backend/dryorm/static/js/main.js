@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     var query_html = []
                     for(var i=0;i<data.result.queries.length;i++){
                         let query = data.result.queries[i];
-                        let colorized = colorize(query.sql);
-                        query_html.push(`<span class="font-semibold text-django-primary/80">---- ${query.time}s ----</span>\n\n${colorized}\n\n`);
+                        let padding = query.time.toString().length + 2;
+                        let colorized = colorize(query.sql, padding);
+                        query_html.push(`<span class="font-semibold text-django-primary/80">${query.time}s</span> ${colorized}\n\n`);
                     }
 
                     if (query_html.length > 0){
@@ -200,18 +201,23 @@ function showRightColumn() {
     }
 }
 
-function colorize(query){
+function colorize(query, padding = 0){
     const keywords = new Set([
         "BEGIN", "COMMIT", "ESCAPE", "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
     ]);
 
-    const highlighted = query.replace(/\b\w+\b/g, (token) => {
-        return keywords.has(token.toUpperCase())
-            ? `<span class="font-bold text-django-primary">${token}</span>`
-            : token;
+    const lines = query.split('\n');
+    const highlightedLines = lines.map((line, index) => {
+        const highlighted = line.replace(/\b\w+\b/g, (token) => {
+            return keywords.has(token.toUpperCase())
+                ? `<span class="font-bold text-django-primary">${token}</span>`
+                : token;
+        });
+        // Add padding to all lines except the first one
+        return index === 0 ? highlighted : ' '.repeat(padding) + highlighted;
     });
 
-    return highlighted;
+    return highlightedLines.join('\n');
 }
 
 

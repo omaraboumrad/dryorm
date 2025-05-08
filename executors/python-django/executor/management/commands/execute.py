@@ -19,9 +19,9 @@ class Command(BaseCommand):
             returned = run()
 
         excluded = [
-            # 'BEGIN',
-            # 'COMMIT',
-            # 'ROLLBACK',
+            'BEGIN',
+            'COMMIT',
+            'ROLLBACK',
         ]
 
         combined = dict(
