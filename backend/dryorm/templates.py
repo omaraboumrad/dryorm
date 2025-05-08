@@ -21,7 +21,10 @@ def run():
     # as a Table below the Output Section and will be given the key as title.
     return {
         'People': list(Person.objects.values()),
-        'Other': {'name': 'value', 'other': 'value'},
+        'Other': [
+            {'name': 'Cell 1', 'other': 'Cell 2'},
+            {'name': 'Cell 3', 'other': 'Cell 4'},
+        ]
     }
 
     # Alternatively, you can just return a list of dicts
