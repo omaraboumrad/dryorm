@@ -6,7 +6,7 @@ from faker import Faker
 
 # You can place the models here
 class Person(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
 
 # You need a run function
 def run():
@@ -35,7 +35,7 @@ def run():
 BASIC = '''from django.db import models
 
 class Person(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -49,7 +49,7 @@ BULK = '''from django.db import models
 from django.db import models
 
 class Person(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
 
 def run():
     Person.objects.bulk_create([
@@ -71,8 +71,8 @@ class Person(models.Model):
         USER = 'user'
         GUEST = 'guest'
 
-    name = models.CharField()
-    role = models.CharField(choices=Role.choices)
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100, choices=Role.choices)
 
 def run():
     fake = Faker()
@@ -97,8 +97,8 @@ from django.db import models
 from tabulate import tabulate
 
 class Person(models.Model):
-    name = models.CharField()
-    country = models.CharField()
+    name = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
 
 data = """\
 name,country
@@ -123,10 +123,10 @@ def run():
 BASIC_FK = '''from django.db import models
 
 class Category(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
 
 class Product(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
 def run():
@@ -147,7 +147,7 @@ def run():
 SELF_FK = '''from django.db import models
 
 class Employee(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
     manager = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
@@ -187,7 +187,7 @@ TABULAR_OUTPUT = '''from django.db import models
 from django.db import models
 
 class Person(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=100)
 
 def run():
     Person.objects.bulk_create([

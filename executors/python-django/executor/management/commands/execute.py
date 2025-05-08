@@ -4,6 +4,7 @@ import json
 
 from django.core.management.base import BaseCommand
 from django.db import connection
+import sqlparse
 
 from executor.models import run
 
@@ -25,7 +26,10 @@ class Command(BaseCommand):
 
         combined = dict(
             output=out.getvalue(),
-            queries=[q for q in connection.queries if q['sql'] not in excluded],
+            queries=[
+                {'time': q['time'], 'sql': sqlparse.format(q['sql'], reindent=True)}
+                 for q in connection.queries if q['sql'] not in excluded
+            ],
             returned=returned,
         )
 
