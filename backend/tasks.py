@@ -121,7 +121,7 @@ def run_django(channel, code):
             result=json.loads(decoded)
         ))
     finally:
-        cache.set(key, reply)
+        cache.set(key, reply, timeout=60 * 60 * 24 * 365)
         async_to_sync(channel_layer.send)(channel, {
             "type": "websocket.send",
             "text": reply

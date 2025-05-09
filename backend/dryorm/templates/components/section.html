@@ -1,4 +1,4 @@
-<c-vars background="bg-white" />
+<c-vars background="bg-white" classes=""/>
 <div class="flex items-center justify-between p-4 border-b border-django-primary/10 cursor-pointer {{ background }}"
      {% if id %}data-section="{{ id }}"{% endif %}>
     <div class="flex items-center space-x-4">
@@ -10,4 +10,4 @@
     </div>
     {{ right }}
 </div>
-<div id="{{ id }}" class="flex flex-col border-b border-django-primary/10">{{ slot }}</div>
+<div id="{{ id }}" class="flex flex-col border-b border-django-primary/10 {{classes}}">{{ slot }}</div>
