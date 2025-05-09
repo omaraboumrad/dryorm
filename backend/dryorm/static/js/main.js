@@ -39,7 +39,9 @@ document.addEventListener('DOMContentLoaded', function() {
             Tab: function(cm) {
                 const spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
                 cm.replaceSelection(spaces);
-            }
+            },
+            'Ctrl-Enter': (cm) => execute(),
+            'Cmd-Enter': (cm) => execute(),
         }
     });
     models_editor.setSize("100%", "100%");
@@ -121,8 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     connect();
 
-    // --- Button Handlers ---
-    run.addEventListener('click', function(){
+    function execute() {
         output.textContent = '';
         queries.innerHTML = '';
         document.getElementById('returned-data').innerHTML = '';
@@ -139,6 +140,11 @@ document.addEventListener('DOMContentLoaded', function() {
         socket.send(payload);
         loader.classList.remove('hidden');
         run.disabled = true;
+    }
+
+    // --- Button Handlers ---
+    run.addEventListener('click', function(){
+        execute()
     });
 
     save.addEventListener('click', function(){
