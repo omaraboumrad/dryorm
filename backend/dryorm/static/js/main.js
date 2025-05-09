@@ -27,6 +27,16 @@ document.addEventListener('DOMContentLoaded', function() {
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
 
+    // Store raw data
+    let rawOutput = '';
+    let rawQueries = [];
+
+    // Setup copy buttons for static sections
+    setupCopyButton(document.querySelector('[data-section="output-section"] .copy-indicator'), () => rawOutput);
+    setupCopyButton(document.querySelector('[data-section="queries-section"] .copy-indicator'), () => {
+        return rawQueries.map(q => `${q.sql}`).join('\n\n');
+    });
+
     // --- Code Area ---
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
@@ -62,15 +72,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
 
                 case 'job-done':
-                    output.textContent = data.result.output === '' ? 'No output' : data.result.output;
+                    rawOutput = data.result.output;
+                    output.textContent = rawOutput === '' ? 'No output' : rawOutput;
 
-                    if(data.result.queries.length === 0){
+                    rawQueries = data.result.queries;
+                    if(rawQueries.length === 0){
                         queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
                     }
 
                     var query_html = []
-                    for(var i=0;i<data.result.queries.length;i++){
-                        let query = data.result.queries[i];
+                    for(var i=0;i<rawQueries.length;i++){
+                        let query = rawQueries[i];
                         let padding = query.time.toString().length + 2;
                         let colorized = colorize(query.sql, padding);
                         query_html.push(`<span class="font-semibold text-django-primary/80">${query.time}s</span> ${colorized}\n\n`);
@@ -242,6 +254,26 @@ function colorize(query, padding = 0){
 //            o
 //           /\
 
+// Reusable copy function
+function setupCopyButton(button, getContent) {
+    button.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent the click from triggering the collapse
+        const content = getContent();
+        const copiedLabel = document.createElement('span');
+        copiedLabel.className = 'text-green-500 text-sm ml-2';
+        copiedLabel.textContent = 'Copied!';
+        navigator.clipboard.writeText(content).then(() => {
+            const icon = this.querySelector('svg');
+            icon.classList.remove('group-hover:block');
+            icon.parentNode.appendChild(copiedLabel);
+            setTimeout(() => {
+                copiedLabel.remove();
+                icon.classList.add('group-hover:block');
+            }, 1000);
+        });
+    });
+}
+
 function formatReturnedData(returned) {
     if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
 
@@ -334,6 +366,37 @@ function handleReturnedData(returned) {
                 section.style.display = 'none';
                 indicator.textContent = '▶';
             }
+        });
+
+        // Add copy button to each returned data section
+        const sectionId = header.getAttribute('data-section');
+        const section = document.getElementById(sectionId);
+        const table = section.querySelector('table');
+
+        // Create copy button container
+        const copyButtonContainer = document.createElement('div');
+        copyButtonContainer.className = 'copy-indicator';
+        copyButtonContainer.innerHTML = '<svg class="w-6 h-6 text-django-tertiary hidden group-hover:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 7 2 2 4-4m-5-9v4h4V3h-4Z" /></svg>';
+
+        // Add copy button to the header
+        const headerContent = header.querySelector('div');
+        headerContent.appendChild(copyButtonContainer);
+
+        // Setup copy functionality
+        setupCopyButton(copyButtonContainer, () => {
+            if (table) {
+                const rows = table.querySelectorAll('tbody tr');
+                let content = '';
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach(cell => {
+                        content += cell.textContent.trim() + '\t';
+                    });
+                    content += '\n';
+                });
+                return content;
+            }
+            return '';
         });
     });
 }

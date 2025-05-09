@@ -40,7 +40,14 @@ index
     <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full">
         <c-section title="Output" id="output-section" background="bg-django-secondary/20">
             <c-slot name="icon"><c-icons.terminal /></c-slot>
-            <c-slot name="right"><c-indicator /></c-slot>
+            <c-slot name="indicator">
+                <div class="flex items-center gap-2 copy-indicator">
+                    <c-icons.clipboard-copy color="text-django-tertiary" />
+                </div>
+            </c-slot>
+            <c-slot name="right">
+                <c-indicator />
+            </c-slot>
             <pre id="output" class="whitespace-pre-wrap h-full p-3 text-django-text">No output.</pre>
         </c-section>
 
@@ -48,13 +55,13 @@ index
 
         <c-section title="Queries" id="queries-section" background="bg-django-secondary/20" classes="h-full">
             <c-slot name="icon"><c-icons.db /></c-slot>
-            <c-slot name="right">
-                <div class="flex items-center gap-2">
-                    <div class="copy-indicator">
-                <c-icons.clipboard-copy color="text-django-tertiary" />
-                    </div>
-                <c-indicator />
+            <c-slot name="indicator">
+                <div class="flex items-center gap-2 copy-indicator">
+                    <c-icons.clipboard-copy color="text-django-tertiary" />
                 </div>
+            </c-slot>
+            <c-slot name="right">
+                <c-indicator />
             </c-slot>
             <pre id="queries" class="whitespace-pre-wrap p-2 text-django-text">No queries.</pre>
         </c-section>
