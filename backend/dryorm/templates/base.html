@@ -16,6 +16,7 @@
                             'django': {
                                 'primary': '#0C4B33',
                                 'secondary': '#44B78B',
+                                'tertiary': '#47bd90',
                                 'bg': '#F8F8F8',
                                 'text': '#333333'
                             }
@@ -46,8 +47,9 @@
     <body class="bg-django-bg h-full flex flex-col">
         <c-nav>
             <c-slot name="links">
-                <a class="text-md text-white hover:underline" href="{% url 'list' %}">View</a>
-                <a class="text-md text-white hover:underline cursor-pointer" onclick="document.getElementById('about-dialog').showModal()">About</a>
+                <a class="text-lg text-white hover:underline" href="{% url 'list' %}">Browse</a>
+                /
+                <a class="text-lg text-white hover:underline cursor-pointer" href="{% url 'about' %}">About</a>
             </c-slot>
             <c-slot name="center">
                 {% block center-actions %}{% endblock %}

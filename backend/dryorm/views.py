@@ -35,6 +35,10 @@ class SnippetHomeView(generic.TemplateView):
         return context
 
 
+class AboutView(generic.TemplateView):
+    template_name = 'about.html'
+
+
 def save(request):
     if request.method != 'POST':
         return http.HttpResponseNotAllowed('nope!')
@@ -51,5 +55,6 @@ def save(request):
 # Define templates as a dictionary
 
 home = SnippetHomeView.as_view()
+about = AboutView.as_view()
 detail = SnippetDetailView.as_view()
 list_snippets = SnippetListView.as_view()

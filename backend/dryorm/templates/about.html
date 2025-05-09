@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Dry ORM - About{% endblock %}
+{% block content %}
+    <main class="px-6 py-2 max-w-4xl flex flex-col gap-4">
+        <div class="space-y-4">
+            <h2 class="py-4 text-xl font-semibold border-b"># Intro</h2>
+            <p>DryORM allows you to run Django ORM code against SQLite. The technologies used to power this webapp are:</p>
+            <ul class="list-disc list-inside">
+                <li>
+                    <strong>Frameworks & Libraries:</strong> <a class="text-django-secondary" href="https://wwww.djangoproject.com">Django</a> / <a class="text-django-secondary"
+    href="https://channels.readthedocs.io/en/latest/index.html">Channels</a> / <a class="text-django-secondary" href="https://python-rq.org/">Python RQ</a>
+                </li>
+                <li>
+                    <strong>DB / Broker:</strong> Postgres / SQLite / Redis
+                </li>
+                <li>
+                    <strong>Infra:</strong> Docker / Compose
+                </li>
+                <li>
+                    <strong>Frontend:</strong> Django Templates / Vanilla JS / Tailwindcss (<strong>play.*</strong> for now)
+                </li>
+            </ul>
+            <p>
+                The project is built primarily to provide <a class="text-django-secondary"
+    href="https://discord.com/invite/xcRH6mN4fa">Django's Discord Community</a> Staff with a medium to assist users with their ORM questions rather quickly.
+                The implementation is in fact framework-agnostic, however Django will remain the primary purpose for the foreseeable future.
+            </p>
+            <p>
+                Since I'm not forcing anyone to login, there are several safeguards in place. Nevertheless, I urge you not to cause harm. The limitations are as follows:
+            </p>
+            <ul class="list-disc list-inside">
+                <li>Rate limits</li>
+                <li>10 concurrent executions</li>
+                <li>No network</li>
+                <li>50MB limit</li>
+                <li>10s timeout</li>
+            </ul>
+            <p>Major thanks to everyone that has helped test and provide feedback on the project.</p>
+            <p>
+                <a class="font-bold text-django-secondary" href="https://xterm.info">Xterm</a>
+            </p>
+        </div>
+        <div class="space-y-4 mt-4 whitespace-nowrap [&_*]:whitespace-inherit">
+            <h2 class="py-4 border-b border-t text-xl font-semibold"># Changelog</h2>
+            <div class="grid grid-cols-2 grid-cols-[max-content_min-content] w-fit gap-4">
+                <div class="font-semibold">May 6th, 2025</div>
+                <div class="">Initial release</div>
+                <div class="font-semibold">May 7th, 2025</div>
+                <ul>
+                    <li>UI - adds footer with disclaimer</li>
+                    <li>UI - adds sql time per query</li>
+                    <li>UI - highlight keywords in sql</li>
+                    <li>UI - changes the code editor colors to match theme</li>
+                </ul>
+                <div class="font-semibold">May 8th, 2025</div>
+                <ul>
+                    <li>Engine - execution is now exponentially faster [more improvements planned]</li>
+                    <li>Engine - result is now cached, driven by the code hash</li>
+                    <li>Engine - increased concurrent workers to 10</li>
+                    <li>Engine - upgraded executors to Django 5.2.1</li>
+                    <li>UI - improved contrast on some elements</li>
+                    <li>UI - queries are now more human readable</li>
+                </ul>
+            </div>
+            <p>Future plans include adding support for more databases and improving the UI.</p>
+        </div>
+    </main>
+{% endblock %}
