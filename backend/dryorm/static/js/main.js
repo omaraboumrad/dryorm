@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             switch(data.event){
                 case 'job-fired':
-                    job.textContent = data.key;
+                    // job.textContent = data.key;
                     break;
 
                 case 'job-done':
@@ -107,25 +107,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         socket.onopen = function(e) {
-            job.textContent = 'connected';
+            // job.textContent = 'connected';
             run.disabled = false;
         }
 
         socket.onclose = function(e) {
-            job.textContent = 'connection died';
+            // job.textContent = 'connection died';
             run.disabled = true;
             setTimeout(function(){
-                job.textContent = 'reconnecting';
+                // job.textContent = 'reconnecting';
                 connect();
             }, 2000);
         }
     }
 
     connect();
+    models_editor.focus();
+
 
     function execute() {
-        output.textContent = '';
-        queries.innerHTML = '';
+        output.textContent = 'loading...';
+        queries.innerHTML = 'loading...';
         document.getElementById('returned-data').innerHTML = '';
 
         if (models_editor.getValue().trim() === '') {
@@ -160,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            job.textContent = 'new snippet saved';
+            // job.textContent = 'new snippet saved';
             name.value = '';
             isPrivate.checked = false;
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
@@ -171,6 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var template_name = event.target.value;
         var template_text = templates[template_name] || '';
         models_editor.setValue(template_text);
+        models_editor.focus();
     });
 
     document.querySelectorAll('[data-section]').forEach(header => {

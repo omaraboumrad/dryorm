@@ -35,7 +35,7 @@ index
                 </div>
             </c-slot>
         </c-section>
-        <textarea id="code_models">{{ object.code }}</textarea>
+        <textarea id="code_models">{% if object %}{{ object.code }}{% else %}{{first}}{% endif %}</textarea>
     </div>
     <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full">
         <c-section title="Output" id="output-section" background="bg-django-secondary/20">
