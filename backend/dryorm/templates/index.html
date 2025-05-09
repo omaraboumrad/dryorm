@@ -23,14 +23,16 @@ index
     <div class="bg-white flex flex-col h-full">
         <c-section title="Code">
             <c-slot name="icon"><c-icons.code /></c-slot>
-            <c-slot name="note"><span id="job" class="text-django-primary/80 px-3 rounded  whitespace-nowrap"></span></c-slot>
             <c-slot name="right">
-                <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
-                    <option value="">Select a template</option>
-                    {% for key, _ in templates.items %}
-                        <option value="{{key}}">{{key}}</option>
-                    {% endfor %}
-                </select>
+                <div class="flex items-center gap-2">
+            <div id="loader" class="w-6 h-6 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden"></div>
+            <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+                <option value="">Select a template</option>
+                {% for key, _ in templates.items %}
+                <option value="{{key}}">{{key}}</option>
+                {% endfor %}
+            </select>
+                </div>
             </c-slot>
         </c-section>
         <textarea id="code_models">{{ object.code }}</textarea>
