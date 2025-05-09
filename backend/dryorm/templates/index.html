@@ -48,7 +48,14 @@ index
 
         <c-section title="Queries" id="queries-section" background="bg-django-secondary/20" classes="h-full">
             <c-slot name="icon"><c-icons.db /></c-slot>
-            <c-slot name="right"><c-indicator /></c-slot>
+            <c-slot name="right">
+                <div class="flex items-center gap-2">
+                    <div class="copy-indicator">
+                <c-icons.clipboard-copy color="text-django-tertiary" />
+                    </div>
+                <c-indicator />
+                </div>
+            </c-slot>
             <pre id="queries" class="whitespace-pre-wrap p-2 text-django-text">No queries.</pre>
         </c-section>
     </div>
