@@ -261,7 +261,7 @@ function formatReturnedData(returned) {
         headerRow.className = '';
         headers.forEach(header => {
             const th = document.createElement('th');
-            th.className = 'p-1 bg-django-secondary/20 border border-django-primary/30 text-left';
+            th.className = 'p-1 bg-sky-200 border border-sky-300 text-left';
             th.textContent = header;
             headerRow.appendChild(th);
         });
@@ -272,7 +272,7 @@ function formatReturnedData(returned) {
             const row = document.createElement('tr');
             headers.forEach(header => {
                 const td = document.createElement('td');
-                td.className = 'p-1 bg-django-secondary/10 border border-django-primary/30';
+                td.className = 'p-1 bg-sky-100 border border-sky-300';
                 td.textContent = item[header] !== undefined ? item[header] : '';
                 row.appendChild(td);
             });
