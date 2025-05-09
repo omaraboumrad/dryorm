@@ -109,6 +109,10 @@ document.addEventListener('DOMContentLoaded', function() {
         socket.onopen = function(e) {
             // job.textContent = 'connected';
             run.disabled = false;
+            // if url has "?run" then run the code
+            if (window.location.search.includes('?run')) {
+                execute();
+            }
         }
 
         socket.onclose = function(e) {
@@ -147,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Button Handlers ---
     run.addEventListener('click', function(){
         execute()
+        models_editor.focus();
     });
 
     save.addEventListener('click', function(){
