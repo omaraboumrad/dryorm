@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
 
+    var erd_link = document.getElementById('erd');
+
     // Store raw data
     let rawOutput = '';
     let rawQueries = [];
@@ -82,18 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     let erd = data.result.erd;
                     if (erd && erd.length > 0) {
-                        const link = document.getElementById('erd');
-                        link.classList.remove('hidden');
-                        link.href = '#';
-                        link.onclick = function(e) {
-                            e.preventDefault();
-                            const dialog = document.getElementById('dialog');
-                            const backdrop = document.getElementById('dialog-backdrop');
-                            const erdSvg = document.getElementById('erd-svg');
-                            erdSvg.data = `https://kroki.io/mermaid/svg/${erd}`;
-                            dialog.classList.remove('hidden');
-                            backdrop.classList.remove('hidden');
-                        };
+                        erd_link.classList.remove('hidden');
+                        erd_link.href = `https://kroki.io/mermaid/svg/${erd}`;
+                        erd_link.target = '_blank';
                     }
 
                     var query_html = []
@@ -160,6 +153,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function execute() {
         output.textContent = 'loading...';
         queries.innerHTML = 'loading...';
+        
+        // Reset ERD-related elements
+        erd_link.classList.add('hidden');
+        erd_link.href = '#';
+        erd_link.onclick = null;
+
         document.getElementById('returned-data').innerHTML = '';
 
         if (models_editor.getValue().trim() === '') {
@@ -225,206 +224,194 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add dialog close functionality
-    const dialog = document.getElementById('dialog');
-    const backdrop = document.getElementById('dialog-backdrop');
-    const closeButton = document.getElementById('dialog-close');
 
-    function closeDialog() {
-        dialog.classList.add('hidden');
-        backdrop.classList.add('hidden');
+    function showRightColumn() {
+        const rightColumn = document.getElementById('right_column');
+        const grid = document.getElementById('main_grid');
+
+        if (rightColumn.classList.contains('hidden')) {
+            rightColumn.classList.remove('hidden');
+            grid.classList.remove('grid-cols-1');
+            grid.classList.add('grid-cols-2');
+        }
     }
 
-    closeButton.addEventListener('click', closeDialog);
-    backdrop.addEventListener('click', closeDialog);
+    function colorize(query, padding = 0){
+        const keywords = new Set([
+            "BEGIN", "COMMIT", "ESCAPE", "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
+        ]);
+
+        const lines = query.split('\n');
+        const highlightedLines = lines.map((line, index) => {
+            const highlighted = line.replace(/\b\w+\b/g, (token) => {
+                return keywords.has(token.toUpperCase())
+                    ? `<span class="font-bold text-django-primary">${token}</span>`
+                    : token;
+            });
+            // Add padding to all lines except the first one
+            return index === 0 ? highlighted : ' '.repeat(padding) + highlighted;
+        });
+
+        return highlightedLines.join('\n');
+    }
+
+
+    // --- AI Generated Code ---
+    //
+    //       ... works ...
+    //        ¯\_(ツ)_/¯
+    //            o
+    //           /\
+
+    // Reusable copy function
+    function setupCopyButton(button, getContent) {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent the click from triggering the collapse
+            const content = getContent();
+            const copiedLabel = document.createElement('span');
+            copiedLabel.className = 'text-green-500 text-sm ml-2';
+            copiedLabel.textContent = 'Copied!';
+            navigator.clipboard.writeText(content).then(() => {
+                const icon = this.querySelector('svg');
+                icon.classList.remove('group-hover:block');
+                icon.parentNode.appendChild(copiedLabel);
+                setTimeout(() => {
+                    copiedLabel.remove();
+                    icon.classList.add('group-hover:block');
+                }, 1000);
+            });
+        });
+    }
+
+    function formatReturnedData(returned) {
+        if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
+
+            // Get all unique keys from all dictionaries
+            const headers = new Set()
+            returned.forEach(item => {
+                Object.keys(item).forEach(key => headers.add(key));
+            });
+
+            // Get the template
+            const template = document.getElementById('returned_data_template');
+            const table = template.content.cloneNode(true);
+            const thead = table.querySelector('thead');
+            const tbody = table.querySelector('tbody');
+            const header = table.querySelector('[data-section]');
+            const section = table.querySelector('.returned-data-section');
+
+            // Generate a unique ID for this section
+            const sectionId = `returned-data-${Math.random().toString(36).substr(2, 9)}`;
+            header.setAttribute('data-section', sectionId);
+            section.id = sectionId;
+
+            // Add headers
+            const headerRow = document.createElement('tr');
+            headerRow.className = '';
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.className = 'p-1 bg-sky-200 border border-sky-300 text-left';
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // Add rows
+            returned.forEach(item => {
+                const row = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.className = 'p-1 bg-sky-100 border border-sky-300';
+                    td.textContent = item[header] !== undefined ? item[header] : '';
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+
+            return table;
+        }
+        return null;
+    }
+
+    function handleReturnedData(returned) {
+        const returnedContainer = document.getElementById('returned-data');
+        returnedContainer.innerHTML = '';
+        
+        if (!returned) return;
+        
+        if (Array.isArray(returned)) {
+            // Case 1: List of dictionaries
+            const table = formatReturnedData(returned);
+            if (table) {
+                const h3 = table.querySelector('h3');
+                h3.textContent = 'Data';
+                returnedContainer.appendChild(table);
+            }
+        } else if (typeof returned === 'object') {
+            // Case 2: Dictionary with keys
+            Object.entries(returned).forEach(([key, value]) => {
+                if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+                    const table = formatReturnedData(value);
+                    if (table) {
+                        const h3 = table.querySelector('h3');
+                        h3.textContent = key;
+                        returnedContainer.appendChild(table);
+                    }
+                }
+            });
+        }
+
+        // Attach click handlers to the newly created sections
+        returnedContainer.querySelectorAll('[data-section]').forEach(header => {
+            header.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                const section = document.getElementById(sectionId);
+                const indicator = this.querySelector('.collapse-indicator');
+
+                if (section.style.display === 'none') {
+                    section.style.display = 'flex';
+                    indicator.textContent = '▼';
+                } else {
+                    section.style.display = 'none';
+                    indicator.textContent = '▶';
+                }
+            });
+
+            // Add copy button to each returned data section
+            const sectionId = header.getAttribute('data-section');
+            const section = document.getElementById(sectionId);
+            const table = section.querySelector('table');
+
+            // Create copy button container
+            const copyButtonContainer = document.createElement('div');
+            copyButtonContainer.className = 'copy-indicator';
+            copyButtonContainer.innerHTML = '<svg class="w-6 h-6 text-django-tertiary hidden group-hover:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 7 2 2 4-4m-5-9v4h4V3h-4Z" /></svg>';
+
+            // Add copy button to the header
+            const headerContent = header.querySelector('div');
+            headerContent.appendChild(copyButtonContainer);
+
+            // Setup copy functionality
+            setupCopyButton(copyButtonContainer, () => {
+                if (table) {
+                    const rows = table.querySelectorAll('tbody tr');
+                    let content = '';
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach(cell => {
+                            content += cell.textContent.trim() + '\t';
+                        });
+                        content += '\n';
+                    });
+                    return content;
+                }
+                return '';
+            });
+        });
+    }
 });
 
 function addQuery(query) {
     const queries = document.getElementById('queries');
     queries.appendChild(document.createquery);
-}
-
-function showRightColumn() {
-    const rightColumn = document.getElementById('right_column');
-    const grid = document.getElementById('main_grid');
-
-    if (rightColumn.classList.contains('hidden')) {
-        rightColumn.classList.remove('hidden');
-        grid.classList.remove('grid-cols-1');
-        grid.classList.add('grid-cols-2');
-    }
-}
-
-function colorize(query, padding = 0){
-    const keywords = new Set([
-        "BEGIN", "COMMIT", "ESCAPE", "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
-    ]);
-
-    const lines = query.split('\n');
-    const highlightedLines = lines.map((line, index) => {
-        const highlighted = line.replace(/\b\w+\b/g, (token) => {
-            return keywords.has(token.toUpperCase())
-                ? `<span class="font-bold text-django-primary">${token}</span>`
-                : token;
-        });
-        // Add padding to all lines except the first one
-        return index === 0 ? highlighted : ' '.repeat(padding) + highlighted;
-    });
-
-    return highlightedLines.join('\n');
-}
-
-
-// --- AI Generated Code ---
-//
-//       ... works ...
-//        ¯\_(ツ)_/¯
-//            o
-//           /\
-
-// Reusable copy function
-function setupCopyButton(button, getContent) {
-    button.addEventListener('click', function(e) {
-        e.stopPropagation(); // Prevent the click from triggering the collapse
-        const content = getContent();
-        const copiedLabel = document.createElement('span');
-        copiedLabel.className = 'text-green-500 text-sm ml-2';
-        copiedLabel.textContent = 'Copied!';
-        navigator.clipboard.writeText(content).then(() => {
-            const icon = this.querySelector('svg');
-            icon.classList.remove('group-hover:block');
-            icon.parentNode.appendChild(copiedLabel);
-            setTimeout(() => {
-                copiedLabel.remove();
-                icon.classList.add('group-hover:block');
-            }, 1000);
-        });
-    });
-}
-
-function formatReturnedData(returned) {
-    if (Array.isArray(returned) && returned.length > 0 && typeof returned[0] === 'object') {
-
-        // Get all unique keys from all dictionaries
-        const headers = new Set()
-        returned.forEach(item => {
-            Object.keys(item).forEach(key => headers.add(key));
-        });
-
-        // Get the template
-        const template = document.getElementById('returned_data_template');
-        const table = template.content.cloneNode(true);
-        const thead = table.querySelector('thead');
-        const tbody = table.querySelector('tbody');
-        const header = table.querySelector('[data-section]');
-        const section = table.querySelector('.returned-data-section');
-
-        // Generate a unique ID for this section
-        const sectionId = `returned-data-${Math.random().toString(36).substr(2, 9)}`;
-        header.setAttribute('data-section', sectionId);
-        section.id = sectionId;
-
-        // Add headers
-        const headerRow = document.createElement('tr');
-        headerRow.className = '';
-        headers.forEach(header => {
-            const th = document.createElement('th');
-            th.className = 'p-1 bg-sky-200 border border-sky-300 text-left';
-            th.textContent = header;
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-
-        // Add rows
-        returned.forEach(item => {
-            const row = document.createElement('tr');
-            headers.forEach(header => {
-                const td = document.createElement('td');
-                td.className = 'p-1 bg-sky-100 border border-sky-300';
-                td.textContent = item[header] !== undefined ? item[header] : '';
-                row.appendChild(td);
-            });
-            tbody.appendChild(row);
-        });
-
-        return table;
-    }
-    return null;
-}
-
-function handleReturnedData(returned) {
-    const returnedContainer = document.getElementById('returned-data');
-    returnedContainer.innerHTML = '';
-    
-    if (!returned) return;
-    
-    if (Array.isArray(returned)) {
-        // Case 1: List of dictionaries
-        const table = formatReturnedData(returned);
-        if (table) {
-            const h3 = table.querySelector('h3');
-            h3.textContent = 'Data';
-            returnedContainer.appendChild(table);
-        }
-    } else if (typeof returned === 'object') {
-        // Case 2: Dictionary with keys
-        Object.entries(returned).forEach(([key, value]) => {
-            if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
-                const table = formatReturnedData(value);
-                if (table) {
-                    const h3 = table.querySelector('h3');
-                    h3.textContent = key;
-                    returnedContainer.appendChild(table);
-                }
-            }
-        });
-    }
-
-    // Attach click handlers to the newly created sections
-    returnedContainer.querySelectorAll('[data-section]').forEach(header => {
-        header.addEventListener('click', function() {
-            const sectionId = this.getAttribute('data-section');
-            const section = document.getElementById(sectionId);
-            const indicator = this.querySelector('.collapse-indicator');
-
-            if (section.style.display === 'none') {
-                section.style.display = 'flex';
-                indicator.textContent = '▼';
-            } else {
-                section.style.display = 'none';
-                indicator.textContent = '▶';
-            }
-        });
-
-        // Add copy button to each returned data section
-        const sectionId = header.getAttribute('data-section');
-        const section = document.getElementById(sectionId);
-        const table = section.querySelector('table');
-
-        // Create copy button container
-        const copyButtonContainer = document.createElement('div');
-        copyButtonContainer.className = 'copy-indicator';
-        copyButtonContainer.innerHTML = '<svg class="w-6 h-6 text-django-tertiary hidden group-hover:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 7 2 2 4-4m-5-9v4h4V3h-4Z" /></svg>';
-
-        // Add copy button to the header
-        const headerContent = header.querySelector('div');
-        headerContent.appendChild(copyButtonContainer);
-
-        // Setup copy functionality
-        setupCopyButton(copyButtonContainer, () => {
-            if (table) {
-                const rows = table.querySelectorAll('tbody tr');
-                let content = '';
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    cells.forEach(cell => {
-                        content += cell.textContent.trim() + '\t';
-                    });
-                    content += '\n';
-                });
-                return content;
-            }
-            return '';
-        });
-    });
 }
