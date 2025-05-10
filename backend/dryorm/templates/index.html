@@ -56,7 +56,7 @@ index
         <c-section title="Queries" id="queries-section" background="bg-django-secondary/20" classes="h-full">
             <c-slot name="icon"><c-icons.db /></c-slot>
             <c-slot name="indicator">
-                <a href="#" class="text-django-text underline hidden" id="erd" target="><c-icons.erd /></a>
+                <a href="#" class="text-django-text underline hidden" id="erd"><c-icons.erd color="text-django-tertiary" /></a>
                 <div class="flex items-center gap-2 copy-indicator">
                     <c-icons.clipboard-copy color="text-django-tertiary" />
                 </div>
@@ -94,4 +94,5 @@ index
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
 
 <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+<c-dialog />
 {% endblock %}

@@ -1,0 +1,21 @@
+<!-- Dialog backdrop -->
+<div id="dialog-backdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+<!-- Dialog -->
+<div id="dialog" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-3/4 h-3/4 flex flex-col">
+        <!-- Dialog header -->
+        <div class="flex items-center justify-between p-4 border-b">
+            <h3 id="dialog-title" class="text-xl font-semibold text-django-text">ERD Diagram</h3>
+            <button id="dialog-close" class="text-django-text hover:text-django-primary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <!-- Dialog content -->
+        <div id="dialog-content" class="p-4 overflow-auto flex-grow flex items-center justify-center">
+            <object id="erd-svg" type="image/svg+xml" class="w-full h-full"></object>
+        </div>
+    </div>
+</div> 

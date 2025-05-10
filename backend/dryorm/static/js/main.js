@@ -84,7 +84,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (erd && erd.length > 0) {
                         const link = document.getElementById('erd');
                         link.classList.remove('hidden');
-                        link.href = `https://kroki.io/mermaid/svg/${erd}`;
+                        link.href = '#';
+                        link.onclick = function(e) {
+                            e.preventDefault();
+                            const dialog = document.getElementById('dialog');
+                            const backdrop = document.getElementById('dialog-backdrop');
+                            const erdSvg = document.getElementById('erd-svg');
+                            erdSvg.data = `https://kroki.io/mermaid/svg/${erd}`;
+                            dialog.classList.remove('hidden');
+                            backdrop.classList.remove('hidden');
+                        };
                     }
 
                     var query_html = []
@@ -216,6 +225,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Add dialog close functionality
+    const dialog = document.getElementById('dialog');
+    const backdrop = document.getElementById('dialog-backdrop');
+    const closeButton = document.getElementById('dialog-close');
+
+    function closeDialog() {
+        dialog.classList.add('hidden');
+        backdrop.classList.add('hidden');
+    }
+
+    closeButton.addEventListener('click', closeDialog);
+    backdrop.addEventListener('click', closeDialog);
 });
 
 function addQuery(query) {
