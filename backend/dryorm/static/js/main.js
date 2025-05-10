@@ -80,6 +80,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
                     }
 
+                    let erd = data.result.erd;
+                    if (erd && erd.length > 0) {
+                        const link = document.getElementById('erd');
+                        link.classList.remove('hidden');
+                        link.href = `https://kroki.io/mermaid/svg/${erd}`;
+                    }
+
                     var query_html = []
                     for(var i=0;i<rawQueries.length;i++){
                         let query = rawQueries[i];
