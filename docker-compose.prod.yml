@@ -25,7 +25,7 @@ services:
         volumes:
             - static:/app/static
         ports:
-            - 5555:80
+            - 80
         depends_on:
             - backend
         labels:
