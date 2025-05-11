@@ -1,6 +1,7 @@
 volumes:
     postgres_data: {}
     postgres_snippets_data: {}
+    mariadb_snippets_data: {}
     django_cache: {}
 
 networks:
@@ -19,7 +20,7 @@ services:
         volumes:
             - postgres_data:/var/lib/postgresql/data
 
-    database_snippets:
+    database_postgres:
         image: postgres:alpine
         environment:
             POSTGRES_USER: dryorm
@@ -27,6 +28,18 @@ services:
             POSTGRES_DB: dryorm
         volumes:
             - postgres_snippets_data:/var/lib/postgresql/data
+        networks:
+            - snippets_net
+
+    database_mariadb:
+        image: yobasystems/alpine-mariadb
+        environment:
+            MYSQL_ROOT_PASSWORD: dryorm
+            MYSQL_DATABASE: dryorm
+            MYSQL_USER: dryorm
+            MYSQL_PASSWORD: dryorm
+        volumes:
+            - mariadb_snippets_data:/var/lib/mysql
         networks:
             - snippets_net
 
@@ -54,7 +67,8 @@ services:
             - ./backend:/app
             - django_cache:/app/cache
         depends_on:
-            - database_snippets
+            - database_postgres
+            - database_mariadb
             - redis
             - backend
         networks:

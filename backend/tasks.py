@@ -20,6 +20,7 @@ from docker.errors import (
 )
 
 from dryorm import constants
+from dryorm.databases import DATABASES
 
 class OverloadedError(Exception):
     pass
@@ -30,32 +31,6 @@ def find_running_django_containers(client, prefix='django-'):
         if container.name.startswith(prefix)
     ]
 
-def bootstrap_database(database):
-    random_hash = uuid.uuid4().hex[:6]
-    unique_name = f'{database.key}-{random_hash}'
-    if database.key != 'sqlite':
-        subprocess.run([
-            'scripts/create_db.sh',
-            database.host,
-            str(database.port),
-            database.user,
-            database.password,
-            unique_name,
-            unique_name,
-            unique_name,
-        ])
-        return unique_name
-
-def teardown_database(database, unique_name):
-    if database.key != 'sqlite':
-        subprocess.run([
-            'psql',
-            '-h', database.host,
-            '-p', str(database.port),
-            '-U', database.user,
-            '-c', f'DROP DATABASE "{unique_name}";'
-        ], env={**os.environ, 'PGPASSWORD': database.password})
-
 
 def run_django(channel, code, database, ignore_cache=False):
     client = docker.from_env()
@@ -63,7 +38,7 @@ def run_django(channel, code, database, ignore_cache=False):
 
     channel_layer = get_channel_layer()
     executor = constants.EXECUTOR
-    selected_db = constants.DATABASES.get(database)
+    selected_db = DATABASES.get(database, 'sqlite')
     cached_reply = cache.get(f'{database}-{key}')
     unique_name = None
 
@@ -82,7 +57,8 @@ def run_django(channel, code, database, ignore_cache=False):
                 raise OverloadedError
 
 
-            unique_name = bootstrap_database(selected_db)
+            if selected_db.needs_setup:
+                unique_name = selected_db.setup()
 
             environment = [
                 f'CODE={code}',
@@ -175,8 +151,8 @@ def run_django(channel, code, database, ignore_cache=False):
         cache.set(f'{database}-{key}', reply, timeout=60 * 60 * 24 * 365)
     finally:
         if not cached_reply or ignore_cache:
-            if unique_name:
-                teardown_database(selected_db, unique_name)
+            if unique_name and selected_db.needs_setup:
+                selected_db.teardown(unique_name)
 
             async_to_sync(channel_layer.send)(channel, {
                 "type": "websocket.send",
