@@ -8,7 +8,7 @@ DB_NAME=${5:-$DB_NAME}
 DB_USER=${6:-$DB_USER}
 DB_PASSWORD=${7:-$DB_PASSWORD}
 
-mysql -h $SERVICE_DB_HOST -P $SERVICE_DB_PORT -u $SERVICE_DB_USER -p$SERVICE_DB_PASSWORD <<SQL
+mysql -h $SERVICE_DB_HOST -P $SERVICE_DB_PORT -u root -p$SERVICE_DB_PASSWORD <<SQL
 -- Drop database and user if they exist
 DROP DATABASE IF EXISTS \`$DB_NAME\`;
 DROP USER IF EXISTS \`$DB_USER\`@\`%\`;
@@ -19,9 +19,9 @@ CREATE USER \`$DB_USER\`@\`%\` IDENTIFIED BY '$DB_PASSWORD';
 
 -- Grant access to only this DB
 GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO \`$DB_USER\`@\`%\`;
-REVOKE ALL PRIVILEGES ON *.* FROM \`$DB_USER\`@\`%\`;
-GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO \`$DB_USER\`@\`%\`;
 
 -- Flush privileges to apply changes
 FLUSH PRIVILEGES;
+
 SQL 
+
