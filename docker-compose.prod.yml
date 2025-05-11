@@ -30,7 +30,8 @@ services:
             - backend
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.nginx.rule=Host(`dryorm.d.xterm.info`)"
+            - "traefik.http.routers.dryorm.rule=Host(`dryorm.xterm.info`)"
+            - "traefik.http.routers.dryorm.tls.certresolver=xterm-info"
 
     redis:
         image: redis:7.4-alpine
