@@ -30,6 +30,33 @@ def find_running_django_containers(client, prefix='django-'):
         if container.name.startswith(prefix)
     ]
 
+def bootstrap_database(database):
+    random_hash = uuid.uuid4().hex[:6]
+    unique_name = f'{database.key}-{random_hash}'
+    if database.key != 'sqlite':
+        subprocess.run([
+            'scripts/create_db.sh',
+            database.host,
+            str(database.port),
+            database.user,
+            database.password,
+            unique_name,
+            unique_name,
+            unique_name,
+        ])
+        return unique_name
+
+def teardown_database(database, unique_name):
+    if database.key != 'sqlite':
+        subprocess.run([
+            'psql',
+            '-h', database.host,
+            '-p', str(database.port),
+            '-U', database.user,
+            '-c', f'DROP DATABASE "{unique_name}";'
+        ], env={**os.environ, 'PGPASSWORD': database.password})
+
+
 def run_django(channel, code, database, ignore_cache=False):
     client = docker.from_env()
     key = hashlib.md5(code.encode('utf-8')).hexdigest()
@@ -38,7 +65,7 @@ def run_django(channel, code, database, ignore_cache=False):
     executor = constants.EXECUTOR
     selected_db = constants.DATABASES.get(database)
     cached_reply = cache.get(f'{database}-{key}')
-    random_hash = uuid.uuid4().hex[:6]
+    unique_name = None
 
     try:
         # Is the result already cached?
@@ -54,6 +81,9 @@ def run_django(channel, code, database, ignore_cache=False):
             if len(running) >= executor.max_containers:
                 raise OverloadedError
 
+
+            unique_name = bootstrap_database(selected_db)
+
             environment = [
                 f'CODE={code}',
                 f'SERVICE_DB_HOST={selected_db.host}',
@@ -61,11 +91,10 @@ def run_django(channel, code, database, ignore_cache=False):
                 f'SERVICE_DB_USER={selected_db.user}',
                 f'SERVICE_DB_PASSWORD={selected_db.password}',
                 f'DB_TYPE={selected_db.key}',
-                f'DB_NAME={selected_db.key}-{random_hash}',
-                f'DB_USER={selected_db.key}-{random_hash}',
-                f'DB_PASSWORD={selected_db.key}-{random_hash}',
+                f'DB_NAME={unique_name}',
+                f'DB_USER={unique_name}',
+                f'DB_PASSWORD={unique_name}',
             ]
-
 
             result = client.containers.run(
                 executor.image,
@@ -146,18 +175,8 @@ def run_django(channel, code, database, ignore_cache=False):
         cache.set(f'{database}-{key}', reply, timeout=60 * 60 * 24 * 365)
     finally:
         if not cached_reply or ignore_cache:
-            if selected_db.key != 'sqlite':
-                # Drop the database
-                try:
-                    subprocess.run([
-                        'psql',
-                        '-h', selected_db.host,
-                        '-p', str(selected_db.port),
-                        '-U', selected_db.user,
-                        '-c', f'DROP DATABASE "{selected_db.key}-{random_hash}";'
-                    ], env={**os.environ, 'PGPASSWORD': selected_db.password})
-                except subprocess.CalledProcessError as e:
-                    print(f"Error dropping database: {e}")
+            if unique_name:
+                teardown_database(selected_db, unique_name)
 
             async_to_sync(channel_layer.send)(channel, {
                 "type": "websocket.send",
