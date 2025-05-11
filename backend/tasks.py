@@ -28,19 +28,20 @@ def find_running_django_containers(client, prefix='django-'):
         if container.name.startswith(prefix)
     ]
 
-def run_django(channel, code):
+def run_django(channel, code, ignore_cache=False):
     client = docker.from_env()
     key = hashlib.md5(code.encode('utf-8')).hexdigest()
 
     channel_layer = get_channel_layer()
     executor = constants.EXECUTOR
+    cached_reply = cache.get(key)
 
     try:
         # Is the result already cached?
-        if reply := cache.get(key):
+        if cached_reply and not ignore_cache:
             async_to_sync(channel_layer.send)(channel, {
                 "type": "websocket.send",
-                "text": reply
+                "text": cached_reply
             })
             return
         else:
@@ -120,9 +121,10 @@ def run_django(channel, code):
             event=constants.JOB_DONE_EVENT,
             result=json.loads(decoded)
         ))
-    finally:
         cache.set(key, reply, timeout=60 * 60 * 24 * 365)
-        async_to_sync(channel_layer.send)(channel, {
-            "type": "websocket.send",
-            "text": reply
-        })
+    finally:
+        if not cached_reply or ignore_cache:
+            async_to_sync(channel_layer.send)(channel, {
+                "type": "websocket.send",
+                "text": reply
+            })

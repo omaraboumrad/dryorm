@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var isPrivate = document.getElementById('isPrivate');
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
+    var ignore_cache = document.getElementById('ignore_cache');
 
     var erd_link = document.getElementById('erd');
 
@@ -153,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function execute() {
         output.textContent = 'loading...';
         queries.innerHTML = 'loading...';
-        
+
         // Reset ERD-related elements
         erd_link.classList.add('hidden');
         erd_link.href = '#';
@@ -168,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var payload = JSON.stringify({
             code: models_editor.getValue(),
+            ignore_cache: ignore_cache.checked,
         });
 
         socket.send(payload);

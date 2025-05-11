@@ -24,7 +24,7 @@ JOB_OVERLOADED = 'job-overloaded'
 EXECUTOR = Executor(
     image='dryorm-executor/python-django',
     key='python/django',
-    memory='50m',
+    memory='75m',
     verbose='Python - Django',
     max_containers=5,
 )
