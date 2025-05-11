@@ -1,0 +1,60 @@
+volumes:
+    postgres_data: {}
+    django_cache: {}
+
+services:
+
+    database:
+        image: postgres:alpine
+        environment:
+            POSTGRES_USER: dryorm
+            POSTGRES_PASSWORD: dryorm
+            POSTGRES_DB: dryorm
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+    redis:
+        image: redis:7.4-alpine
+
+    backend:
+        build: ./backend/
+        image: dryorm/backend
+        volumes:
+            - ./backend:/app
+            - django_cache:/app/cache
+        depends_on:
+            - database
+            - redis
+        ports:
+            - 8090:8000
+        command: python manage.py runserver 0.0.0.0:8000
+        env_file: .env
+
+    rq_worker:
+        image: dryorm/backend
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./backend:/app
+            - django_cache:/app/cache
+        depends_on:
+            - redis
+            - backend
+        deploy:
+            replicas: 5
+        command: rq worker --url redis://redis:6379
+        env_file: .env
+
+    rq_dashboard:
+        build: ./rq-dashboard/
+        image: dryorm/rq-dashboard
+        depends_on:
+            - redis
+        ports:
+            - 9181:9181
+
+    # Executors
+
+    executor-python-django:
+        build: ./executors/python-django
+        image: dryorm-executor/python-django
+        command: /bin/true
