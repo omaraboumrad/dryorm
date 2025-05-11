@@ -1,6 +1,7 @@
 volumes:
     static: {}
     postgres_data: {}
+    postgres_snippets_data: {}
     django_cache: {}
 
 networks:
@@ -18,6 +19,18 @@ services:
             POSTGRES_DB: dryorm
         volumes:
             - postgres_data:/var/lib/postgresql/data
+
+
+    database_snippets:
+        image: postgres:alpine
+        environment:
+            POSTGRES_USER: dryorm
+            POSTGRES_PASSWORD: dryorm
+            POSTGRES_DB: dryorm
+        volumes:
+            - postgres_snippets_data:/var/lib/postgresql/data
+        networks:
+            - snippets_net
 
     nginx:
         build: ./webserver/
@@ -55,8 +68,12 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
             - django_cache:/app/cache
         depends_on:
+            - database_snippets
             - redis
             - backend
+        networks:
+            - default
+            - snippets_net
         deploy:
             replicas: 10 
         command: rq worker --url redis://redis:6379

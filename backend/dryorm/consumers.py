@@ -21,8 +21,9 @@ class WSConsumer(AsyncWebsocketConsumer):
         payload = json.loads(text_data)
         code = payload['code']
         ignore_cache = payload.get('ignore_cache', False)
+        database = payload.get('database', 'sqlite')
 
-        job = queue.enqueue(tasks.run_django, self.channel_name, code, ignore_cache)
+        job = queue.enqueue(tasks.run_django, self.channel_name, code, database, ignore_cache)
 
         reply = json.dumps(dict(
             event=constants.JOB_FIRED_EVENT,

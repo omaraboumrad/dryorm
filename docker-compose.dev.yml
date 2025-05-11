@@ -1,6 +1,12 @@
 volumes:
     postgres_data: {}
+    postgres_snippets_data: {}
     django_cache: {}
+
+networks:
+  snippets_net:
+    driver: bridge
+    internal: true
 
 services:
 
@@ -12,6 +18,17 @@ services:
             POSTGRES_DB: dryorm
         volumes:
             - postgres_data:/var/lib/postgresql/data
+
+    database_snippets:
+        image: postgres:alpine
+        environment:
+            POSTGRES_USER: dryorm
+            POSTGRES_PASSWORD: dryorm
+            POSTGRES_DB: dryorm
+        volumes:
+            - postgres_snippets_data:/var/lib/postgresql/data
+        networks:
+            - snippets_net
 
     redis:
         image: redis:7.4-alpine
@@ -37,20 +54,14 @@ services:
             - ./backend:/app
             - django_cache:/app/cache
         depends_on:
+            - database_snippets
             - redis
             - backend
-        deploy:
-            replicas: 5
+        networks:
+            - default
+            - snippets_net
         command: rq worker --url redis://redis:6379
         env_file: .env
-
-    rq_dashboard:
-        build: ./rq-dashboard/
-        image: dryorm/rq-dashboard
-        depends_on:
-            - redis
-        ports:
-            - 9181:9181
 
     # Executors
 

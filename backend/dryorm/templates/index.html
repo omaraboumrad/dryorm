@@ -31,6 +31,11 @@
                 <input type="checkbox" id="ignore_cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
                 <label for="ignore_cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
             </div>
+            <select id="database-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+                {% for key, database in databases.items %}
+                <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
+                {% endfor %}
+            </select>
 
             <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
                 <option value="">Select a template</option>

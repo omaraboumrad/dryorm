@@ -4,6 +4,7 @@ from django.http import JsonResponse
 
 from . import models
 from . import templates
+from . import constants
 
 
 class SnippetListView(generic.ListView):
@@ -22,6 +23,7 @@ class SnippetDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['databases'] = constants.DATABASES
         context['templates'] = templates.TEMPLATES
         context['first'] = templates.TEMPLATES['basic']
         return context
@@ -32,6 +34,7 @@ class SnippetHomeView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['databases'] = constants.DATABASES
         context['templates'] = templates.TEMPLATES
         context['first'] = templates.TEMPLATES['basic']
         return context
@@ -48,6 +51,7 @@ def save(request):
     instance = models.Snippet.objects.create_snippet(
         name=request.POST.get('name'),
         code=request.POST.get('code'),
+        database=request.POST.get('database'),
         private=request.POST.get('private') == 'true'
     )
 

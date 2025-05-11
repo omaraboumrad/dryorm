@@ -17,6 +17,7 @@ RUN apt-get install -y \
   libffi-dev \
   libldap2-dev \
   libsasl2-dev \
+  postgresql-client \
   wget \
   && rm -rf /var/lib/apt/lists/*
 

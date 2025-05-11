@@ -9,6 +9,14 @@ class Executor:
     memory: str
     max_containers: int
 
+@dataclass
+class Database:
+    key: str
+    description: str
+    host: str = ''
+    port: int = 0
+    user: str = ''
+    password: str = ''
 
 JOB_FIRED_EVENT = 'job-fired'
 JOB_DONE_EVENT = 'job-done'
@@ -29,11 +37,18 @@ EXECUTOR = Executor(
     max_containers=5,
 )
 
-# Executor(
-#     image='dryorm-executor/python-sqlalchemy',
-#     key='python/sqlalchemy',
-#     verbose='Python - SQLAlchemy'),
-# Executor(
-#     image='dryorm-executor/python-peewee',
-#     key='python/peewee',
-#     verbose='Python - Peewee')
+
+DATABASES = {
+    'sqlite': Database(
+        key='sqlite',
+        description='SQLite',
+    ),
+    'postgres': Database(
+        key='postgres',
+        description='PostgreSQL 17.4',
+        host='database_snippets',
+        port=5432,
+        user='dryorm',
+        password='dryorm',
+    ),
+}

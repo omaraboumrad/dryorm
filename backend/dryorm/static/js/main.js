@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var isPrivate = document.getElementById('isPrivate');
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
+    var database_select = document.getElementById('database-select');
     var ignore_cache = document.getElementById('ignore_cache');
 
     var erd_link = document.getElementById('erd');
@@ -170,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var payload = JSON.stringify({
             code: models_editor.getValue(),
             ignore_cache: ignore_cache.checked,
+            database: database_select.value,
         });
 
         socket.send(payload);
@@ -187,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
         formData.append('name', name.value);
+        formData.append('database', database_select.value);
         formData.append('private', isPrivate.checked);
         formData.append('csrfmiddlewaretoken', csrftoken);
 

@@ -1,4 +1,6 @@
 import hashlib
+import subprocess
+import traceback
 import json
 import os
 import uuid
@@ -28,13 +30,15 @@ def find_running_django_containers(client, prefix='django-'):
         if container.name.startswith(prefix)
     ]
 
-def run_django(channel, code, ignore_cache=False):
+def run_django(channel, code, database, ignore_cache=False):
     client = docker.from_env()
     key = hashlib.md5(code.encode('utf-8')).hexdigest()
 
     channel_layer = get_channel_layer()
     executor = constants.EXECUTOR
-    cached_reply = cache.get(key)
+    selected_db = constants.DATABASES.get(database)
+    cached_reply = cache.get(f'{database}-{key}')
+    random_hash = uuid.uuid4().hex[:6]
 
     try:
         # Is the result already cached?
@@ -50,17 +54,28 @@ def run_django(channel, code, ignore_cache=False):
             if len(running) >= executor.max_containers:
                 raise OverloadedError
 
-            container_name = f'django-{uuid.uuid4().hex[:6]}'
+            environment = [
+                f'CODE={code}',
+                f'SERVICE_DB_HOST={selected_db.host}',
+                f'SERVICE_DB_PORT={selected_db.port}',
+                f'SERVICE_DB_USER={selected_db.user}',
+                f'SERVICE_DB_PASSWORD={selected_db.password}',
+                f'DB_TYPE={selected_db.key}',
+                f'DB_NAME={selected_db.key}-{random_hash}',
+                f'DB_USER={selected_db.key}-{random_hash}',
+                f'DB_PASSWORD={selected_db.key}-{random_hash}',
+            ]
+
+
             result = client.containers.run(
                 executor.image,
-                name=container_name,
+                name=f'django-{uuid.uuid4().hex[:6]}',
                 mem_limit=executor.memory,
                 memswap_limit=executor.memory,
-                network_disabled=True,
+                network='dryorm_snippets_net',
                 remove=True,
-                environment=[
-                    'CODE={}'.format(code),
-                ])
+                environment=environment,
+            )
     except ContainerError as error: # Do some logging
         match error.exit_status:
             case 137:
@@ -113,6 +128,13 @@ def run_django(channel, code, ignore_cache=False):
             event=constants.JOB_OVERLOADED,
             error=f"System is currently overloaded (>= {executor.max_containers} instances), please try again in a few! Sorry!"
         ))
+    except:
+        # Catch-all for any other exceptions
+        message = traceback.format_exc()
+        reply = json.dumps(dict(
+            event=constants.JOB_INTERNAL_ERROR_EVENT,
+            error=f"Unknown error occurred. Please try again later.\n{message}"
+        ))
     else:
         decoded = result.decode('utf-8')
 
@@ -121,9 +143,18 @@ def run_django(channel, code, ignore_cache=False):
             event=constants.JOB_DONE_EVENT,
             result=json.loads(decoded)
         ))
-        cache.set(key, reply, timeout=60 * 60 * 24 * 365)
+        cache.set(f'{database}-{key}', reply, timeout=60 * 60 * 24 * 365)
     finally:
         if not cached_reply or ignore_cache:
+            subprocess.run([
+                'psql',
+                '-h', selected_db.host,
+                '-p', str(selected_db.port),
+                '-U', selected_db.user,
+                '-c', f'DROP DATABASE "{selected_db.key}-{random_hash}";'
+            ], env={**os.environ, 'PGPASSWORD': selected_db.password})
+
+
             async_to_sync(channel_layer.send)(channel, {
                 "type": "websocket.send",
                 "text": reply
