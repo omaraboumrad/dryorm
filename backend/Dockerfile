@@ -18,6 +18,9 @@ RUN apt-get install -y \
   libldap2-dev \
   libsasl2-dev \
   postgresql-client \
+  pkg-config \
+  default-libmysqlclient-dev \
+  mariadb-client \
   wget \
   && rm -rf /var/lib/apt/lists/*
 

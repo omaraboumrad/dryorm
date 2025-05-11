@@ -46,6 +46,17 @@ match env('DB_TYPE', 'sqlite'):
                 "PORT": env('SERVICE_DB_PORT'),
             },
         }
+    case 'mariadb':
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.mysql",
+                "NAME": env('DB_NAME'),
+                "USER": env('DB_USER'),
+                "PASSWORD": env('DB_PASSWORD'),
+                "HOST": env('SERVICE_DB_HOST'),
+                "PORT": env('SERVICE_DB_PORT'),
+            },
+        }
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'

@@ -15,6 +15,7 @@ class Database:
     port: int = 0
     user: str = ''
     password: str = ''
+    script: str = ''
 
     def setup(self):
         raise NotImplementedError("Database setup not implemented")
@@ -42,13 +43,14 @@ class PostgreSQL(Database):
             port=5432,
             user='dryorm',
             password='dryorm',
+            script='scripts/postgres_create.sh',
         )
 
     def setup(self):
         random_hash = uuid.uuid4().hex[:6]
         unique_name = f'{self.key}-{random_hash}'
         subprocess.run([
-            'scripts/create_db.sh',
+            self.script,
             self.host,
             str(self.port),
             self.user,
@@ -79,8 +81,33 @@ class MariaDB(Database):
             port=3306,
             user='dryorm',
             password='dryorm',
+            script='scripts/mariadb_create.sh',
         )
 
+    def setup(self):
+        random_hash = uuid.uuid4().hex[:6]
+        unique_name = f'{self.key}-{random_hash}'
+        subprocess.run([
+            self.script,
+            self.host,
+            str(self.port),
+            self.user,
+            self.password,
+            unique_name,
+            unique_name,
+            unique_name,
+        ])
+        return unique_name
+
+    def teardown(self, unique_name):
+        subprocess.run([
+            'mysql',
+            '-h', self.host,
+            '-P', str(self.port),
+            '-u', self.user,
+            f'-p{self.password}',
+            '-e', f'DROP DATABASE IF EXISTS `{unique_name}`; DROP USER IF EXISTS `{unique_name}`@`%`;'
+        ])
 
 
 DATABASES = {
