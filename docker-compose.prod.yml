@@ -8,9 +8,9 @@ networks:
     default:
         external: true
         name: web
-  snippets_net:
-    driver: bridge
-    internal: true
+    snippets_net:
+        driver: bridge
+        internal: true
 
 services:
 
