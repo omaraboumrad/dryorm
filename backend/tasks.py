@@ -146,14 +146,18 @@ def run_django(channel, code, database, ignore_cache=False):
         cache.set(f'{database}-{key}', reply, timeout=60 * 60 * 24 * 365)
     finally:
         if not cached_reply or ignore_cache:
-            subprocess.run([
-                'psql',
-                '-h', selected_db.host,
-                '-p', str(selected_db.port),
-                '-U', selected_db.user,
-                '-c', f'DROP DATABASE "{selected_db.key}-{random_hash}";'
-            ], env={**os.environ, 'PGPASSWORD': selected_db.password})
-
+            if selected_db.key != 'sqlite':
+                # Drop the database
+                try:
+                    subprocess.run([
+                        'psql',
+                        '-h', selected_db.host,
+                        '-p', str(selected_db.port),
+                        '-U', selected_db.user,
+                        '-c', f'DROP DATABASE "{selected_db.key}-{random_hash}";'
+                    ], env={**os.environ, 'PGPASSWORD': selected_db.password})
+                except subprocess.CalledProcessError as e:
+                    print(f"Error dropping database: {e}")
 
             async_to_sync(channel_layer.send)(channel, {
                 "type": "websocket.send",
