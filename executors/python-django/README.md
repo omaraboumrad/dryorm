@@ -20,28 +20,23 @@ $ docker build -t dryorm-executor/python-django .
 or alternatively build the entire stack
 
 ```shell
-$ docker-compose build
+$ docker compose build
 ```
 
 ## How to run
 
 ```shell
-% docker run --rm \
-    -e MODELS="$(cat example/models.py)" \
-    -e TRANSACTION="$(cat example/transaction.py)" \
-    dryorm-executor/python-django
+% docker run --rm -e CODE="$(cat models.py)" dryorm/executor
 {
-  "output": "Available Drivers: ['john', 'doe', 'jane', 'smith']\n",
+  "erd": "base64-encoded-compress-hash-here"
+  "output": "output here",
+  "returned": [
+    {"k1": "v1", "k2": "v2"},
+    {"k1": "v3", "k2": "v4"},
+  ],
   "queries": [
-    {
-      "sql": "INSERT INTO \"core_driver\" (\"name\") SELECT 'john' UNION ALL SELECT 'doe' UNION ALL SELECT 'jane' UNION ALL SELECT 'smith'",
-      "time": "0.000"
-    },
-    {
-      "sql": "SELECT \"core_driver\".\"name\" FROM \"core_driver\"",
-      "time": "0.000"
-    }
+    { "sql": "query 1", "time": "0.000" },
+    { "sql": "query 2", "time": "0.000" },
   ]
 }
 ```
-

@@ -58,7 +58,7 @@ services:
             - redis
             - backend
         deploy:
-            replicas: 5
+            replicas: 10 
         command: rq worker --url redis://redis:6379
         env_file: .env
 
