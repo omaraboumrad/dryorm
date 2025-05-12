@@ -25,24 +25,24 @@
             <c-slot name="icon"><c-icons.code /></c-slot>
             <c-slot name="right">
                 <div class="flex items-center gap-2">
-            <div id="loader" class="w-6 h-6 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden"></div>
-            <!-- ignore cache -->
-            <div class="flex items-center gap-2">
-                <input type="checkbox" id="ignore_cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
-                <label for="ignore_cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
-            </div>
-            <select id="database-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
-                {% for key, database in databases.items %}
-                <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
-                {% endfor %}
-            </select>
+                    <div id="loader" class="w-6 h-6 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden"></div>
+                    <!-- ignore cache -->
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="ignore_cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
+                        <label for="ignore_cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
+                    </div>
+                    <select id="database-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+                        {% for key, database in databases.items %}
+                        <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
+                        {% endfor %}
+                    </select>
 
-            <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
-                <option value="">Select a template</option>
-                {% for key, _ in templates.items %}
-                <option value="{{key}}">{{key}}</option>
-                {% endfor %}
-            </select>
+                    <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+                        <option value="">Select a template</option>
+                        {% for key, _ in templates.items %}
+                        <option value="{{key}}">{{key}}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </c-slot>
         </c-section>
@@ -75,6 +75,69 @@
             <c-slot name="right">
                 <c-icons.plus />
             </c-slot>
+            <div x-data="{
+                         selectedTCL: true,
+                         selectedDDL: true,
+                         selectedSelect: true,
+                         selectedInsert: true,
+                         selectedUpdate: true,
+                         selectedDelete: true,
+                         selectedReverse: false
+                         }"
+                 id="query-filters"
+                 class="flex justify-between items-center p-2 gap-2 bg-slate-200 border-b border-django-primary/20"
+                 >
+                 <div>
+                     <a
+                             href="#"
+                             @click.prevent="selectedTCL = !selectedTCL"
+                             :class="selectedTCL ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
+                             >TCL</a>
+                     <a
+                             href="#"
+                             @click.prevent="selectedDDL = !selectedDDL"
+                             :class="selectedDDL ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
+                             >DDL</a>
+
+                     <a
+                             href="#"
+                             @click.prevent="selectedSelect = !selectedSelect"
+                             :class="selectedSelect ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
+                             >SELECT</a>
+
+                     <a
+                             href="#"
+                             @click.prevent="selectedInsert = !selectedInsert"
+                             :class="selectedInsert ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
+                             >INSERT</a>
+
+                     <a
+                             href="#"
+                             @click.prevent="selectedUpdate = !selectedUpdate"
+                             :class="selectedUpdate ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
+                             >UPDATE</a>
+
+                     <a
+                             href="#"
+                             @click.prevent="selectedDelete = !selectedDelete"
+                             :class="selectedDelete ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
+                             >DELETE</a>
+                    <a
+                            href="#"
+                            @click.prevent="selectedReverse = !selectedReverse"
+                            :class="selectedReverse ? 'bg-slate-500 text-white' : 'text-django-text'"
+                            class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
+                            >REVERSE</a>
+                 </div>
+                <span id="query-count" class="text-django-primary font-semibold text-sm">(0 Queries)</span>
+            </div>
+
             <pre id="queries" class="whitespace-pre-wrap p-2 text-django-text">No queries.</pre>
         </c-section>
     </div>
@@ -85,11 +148,11 @@
         <div class="p-4 bg-django-secondary/20 border-b border-django-primary/20 cursor-pointer flex items-center justify-between" data-section="returned-data-section" x-on:click="open = !open">
             <div class="flex items-center gap-2">
                 <c-icons.grid />
-                <h3 class="font-bold text-django-text"></h3>
+                    <h3 class="font-bold text-django-text"></h3>
             </div>
             <c-icons.plus />
         </div>
-        <div class="returned-data-section p-2" x-show="open" open="false">
+        <div class="returned-data-section" x-show="open" open="false">
             <table class="border-b text-django-text font-mono">
                 <thead></thead>
                 <tbody></tbody>

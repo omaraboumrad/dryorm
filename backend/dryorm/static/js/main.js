@@ -28,8 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var template_select = document.getElementById('template-select');
     var database_select = document.getElementById('database-select');
     var ignore_cache = document.getElementById('ignore_cache');
-
     var erd_link = document.getElementById('erd');
+    var query_filters = document.getElementById('query-filters');
+    var query_count = document.getElementById('query-count');
 
     // Store raw data
     let rawOutput = '';
@@ -79,11 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     rawOutput = data.result.output;
                     output.textContent = rawOutput === '' ? 'No output' : rawOutput;
 
-                    rawQueries = data.result.queries;
-                    if(rawQueries.length === 0){
-                        queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
-                    }
-
                     let erd = data.result.erd;
                     if (erd && erd.length > 0) {
                         erd_link.classList.remove('hidden');
@@ -91,19 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         erd_link.target = '_blank';
                     }
 
-                    var query_html = []
-                    for(var i=0;i<rawQueries.length;i++){
-                        let query = rawQueries[i];
-                        let padding = query.time.toString().length + 2;
-                        let colorized = colorize(query.sql, padding);
-                        query_html.push(`<span class="font-semibold text-django-primary/80">${query.time}s</span> ${colorized}\n\n`);
-                    }
-
-                    if (query_html.length > 0){
-                        queries.innerHTML = query_html.join('');
-                    } else {
-                        queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
-                    }
+                    const state = Alpine.$data(query_filters);
+                    rawQueries = data.result.queries;
+                    query_count.textContent = `Total: ${rawQueries.length} queries`;
+                    fillQueries(queries, rawQueries, state);
 
                     handleReturnedData(data.result.returned);
                     loader.classList.add('hidden');
@@ -125,8 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
             }
 
-
-            showRightColumn();
         }
 
         socket.onopen = function(e) {
@@ -155,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function execute() {
         output.textContent = 'loading...';
         queries.innerHTML = 'loading...';
+        query_count.textContent = 'loading...';
 
         // Reset ERD-related elements
         erd_link.classList.add('hidden');
@@ -213,20 +199,18 @@ document.addEventListener('DOMContentLoaded', function() {
         models_editor.focus();
     });
 
-    function showRightColumn() {
-        const rightColumn = document.getElementById('right_column');
-        const grid = document.getElementById('main_grid');
+    document.querySelectorAll('#query-filters a').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault(); 
+            const state = Alpine.$data(query_filters);
+            fillQueries(queries, rawQueries, state);
+        });
+    });
 
-        if (rightColumn.classList.contains('hidden')) {
-            rightColumn.classList.remove('hidden');
-            grid.classList.remove('grid-cols-1');
-            grid.classList.add('grid-cols-2');
-        }
-    }
 
     function colorize(query, padding = 0){
         const keywords = new Set([
-            "BEGIN", "COMMIT", "ESCAPE", "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
+            "BEGIN", "COMMIT", "SAVEPOINT", "ROLLBACK", "TRUNCATE", "ESCAPE", "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
         ]);
 
         const lines = query.split('\n');
@@ -241,6 +225,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         return highlightedLines.join('\n');
+    }
+
+    function fillQueries(queries, rawQueries, filters) {
+        var clonedQueries = rawQueries.slice(0);
+
+        if (filters.selectedReverse) {
+            clonedQueries = clonedQueries.reverse();
+        }
+        queries.innerHTML = '';
+        var query_html = [];
+
+        for (var i = 0; i < clonedQueries.length; i++) {
+            let query = clonedQueries[i];
+            let sql = query.sql.trim();
+
+            // Match the beginning of the SQL statement using regex
+            if (
+                (/^(BEGIN|COMMIT|ROLLBACK|SAVEPOINT)/i.test(sql) && !filters.selectedTCL) ||
+                (/^(CREATE|ALTER|DROP|TRUNCATE)/i.test(sql) && !filters.selectedDDL) ||
+                (/^SELECT/i.test(sql) && !filters.selectedSelect) ||
+                (/^INSERT/i.test(sql) && !filters.selectedInsert) ||
+                (/^UPDATE/i.test(sql) && !filters.selectedUpdate) ||
+                (/^DELETE/i.test(sql) && !filters.selectedDelete)
+                // (/^REVERSE/i.test(sql) && !filters.selectedReverse)
+            ) {
+                continue;
+            }
+
+            let padding = query.time.toString().length + 2;
+            let colorized = colorize(query.sql, padding);
+            query_html.push(
+                `<span class="font-semibold text-django-primary/80">${query.time}s</span> ${colorized}\n\n`
+            );
+        }
+
+        queries.innerHTML = query_html.length > 0
+            ? query_html.join('')
+            : '<span class="p-2 text-lg">No queries</span>';
     }
 
 
@@ -298,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
             headerRow.className = '';
             headers.forEach(header => {
                 const th = document.createElement('th');
-                th.className = 'p-1 bg-sky-200 border border-sky-300 text-left';
+                th.className = 'p-1 bg-slate-200 border border-slate-300 text-left';
                 th.textContent = header;
                 headerRow.appendChild(th);
             });
@@ -309,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const row = document.createElement('tr');
                 headers.forEach(header => {
                     const td = document.createElement('td');
-                    td.className = 'p-1 bg-sky-100 border border-sky-300';
+                    td.className = 'p-1 bg-slate-100 border border-slate-300';
                     td.textContent = item[header] !== undefined ? item[header] : '';
                     row.appendChild(td);
                 });
@@ -384,8 +406,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-function addQuery(query) {
-    const queries = document.getElementById('queries');
-    queries.appendChild(document.createquery);
-}
