@@ -26,5 +26,5 @@ EXECUTOR = Executor(
     key='python/django',
     memory='75m',
     verbose='Python - Django',
-    max_containers=5,
+    max_containers=10,
 )

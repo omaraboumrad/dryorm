@@ -4,20 +4,20 @@
     <main class="px-6 py-2 max-w-4xl flex flex-col gap-4">
         <div class="space-y-4">
             <h2 class="py-4 text-xl font-semibold border-b"># Intro</h2>
-            <p>DryORM allows you to run Django ORM code against SQLite. The technologies used to power this webapp are:</p>
+            <p>DryORM allows you to run Django ORM code against suported Databases. The technologies used to power this webapp are:</p>
             <ul class="list-disc list-inside">
                 <li>
                     <strong>Frameworks & Libraries:</strong> <a class="text-django-secondary" href="https://wwww.djangoproject.com">Django</a> / <a class="text-django-secondary"
     href="https://channels.readthedocs.io/en/latest/index.html">Channels</a> / <a class="text-django-secondary" href="https://python-rq.org/">Python RQ</a>
                 </li>
                 <li>
-                    <strong>DB / Broker:</strong> Postgres / SQLite / Redis
+                    <strong>DB / Broker:</strong> SQLite / Postgres / MariaDB / Redis
                 </li>
                 <li>
                     <strong>Infra:</strong> Docker / Compose
                 </li>
                 <li>
-                    <strong>Frontend:</strong> Django Templates / Vanilla JS / Tailwindcss (<strong>play.*</strong> for now)
+                    <strong>Frontend:</strong> Django Templates / Tailwindcss (<strong>play.*</strong> for now) / AlpineJS / Vanilla JS
                 </li>
             </ul>
             <p>
@@ -31,11 +31,11 @@
             <ul class="list-disc list-inside">
                 <li>Rate limits</li>
                 <li>10 concurrent executions</li>
-                <li>No network</li>
-                <li>50MB limit</li>
                 <li>10s timeout</li>
+                <li>75MB limit</li>
+                <li>No network</li>
             </ul>
-            <p>Major thanks to everyone that has helped test and provide feedback on the project.</p>
+            <p>Thank you to everyone that has helped test and provide feedback on the project, notably the awesome Django Discord Staff!</p>
             <p>
                 <a class="font-bold text-django-secondary" href="https://xterm.info">Xterm</a>
             </p>
@@ -43,6 +43,10 @@
         <div class="space-y-4 mt-4 whitespace-nowrap [&_*]:whitespace-inherit">
             <h2 class="py-4 border-b border-t text-xl font-semibold"># Changelog</h2>
             <div class="grid grid-cols-2 grid-cols-[max-content_min-content] w-fit gap-4">
+                <div class="font-semibold">May 12th, 2025</div>
+                <ul>
+                    <li>UI - returned tables are now collapsed by default</li>
+                </ul>
                 <div class="font-semibold">May 11th, 2025</div>
                 <ul>
                     <li>Engine - now supports postgres 🎉 <a class="text-django-secondary underline" href="/example-postgres?run">(Example)</a></li>
