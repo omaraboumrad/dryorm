@@ -57,7 +57,7 @@
                 </div>
             </c-slot>
             <c-slot name="right">
-                <c-indicator />
+                <c-icons.plus />
             </c-slot>
             <pre id="output" class="whitespace-pre-wrap h-full p-3 text-django-text">No output.</pre>
         </c-section>
@@ -73,7 +73,7 @@
                 </div>
             </c-slot>
             <c-slot name="right">
-                <c-indicator />
+                <c-icons.plus />
             </c-slot>
             <pre id="queries" class="whitespace-pre-wrap p-2 text-django-text">No queries.</pre>
         </c-section>
@@ -81,15 +81,15 @@
 </div>
 
 <template id="returned_data_template">
-    <div class="collapsible-section">
-        <div class="p-4 bg-django-secondary/20 border-b border-django-primary/20 cursor-pointer flex items-center justify-between" data-section="returned-data-section">
+    <div class="collapsible-section" x-data="{ open: false }">
+        <div class="p-4 bg-django-secondary/20 border-b border-django-primary/20 cursor-pointer flex items-center justify-between" data-section="returned-data-section" x-on:click="open = !open">
             <div class="flex items-center gap-2">
                 <c-icons.grid />
                 <h3 class="font-bold text-django-text"></h3>
             </div>
-            <span class="collapse-indicator">▼</span>
+            <c-icons.plus />
         </div>
-        <div class="returned-data-section p-2">
+        <div class="returned-data-section p-2" x-show="open" open="false">
             <table class="border-b text-django-text font-mono">
                 <thead></thead>
                 <tbody></tbody>
@@ -101,6 +101,7 @@
 {% csrf_token %}
 
 {{ templates|json_script:'templates' }}
+<script src="//unpkg.com/alpinejs" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
 

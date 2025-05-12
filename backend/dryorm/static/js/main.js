@@ -213,23 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
         models_editor.focus();
     });
 
-    document.querySelectorAll('[data-section]').forEach(header => {
-        header.addEventListener('click', function() {
-            const sectionId = this.getAttribute('data-section');
-            const section = document.getElementById(sectionId);
-            const indicator = this.querySelector('.collapse-indicator');
-
-            if (section.style.display === 'none') {
-                section.style.display = 'flex';
-                indicator.textContent = '▼';
-            } else {
-                section.style.display = 'none';
-                indicator.textContent = '▶';
-            }
-        });
-    });
-
-
     function showRightColumn() {
         const rightColumn = document.getElementById('right_column');
         const grid = document.getElementById('main_grid');
@@ -368,20 +351,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Attach click handlers to the newly created sections
         returnedContainer.querySelectorAll('[data-section]').forEach(header => {
-            header.addEventListener('click', function() {
-                const sectionId = this.getAttribute('data-section');
-                const section = document.getElementById(sectionId);
-                const indicator = this.querySelector('.collapse-indicator');
-
-                if (section.style.display === 'none') {
-                    section.style.display = 'flex';
-                    indicator.textContent = '▼';
-                } else {
-                    section.style.display = 'none';
-                    indicator.textContent = '▶';
-                }
-            });
-
             // Add copy button to each returned data section
             const sectionId = header.getAttribute('data-section');
             const section = document.getElementById(sectionId);
