@@ -1,8 +1,9 @@
+import pathlib
 import os
 
 env = os.environ.get
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 SECRET_KEY = 'fgta52w%k0^(hxp_sf9nk!abb@d!--9f@q*1!%z5b^0==*jwzy'
 DEBUG = True
 
@@ -16,7 +17,11 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = []
 
-ROOT_URLCONF = 'executor.urls'
+
+with open(BASE_DIR / 'executor' / 'models.py') as f:
+    contents = f.read()
+    if 'urlpatterns' in contents:
+        ROOT_URLCONF = 'executor.models'
 
 TEMPLATES = []
 
