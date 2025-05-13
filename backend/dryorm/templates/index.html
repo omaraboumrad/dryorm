@@ -163,6 +163,17 @@
 
 {% csrf_token %}
 
+<dialog id="html-dialog" class="w-[80%] h-[80%] p-0 border-0 rounded-xl overflow-hidden shadow-lg">
+  <div class="flex justify-end items-center p-2 bg-django-primary border-b border-gray-300 rounded-sm font-semibold">
+    <button 
+      class="px-3 py-1 text-sm bg-django-tertiary text-gray-700"
+      onclick="document.getElementById('html-dialog').close()">
+      ✖ Close
+    </button>
+  </div>
+  <iframe id="html-iframe" class="w-full h-[calc(100%-2.5rem)] border-0"></iframe>
+</dialog>
+
 {{ templates|json_script:'templates' }}
 <script src="//unpkg.com/alpinejs" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>

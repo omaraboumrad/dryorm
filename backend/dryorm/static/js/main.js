@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var erd_link = document.getElementById('erd');
     var query_filters = document.getElementById('query-filters');
     var query_count = document.getElementById('query-count');
+    const dialog = document.getElementById('html-dialog');
+    const iframe = document.getElementById('html-iframe');
 
     // Store raw data
     let rawOutput = '';
@@ -92,7 +94,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     query_count.textContent = `Total: ${rawQueries.length} queries`;
                     fillQueries(queries, rawQueries, state);
 
-                    handleReturnedData(data.result.returned);
+                    if (typeof data.result.returned === 'string' ){
+                        // If the returned data is a string, show it as HTML
+                        iframe.srcdoc = data.result.returned;
+                        dialog.showModal();
+                    } else {
+                        handleReturnedData(data.result.returned);
+                    }
+
                     loader.classList.add('hidden');
                     run.disabled = false;
                     break;
