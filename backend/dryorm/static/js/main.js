@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var template_text = templates[template_name] || '';
         models_editor.setValue(template_text);
         models_editor.focus();
+        window.history.pushState('Dry ORM', 'Dry ORM', '/');
     });
 
     document.querySelectorAll('#query-filters a').forEach(link => {
