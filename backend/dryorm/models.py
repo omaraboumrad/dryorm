@@ -36,7 +36,7 @@ class Snippet(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     code = models.TextField()
     result = models.TextField(blank=True)
-    created = models.DateField(auto_now=True)
+    created = models.DateTimeField(auto_now=True)
     private = models.BooleanField(default=False)
     database = models.CharField(max_length=50, default='sqlite')
 

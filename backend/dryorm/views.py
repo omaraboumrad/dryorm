@@ -11,6 +11,7 @@ from . import databases
 class SnippetListView(generic.ListView):
     model = models.Snippet
     template_name = 'snippet_list.html'
+    paginate_by = 10
 
     def get_queryset(self):
         return models.Snippet.objects.filter(
