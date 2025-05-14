@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var erd_link = document.getElementById('erd');
     var query_filters = document.getElementById('query-filters');
     var query_count = document.getElementById('query-count');
+    const show_template = document.getElementById('show-template');
     const dialog = document.getElementById('html-dialog');
     const iframe = document.getElementById('html-iframe');
 
@@ -98,6 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         // If the returned data is a string, show it as HTML
                         iframe.srcdoc = data.result.returned;
                         dialog.showModal();
+                        show_template.classList.remove('hidden');
                     } else {
                         handleReturnedData(data.result.returned);
                     }
@@ -151,6 +153,9 @@ document.addEventListener('DOMContentLoaded', function() {
         queries.innerHTML = 'loading...';
         query_count.textContent = 'loading...';
 
+        // Reset show template
+        show_template.classList.add('hidden');
+
         // Reset ERD-related elements
         erd_link.classList.add('hidden');
         erd_link.href = '#';
@@ -173,6 +178,10 @@ document.addEventListener('DOMContentLoaded', function() {
         loader.classList.remove('hidden');
         run.disabled = true;
     }
+
+    show_template.addEventListener('click', function() {
+        dialog.showModal();
+    });
 
     // --- Button Handlers ---
     run.addEventListener('click', function(){
