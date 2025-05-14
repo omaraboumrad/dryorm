@@ -2,6 +2,17 @@
 import os
 import sys
 
+
+# Why? Because we're using test client in the snippets
+# which resets the queries and closes old connections
+# which won't allow us to capture _everything_ that
+# happened in the snippet. This block will persist
+# the previous connection/queries.
+from django import db
+noop = lambda *args, **kwargs: None
+db.reset_queries = noop
+db.close_old_connections = noop
+
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "executor.settings")
     try:
