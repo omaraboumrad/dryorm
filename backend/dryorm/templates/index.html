@@ -79,11 +79,11 @@
             <div x-data="{
                          selectedTCL: true,
                          selectedDDL: true,
-                         selectedSelect: true,
-                         selectedInsert: true,
-                         selectedUpdate: true,
-                         selectedDelete: true,
-                         selectedReverse: false
+                         selectedSELECT: true,
+                         selectedINSERT: true,
+                         selectedUPDATE: true,
+                         selectedDELETE: true,
+                         selectedREVERSE: false
                          }"
                  id="query-filters"
                  class="flex justify-between items-center p-2 gap-2 bg-slate-200 border-b border-django-primary/20"
@@ -104,35 +104,35 @@
 
                      <a
                              href="#"
-                             @click.prevent="selectedSelect = !selectedSelect"
-                             :class="selectedSelect ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             @click.prevent="selectedSELECT = !selectedSELECT"
+                             :class="selectedSELECT ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
                              >SELECT</a>
 
                      <a
                              href="#"
-                             @click.prevent="selectedInsert = !selectedInsert"
-                             :class="selectedInsert ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             @click.prevent="selectedINSERT = !selectedINSERT"
+                             :class="selectedINSERT ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
                              >INSERT</a>
 
                      <a
                              href="#"
-                             @click.prevent="selectedUpdate = !selectedUpdate"
-                             :class="selectedUpdate ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             @click.prevent="selectedUPDATE = !selectedUPDATE"
+                             :class="selectedUPDATE ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
                              >UPDATE</a>
 
                      <a
                              href="#"
-                             @click.prevent="selectedDelete = !selectedDelete"
-                             :class="selectedDelete ? 'bg-django-primary/80 text-white' : 'text-django-text'"
+                             @click.prevent="selectedDELETE = !selectedDELETE"
+                             :class="selectedDELETE ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
                              >DELETE</a>
                     <a
                             href="#"
-                            @click.prevent="selectedReverse = !selectedReverse"
-                            :class="selectedReverse ? 'bg-slate-500 text-white' : 'text-django-text'"
+                            @click.prevent="selectedREVERSE = !selectedREVERSE"
+                            :class="selectedREVERSE ? 'bg-slate-500 text-white' : 'text-django-text'"
                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
                             >REVERSE</a>
                  </div>

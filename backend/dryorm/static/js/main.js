@@ -247,40 +247,48 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fillQueries(queries, rawQueries, filters) {
-        var clonedQueries = rawQueries.slice(0);
+        const tokenMapper = {
+            TCL: ['BEGIN', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'SET'],
+            DDL: ['CREATE', 'ALTER', 'DROP', 'TRUNCATE'],
+            SELECT: ['SELECT'],
+            INSERT: ['INSERT'],
+            UPDATE: ['UPDATE'],
+            DELETE: ['DELETE'],
+        };
 
-        if (filters.selectedReverse) {
-            clonedQueries = clonedQueries.reverse();
-        }
-        queries.innerHTML = '';
-        var query_html = [];
+        const getTypes = sql => {
+            const upper = sql.trim().toUpperCase();
+            return Object.entries(tokenMapper)
+                .filter(([_, tokens]) => tokens.some(token => upper.startsWith(token)))
+                .map(([type]) => type);
+        };
 
-        for (var i = 0; i < clonedQueries.length; i++) {
-            let query = clonedQueries[i];
-            let sql = query.sql.trim();
+        const counts = {};
+        const filtered = [];
 
-            // Match the beginning of the SQL statement using regex
-            if (
-                (/^(BEGIN|COMMIT|ROLLBACK|SAVEPOINT)/i.test(sql) && !filters.selectedTCL) ||
-                (/^(CREATE|ALTER|DROP|TRUNCATE)/i.test(sql) && !filters.selectedDDL) ||
-                (/^SELECT/i.test(sql) && !filters.selectedSelect) ||
-                (/^INSERT/i.test(sql) && !filters.selectedInsert) ||
-                (/^UPDATE/i.test(sql) && !filters.selectedUpdate) ||
-                (/^DELETE/i.test(sql) && !filters.selectedDelete)
-                // (/^REVERSE/i.test(sql) && !filters.selectedReverse)
-            ) {
-                continue;
-            }
+        for (const query of rawQueries) {
+            const types = getTypes(query.sql);
+            types.forEach(type => counts[type] = (counts[type] || 0) + 1);
 
-            let padding = query.time.toString().length + 2;
-            let colorized = colorize(query.sql, padding);
-            query_html.push(
-                `<span class="font-semibold text-django-primary/80">${query.time}s</span> ${colorized}\n\n`
-            );
+            // Only exclude queries if a type is explicitly toggled OFF
+            const isExcluded = types.some(type => filters[`selected${type}`] === false);
+            if (!isExcluded) filtered.push(query);
         }
 
-        queries.innerHTML = query_html.length > 0
-            ? query_html.join('')
+        // Update filter labels
+        document.querySelectorAll('#query-filters a').forEach(link => {
+            const type = link.textContent.trim().split(' ')[0];
+            const count = counts[type] || 0;
+            link.textContent = count > 0 ? `${type} (${count})` : type;
+        });
+
+        if (filters.selectedREVERSE) filtered.reverse();
+
+        queries.innerHTML = filtered.length
+            ? filtered.map(q => {
+                const pad = q.time.toString().length + 2;
+                return `<span class="font-semibold text-django-primary/80">${q.time}s</span> ${colorize(q.sql, pad)}\n\n`;
+            }).join('')
             : '<span class="p-2 text-lg">No queries</span>';
     }
 
