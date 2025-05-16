@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var ignore_cache = document.getElementById('ignore_cache');
     var erd_link = document.getElementById('erd');
     var query_filters = document.getElementById('query-filters');
-    var query_count = document.getElementById('query-count');
+    var query_count_number = document.getElementById('query-count-number');
     const show_template = document.getElementById('show-template');
     const dialog = document.getElementById('html-dialog');
     const iframe = document.getElementById('html-iframe');
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     const state = Alpine.$data(query_filters);
                     rawQueries = data.result.queries;
-                    query_count.textContent = `Total: ${rawQueries.length} queries`;
+                    query_count_number.textContent = rawQueries.length;
                     fillQueries(queries, rawQueries, state);
 
                     if (typeof data.result.returned === 'string' ){
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function execute() {
         output.textContent = 'loading...';
         queries.innerHTML = 'loading...';
-        query_count.textContent = 'loading...';
+        query_count_number.textContent = '...';
 
         // Reset show template
         show_template.classList.add('hidden');
@@ -276,10 +276,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Update filter labels
-        document.querySelectorAll('#query-filters a').forEach(link => {
-            const type = link.textContent.trim().split(' ')[0];
+        document.querySelectorAll('#query-filters a .count').forEach(span => {
+            const type = span.getAttribute('data-type');
             const count = counts[type] || 0;
-            link.textContent = count > 0 ? `${type} (${count})` : type;
+            span.textContent = count > 0 ? ` (${count})` : '';
         });
 
         if (filters.selectedREVERSE) filtered.reverse();

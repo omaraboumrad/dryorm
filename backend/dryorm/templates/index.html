@@ -96,49 +96,49 @@
                              @click.prevent="selectedTCL = !selectedTCL"
                              :class="selectedTCL ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             >TCL</a>
+                             ><span class="hidden md:inline">TCL</span><span class="md:hidden">TCL</span><span class="count" data-type="TCL"></span></a>
                      <a
                              href="#"
                              @click.prevent="selectedDDL = !selectedDDL"
                              :class="selectedDDL ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             >DDL</a>
+                             ><span class="hidden md:inline">DDL</span><span class="md:hidden">DDL</span><span class="count" data-type="DDL"></span></a>
 
                      <a
                              href="#"
                              @click.prevent="selectedSELECT = !selectedSELECT"
                              :class="selectedSELECT ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             >SELECT</a>
+                             ><span class="hidden md:inline">SELECT</span><span class="md:hidden">S</span><span class="count" data-type="SELECT"></span></a>
 
                      <a
                              href="#"
                              @click.prevent="selectedINSERT = !selectedINSERT"
                              :class="selectedINSERT ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             >INSERT</a>
+                             ><span class="hidden md:inline">INSERT</span><span class="md:hidden">I</span><span class="count" data-type="INSERT"></span></a>
 
                      <a
                              href="#"
                              @click.prevent="selectedUPDATE = !selectedUPDATE"
                              :class="selectedUPDATE ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             >UPDATE</a>
+                             ><span class="hidden md:inline">UPDATE</span><span class="md:hidden">U</span><span class="count" data-type="UPDATE"></span></a>
 
                      <a
                              href="#"
                              @click.prevent="selectedDELETE = !selectedDELETE"
                              :class="selectedDELETE ? 'bg-django-primary/80 text-white' : 'text-django-text'"
                              class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             >DELETE</a>
+                             ><span class="hidden md:inline">DELETE</span><span class="md:hidden">D</span><span class="count" data-type="DELETE"></span></a>
                     <a
                             href="#"
                             @click.prevent="selectedREVERSE = !selectedREVERSE"
                             :class="selectedREVERSE ? 'bg-slate-500 text-white' : 'text-django-text'"
                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                            >REVERSE</a>
+                            ><span class="hidden md:inline">REVERSE</span><span class="md:hidden">R</span></a>
                  </div>
-                <span id="query-count" class="text-django-primary font-semibold text-sm">(0 Queries)</span>
+                <span id="query-count" class="text-django-primary font-semibold text-sm"><span class="hidden md:inline">Queries</span><span class="md:hidden">Q</span> (<span id="query-count-number">0</span>)</span>
             </div>
 
             <pre id="queries" class="whitespace-pre-wrap p-2 text-django-text">No queries.</pre>
