@@ -46,7 +46,7 @@
             gtag('config', 'G-MY7ZELY01L');
         </script>
     </head>
-    <body class="bg-django-bg h-full flex flex-col overflow-hidden">
+    <body class="bg-django-bg h-full flex flex-col">
         <c-nav>
             <c-slot name="links">
                 <a class="text-lg text-white hover:underline" href="{% url 'list' %}">Browse</a>
@@ -61,7 +61,9 @@
             </c-slot>
         </c-nav>
 
-        {% block content %}{% endblock %}
+        <div class="flex-1 overflow-hidden">
+            {% block content %}{% endblock %}
+        </div>
 
         <c-footer />
     </body>
