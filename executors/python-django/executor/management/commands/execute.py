@@ -20,22 +20,46 @@ def format_ddl(sql):
     return cleaned
 
 
-class Command(BaseCommand):
-    help = 'executes the transaction'		
+def collect_ddl():
+    sqlmigrate_out = io.StringIO()
+    with contextlib.redirect_stdout(sqlmigrate_out):
+        call_command('sqlmigrate', 'executor', '0001', stdout=sqlmigrate_out)
 
-    def handle(self, *args, **options):
-        # Grab the Migration SQL.
-        sqlmigrate_out = io.StringIO()
-        with contextlib.redirect_stdout(sqlmigrate_out):
-            call_command('sqlmigrate', 'executor', '0001', stdout=sqlmigrate_out)
-
-        sqlmigrate_queries = [
+        return [
             {
                 'time': '0.000',
                 'sql': format_ddl(q)
             } for q in sqlparse.split(sqlmigrate_out.getvalue())
         ]
 
+
+def collect_sql():
+    sqlmigrate_out = io.StringIO()
+    with contextlib.redirect_stdout(sqlmigrate_out):
+        call_command('sqlmigrate', 'executor', '0001', stdout=sqlmigrate_out)
+
+        return [
+            {
+                'time': '0.000',
+                'sql': format_ddl(q)
+            }
+            for q in sqlparse.split(sqlmigrate_out.getvalue())
+            if q['sql'].startswith('CREATE')
+        ]
+
+def format_sql_queries(queries):
+    return [
+        {'time': q['time'], 'sql': sqlparse.format(q['sql'], reindent=True)}
+        for q in queries if q['sql']
+    ]
+
+
+
+class Command(BaseCommand):
+    help = 'executes the transaction'		
+
+    def handle(self, *args, **options):
+        sqlmigrate_queries = collect_ddl()
         connection.queries_log.clear()
 
         out = io.StringIO()
@@ -49,13 +73,7 @@ class Command(BaseCommand):
         combined = dict(
             output=out.getvalue(),
             erd=erd,
-            queries=[
-                {'time': q['time'], 'sql': sqlparse.format(q['sql'], reindent=True)}
-                 for q in connection.queries if q['sql']
-            ] + [
-                q for q in sqlmigrate_queries
-                if q['sql'].startswith('CREATE')
-            ],
+            queries=format_sql_queries(connection.queries) + sqlmigrate_queries,
             returned=returned,
         )
 
