@@ -62,7 +62,9 @@
         </c-nav>
 
         <div class="flex-1 overflow-hidden">
-            {% block content %}{% endblock %}
+            <div class="h-full overflow-y-auto">
+                {% block content %}{% endblock %}
+            </div>
         </div>
 
         <c-footer />
