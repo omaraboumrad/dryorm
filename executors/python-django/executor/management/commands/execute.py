@@ -73,7 +73,7 @@ class Command(BaseCommand):
         combined = dict(
             output=out.getvalue(),
             erd=erd,
-            queries=format_sql_queries(connection.queries) + sqlmigrate_queries,
+            queries=sqlmigrate_queries + format_sql_queries(connection.queries),
             returned=returned,
         )
 
