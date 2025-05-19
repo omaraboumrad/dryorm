@@ -3,13 +3,14 @@ import io
 import json
 import re
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.management import call_command
 from django.db import connection
+
 import sqlparse
+from . import mermaid
 
 from executor.models import run
-from . import mermaid
 
 
 def format_ddl(sql):
@@ -23,20 +24,11 @@ def format_ddl(sql):
 def collect_ddl():
     sqlmigrate_out = io.StringIO()
     with contextlib.redirect_stdout(sqlmigrate_out):
-        call_command('sqlmigrate', 'executor', '0001', stdout=sqlmigrate_out)
-
-        return [
-            {
-                'time': '0.000',
-                'sql': format_ddl(q)
-            } for q in sqlparse.split(sqlmigrate_out.getvalue())
-        ]
-
-
-def collect_sql():
-    sqlmigrate_out = io.StringIO()
-    with contextlib.redirect_stdout(sqlmigrate_out):
-        call_command('sqlmigrate', 'executor', '0001', stdout=sqlmigrate_out)
+        try:
+            call_command('sqlmigrate', 'executor', '0001', stdout=sqlmigrate_out)
+        except CommandError:
+            # Handle the case where the migration file does not exist
+            return []
 
         return [
             {
@@ -44,15 +36,15 @@ def collect_sql():
                 'sql': format_ddl(q)
             }
             for q in sqlparse.split(sqlmigrate_out.getvalue())
-            if q['sql'].startswith('CREATE')
+            # if q.startswith('CREATE')
         ]
+
 
 def format_sql_queries(queries):
     return [
         {'time': q['time'], 'sql': sqlparse.format(q['sql'], reindent=True)}
         for q in queries if q['sql']
     ]
-
 
 
 class Command(BaseCommand):
