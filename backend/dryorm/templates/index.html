@@ -20,21 +20,23 @@
     <div class="bg-white flex flex-col h-full overflow-hidden">
         <c-section title="Code">
             <c-slot name="icon"><c-icons.code /></c-slot>
-            <c-slot name="right">
-                <div class="flex items-center gap-2">
+            <c-slot name="indicator">
                     <div id="loader" class="w-6 h-6 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden"></div>
+            </c-slot>
+            <c-slot name="right">
+                <div class="flex flex-col items-start sm:flex-row items-start gap-2">
                     <!-- ignore cache -->
                     <div class="flex items-center gap-2">
                         <input type="checkbox" id="ignore_cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
                         <label for="ignore_cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
                     </div>
-                    <select id="database-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+                    <select id="database-select" class="w-full px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
                         {% for key, database in databases.items %}
                         <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
                         {% endfor %}
                     </select>
 
-                    <select id="template-select" class="px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+                    <select id="template-select" class="w-full px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
                         <option value="">Select a template</option>
                         {% for key, _ in templates.items %}
                         <option value="{{key}}">{{key}}</option>
