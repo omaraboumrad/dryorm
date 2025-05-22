@@ -1,11 +1,7 @@
 <nav class="bg-django-primary text-white p-2 min-w-sm">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+    <div class="flex justify-between gap-2">
         <a class="p-2 text-4xl font-bold text-white whitespace-nowrap" href="{% url 'index' %}">DryORM</a>
-        <div class="flex flex-row w-full px-2 sm:w-auto sm:flex-grow items-center justify-between gap-2">
-            <div class="flex items-center gap-2">{{ links }}</div>
-            <div class="flex items-center gap-2">
-                {{ right }}
-            </div>
-        </div>
+        <div class="flex flex-grow items-center justify-end lg:justify-start gap-2">{{ links }}</div>
+        {{ right }}
     </div>
 </nav>

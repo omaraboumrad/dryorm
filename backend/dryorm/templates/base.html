@@ -49,9 +49,19 @@
     <body class="bg-django-bg h-full flex flex-col">
         <c-nav>
             <c-slot name="links">
-                <a class="text-lg text-white hover:underline" href="{% url 'list' %}">Browse</a>
-                /
-                <a class="text-lg text-white hover:underline cursor-pointer" href="{% url 'about' %}">About</a>
+                <div class="hidden lg:flex items-center gap-2">
+                    <a class="flex items-center gap-2 text-lg text-white hover:underline" href="{% url 'list' %}">Browse</a>
+                    /
+                    <a class="text-lg text-white hover:underline cursor-pointer" href="{% url 'about' %}">About</a>
+                </div>
+                <div class="flex lg:hidden items-center gap-4">
+                    <a class="flex items-center gap-2 text-lg text-white hover:underline" href="{% url 'list' %}">
+                        <c-icons.list />
+                    </a>
+                    <a class="text-lg text-white hover:underline cursor-pointer" href="{% url 'about' %}">
+                        <c-icons.info />
+                    </a>
+                </div>
             </c-slot>
             <c-slot name="right">
                 {% block right-actions %}{% endblock %}
