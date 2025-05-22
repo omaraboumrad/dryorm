@@ -23,10 +23,10 @@
 <!-- Small Screens -->
 <div class="flex lg:hidden items-center gap-2">
         <div class="w-8 h-8 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden loader"></div>
-    <button class="bg-django-tertiary hover:bg-django-secondary p-4 lg:p-2 rounded-sm font-medium" id="save">
-        <c-icons.save />
+    <button class="bg-django-tertiary hover:bg-django-secondary p-4 lg:p-2 rounded-sm font-medium" id="mobile-save">
+        <c-icons.share />
     </button>
-    <button class="bg-django-tertiary hover:bg-django-secondary p-4 lg:p-2 rounded-sm font-medium" id="save">
+    <button class="bg-django-tertiary hover:bg-django-secondary p-4 lg:p-2 rounded-sm font-medium" id="mobile-settings">
         <c-icons.cog />
     </button>
     <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium run">
@@ -47,6 +47,28 @@
 {% endblock %}
 
 {% block content %}
+<!-- Mobile Settings Panel -->
+<div id="mobile-settings-panel" class="hidden lg:hidden bg-white p-4 border-b border-django-primary/20">
+    <div class="flex flex-col gap-4">
+        <!-- ignore cache -->
+        <div class="flex items-center gap-2">
+            <input type="checkbox" id="mobile-ignore-cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
+            <label for="mobile-ignore-cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
+        </div>
+        <select id="mobile-database-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+            {% for key, database in databases.items %}
+            <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
+            {% endfor %}
+        </select>
+        <select id="mobile-template-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+            <option value="">Select a template</option>
+            {% for key, _ in templates.items %}
+            <option value="{{key}}">{{key}}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
 <div id="main_grid" class="grid grid-cols-1 lg:grid-cols-2 gap-0.5 h-full">
     <div id="code_column" class="bg-white flex flex-col h-full overflow-hidden">
         <c-section title="Code" display="hidden lg:flex">

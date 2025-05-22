@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var csrftoken = getCookie('csrftoken');
     var runs = document.querySelectorAll('.run');
     var save = document.getElementById('save');
+    var mobileSave = document.getElementById('mobile-save');
     var job = document.getElementById('job');
     var loaders = document.querySelectorAll('.loader');
     var output = document.getElementById('output');
@@ -38,6 +39,60 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultTab = document.getElementById('result-tab');
     const codeColumn = document.getElementById('code_column');
     const rightColumn = document.getElementById('right_column');
+    const mobileSettings = document.getElementById('mobile-settings');
+    const mobileSettingsPanel = document.getElementById('mobile-settings-panel');
+    const mobileIgnoreCache = document.getElementById('mobile-ignore-cache');
+    const mobileDatabaseSelect = document.getElementById('mobile-database-select');
+    const mobileTemplateSelect = document.getElementById('mobile-template-select');
+
+    // Mobile settings panel toggle
+    if (mobileSettings && mobileSettingsPanel) {
+        mobileSettings.addEventListener('click', function() {
+            mobileSettingsPanel.classList.toggle('hidden');
+        });
+    }
+
+    // Sync mobile controls with desktop controls
+    if (mobileIgnoreCache && ignore_cache) {
+        mobileIgnoreCache.addEventListener('change', function() {
+            ignore_cache.checked = this.checked;
+        });
+    }
+
+    if (mobileDatabaseSelect && database_select) {
+        mobileDatabaseSelect.addEventListener('change', function() {
+            database_select.value = this.value;
+        });
+    }
+
+    if (mobileTemplateSelect && template_select) {
+        mobileTemplateSelect.addEventListener('change', function() {
+            template_select.value = this.value;
+            var template_text = templates[this.value] || '';
+            models_editor.setValue(template_text);
+            models_editor.focus();
+            window.history.pushState('Dry ORM', 'Dry ORM', '/');
+        });
+    }
+
+    // Sync desktop controls with mobile controls
+    if (ignore_cache && mobileIgnoreCache) {
+        ignore_cache.addEventListener('change', function() {
+            mobileIgnoreCache.checked = this.checked;
+        });
+    }
+
+    if (database_select && mobileDatabaseSelect) {
+        database_select.addEventListener('change', function() {
+            mobileDatabaseSelect.value = this.value;
+        });
+    }
+
+    if (template_select && mobileTemplateSelect) {
+        template_select.addEventListener('change', function() {
+            mobileTemplateSelect.value = this.value;
+        });
+    }
 
     // Mobile tab switching
     codeTab.addEventListener('click', function() {
@@ -212,7 +267,8 @@ document.addEventListener('DOMContentLoaded', function() {
         models_editor.focus();
     }));
 
-    save.addEventListener('click', function(){
+    // Save functionality for both desktop and mobile
+    function handleSave() {
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
         formData.append('name', name.value);
@@ -226,20 +282,14 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            // job.textContent = 'new snippet saved';
             name.value = '';
             isPrivate.checked = false;
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
-    });
+    }
 
-    template_select.addEventListener('change', function(event) {
-        var template_name = event.target.value;
-        var template_text = templates[template_name] || '';
-        models_editor.setValue(template_text);
-        models_editor.focus();
-        window.history.pushState('Dry ORM', 'Dry ORM', '/');
-    });
+    save.addEventListener('click', handleSave);
+    mobileSave.addEventListener('click', handleSave);
 
     document.querySelectorAll('#query-filters a').forEach(link => {
         link.addEventListener('click', function(event) {
