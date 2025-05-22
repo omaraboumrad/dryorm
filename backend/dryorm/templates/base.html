@@ -63,8 +63,11 @@
                     </a>
                 </div>
             </c-slot>
-            <c-slot name="right">
-                {% block right-actions %}{% endblock %}
+            <c-slot name="actions">
+                {% block actions %}{% endblock %}
+            </c-slot>
+            <c-slot name="mobile">
+                {% block mobile %}{% endblock %}
             </c-slot>
         </c-nav>
 

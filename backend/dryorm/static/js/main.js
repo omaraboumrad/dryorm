@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var run = document.getElementById('run');
     var save = document.getElementById('save');
     var job = document.getElementById('job');
-    var loader = document.getElementById('loader');
+    var loaders = document.querySelectorAll('.loader');
     var output = document.getElementById('output');
     var queries = document.getElementById('queries');
     var name = document.getElementById('name');
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         handleReturnedData(data.result.returned);
                     }
 
-                    loader.classList.add('hidden');
+                    loaders.forEach(loader => loader.classList.add('hidden'));
                     run.disabled = false;
                     break;
                 case 'job-timeout':
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'job-overloaded':
                     output.textContent = data.error;
                     run.disabled = false;
-                    loader.classList.add('hidden');
+                    loaders.forEach(loader => loader.classList.add('hidden'));
                     break;
                 default:
                     console.warn('Unhandled event:', data);
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         socket.send(payload);
-        loader.classList.remove('hidden');
+        loaders.forEach(loader => loader.classList.remove('hidden'));
         run.disabled = true;
     }
 

@@ -1,6 +1,6 @@
-<c-vars background="bg-white" classes="" open="true" />
+<c-vars background="bg-white" classes="" open="true" display="flex"/>
 <div class="{{classes}}" x-data="{ open: {{open}} }">
-    <div class="group flex items-center justify-between p-4 border-b border-django-primary/10 cursor-pointer {{ background }}"
+    <div class="group {{display}} items-center justify-between p-4 border-b border-django-primary/10 cursor-pointer {{ background }}"
          @click="open = !open"
          {% if id %}data-section="{{ id }}"{% endif %}>
         <div class="flex items-center space-x-4">
