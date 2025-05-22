@@ -34,6 +34,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const show_template = document.getElementById('show-template');
     const dialog = document.getElementById('html-dialog');
     const iframe = document.getElementById('html-iframe');
+    const codeTab = document.getElementById('code-tab');
+    const resultTab = document.getElementById('result-tab');
+    const codeColumn = document.getElementById('code_column');
+    const rightColumn = document.getElementById('right_column');
+
+    // Mobile tab switching
+    codeTab.addEventListener('click', function() {
+        codeColumn.classList.remove('hidden');
+        rightColumn.classList.add('hidden');
+        codeTab.classList.add('bg-django-tertiary', 'hover:bg-django-secondary');
+        codeTab.classList.remove('text-white');
+        resultTab.classList.remove('bg-django-tertiary', 'hover:bg-django-secondary');
+        resultTab.classList.add('text-white');
+    });
+
+    resultTab.addEventListener('click', function() {
+        codeColumn.classList.add('hidden');
+        rightColumn.classList.remove('hidden');
+        resultTab.classList.add('bg-django-tertiary', 'hover:bg-django-secondary');
+        resultTab.classList.remove('text-white');
+        codeTab.classList.remove('bg-django-tertiary', 'hover:bg-django-secondary');
+        codeTab.classList.add('text-white');
+    });
 
     // Store raw data
     let rawOutput = '';

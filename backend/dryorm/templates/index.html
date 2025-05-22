@@ -22,6 +22,7 @@
 
 <!-- Small Screens -->
 <div class="flex lg:hidden items-center gap-2">
+        <div class="w-6 h-6 border-4 border-django-text border-t-transparent rounded-full animate-spin hidden loader"></div>
     <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary text-black p-4 lg:p-2 rounded-sm font-medium" id="save">
         <c-icons.save />
     </button>
@@ -30,7 +31,6 @@
     </button>
     <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium" id="run">
         <c-icons.play />
-        <div class="w-6 h-6 border-4 border-django-text border-t-transparent rounded-full animate-spin hidden loader"></div>
     </button>
 </div>
 {% endblock %}
@@ -38,7 +38,6 @@
 {% block mobile %}
 <div class="flex lg:hidden items-center h-full bg-django-primary">
     <div class="flex items-center gap-2 text-lg h-full px-8 border-r border-r-django-text bg-django-tertiary hover:bg-django-secondary" id="code-tab">
-        <c-icons.code />
         <span class="font-semibold">Code</span>
     </div>
     <div class="flex items-center gap-2 text-lg text-white h-full px-8 hover:shadow" id="result-tab">
@@ -48,8 +47,8 @@
 {% endblock %}
 
 {% block content %}
-<div id="main_grid" class="grid grid-cols-2 gap-0.5 h-full">
-    <div class="bg-white flex flex-col h-full overflow-hidden">
+<div id="main_grid" class="grid grid-cols-1 lg:grid-cols-2 gap-0.5 h-full">
+    <div id="code_column" class="bg-white flex flex-col h-full overflow-hidden">
         <c-section title="Code" display="hidden lg:flex">
             <c-slot name="icon"><c-icons.code /></c-slot>
             <c-slot name="indicator">
@@ -81,7 +80,7 @@
             <textarea id="code_models">{% if object %}{{ object.code }}{% else %}{{first}}{% endif %}</textarea>
         </div>
     </div>
-    <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full overflow-auto">
+    <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full overflow-auto hidden lg:flex">
         <c-section title="Output" id="output-section" background="bg-django-secondary/20">
             <c-slot name="icon"><c-icons.terminal /></c-slot>
             <c-slot name="indicator">
