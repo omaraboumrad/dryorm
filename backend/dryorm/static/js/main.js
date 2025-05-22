@@ -16,7 +16,7 @@ function getCookie(name) {
 
 document.addEventListener('DOMContentLoaded', function() {
     var csrftoken = getCookie('csrftoken');
-    var run = document.getElementById('run');
+    var runs = document.querySelectorAll('.run');
     var save = document.getElementById('save');
     var job = document.getElementById('job');
     var loaders = document.querySelectorAll('.loader');
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     loaders.forEach(loader => loader.classList.add('hidden'));
-                    run.disabled = false;
+                    run(true);
                     break;
                 case 'job-timeout':
                 case 'job-oom-killed':
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'job-image-not-found-error':
                 case 'job-overloaded':
                     output.textContent = data.error;
-                    run.disabled = false;
+                    run(true)
                     loaders.forEach(loader => loader.classList.add('hidden'));
                     break;
                 default:
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         socket.onopen = function(e) {
             // job.textContent = 'connected';
-            run.disabled = false;
+            run(true)
             // if url has "?run" then run the code
             if (window.location.search.includes('?run')) {
                 execute();
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         socket.onclose = function(e) {
             // job.textContent = 'connection died';
-            run.disabled = true;
+            run(false)
             setTimeout(function(){
                 // job.textContent = 'reconnecting';
                 connect();
@@ -207,10 +207,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Button Handlers ---
-    run.addEventListener('click', function(){
+    runs.forEach(run => run.addEventListener('click', function(){
         execute()
         models_editor.focus();
-    });
+    }));
 
     save.addEventListener('click', function(){
         var formData = new FormData();
@@ -249,6 +249,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    function run(state){
+        runs.forEach(run => {
+            run.disabled = !state
+        })
+    }
 
     function colorize(query, padding = 0){
         const keywords = new Set([

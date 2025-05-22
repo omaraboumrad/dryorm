@@ -14,7 +14,7 @@
         <c-icons.save />
         <span class="inline">Save</span>
     </button>
-    <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium" id="run">
+    <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium run">
         <c-icons.play />
         <span class="inline">Execute</span>
     </button>
@@ -22,14 +22,14 @@
 
 <!-- Small Screens -->
 <div class="flex lg:hidden items-center gap-2">
-        <div class="w-6 h-6 border-4 border-django-text border-t-transparent rounded-full animate-spin hidden loader"></div>
+        <div class="w-8 h-8 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden loader"></div>
     <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary text-black p-4 lg:p-2 rounded-sm font-medium" id="save">
         <c-icons.save />
     </button>
     <button class="bg-django-tertiary hover:bg-django-secondary text-black p-4 lg:p-2 rounded-sm font-medium" id="save">
         <c-icons.cog />
     </button>
-    <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium" id="run">
+    <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium run">
         <c-icons.play />
     </button>
 </div>
@@ -37,10 +37,10 @@
 
 {% block mobile %}
 <div class="flex lg:hidden items-center h-full bg-django-primary">
-    <div class="flex items-center gap-2 text-lg h-full px-8 border-r border-r-django-text bg-django-tertiary hover:bg-django-secondary" id="code-tab">
+    <div class="flex items-center gap-2 text-lg h-full px-8 border-r border-r-django-text bg-django-tertiary hover:bg-django-secondary cursor-pointer" id="code-tab">
         <span class="font-semibold">Code</span>
     </div>
-    <div class="flex items-center gap-2 text-lg text-white h-full px-8 hover:shadow" id="result-tab">
+    <div class="flex items-center gap-2 text-lg text-white h-full px-8 hover:shadow cursor-pointer" id="result-tab">
         <span class="font-semibold">Result</span>
     </div>
 </div>
