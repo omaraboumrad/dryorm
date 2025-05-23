@@ -3,21 +3,21 @@
 {% load static %}
 
 {% block data %}
-x-data="{ showSettings: false, showCode: true, showResult: false, loading: false }"
+x-data="{ showSettings: false, showCode: true, showResult: false, loading: false, isSmall: window.innerWidth < 1024 }"
 {% endblock %}
 
 {% block actions %}
 <div class="flex items-center w-full h-full justify-between">
     <div class="flex items-center h-full bg-django-primary gap-1 p-2 rounded-sm">
         <div
-                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold"
+                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold select-none"
                 :class="showCode ? 'text-django-text bg-django-secondary':'text-white'"
                 @click="showCode = !showCode"
                 >
                 <span>Code</span>
         </div>
         <div
-                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold"
+                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold select-none"
                 :class="showResult ? 'text-django-text bg-django-secondary':'text-white'"
                 @click="showResult = !showResult"
                 >
@@ -58,13 +58,17 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
     </select>
 </div>
 
-<div id="main_grid" class="grid grid-cols-1 lg:grid-cols-2 gap-0.5 h-full">
-    <div id="code_column" class="bg-white flex flex-col h-full overflow-hidden" x-show="showCode" x-cloak>
+<div class="flex items-center gap-0.5 h-full">
+    <div class="bg-white flex flex-col h-full w-full overflow-hidden" 
+         x-show="!isSmall ? showCode : (showCode && !showResult)" 
+         x-cloak>
         <div class="flex-1 overflow-auto">
             <textarea id="code_models">{% if object %}{{ object.code }}{% else %}{{first}}{% endif %}</textarea>
         </div>
     </div>
-    <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full overflow-auto hidden lg:flex" x-show="showResult" x-cloak>
+    <div class="bg-django-secondary/10 flex flex-col h-full w-full overflow-auto" 
+         x-show="!isSmall ? showResult : (showResult && !showCode)" 
+         x-cloak>
         <c-section title="Output" id="output-section" background="bg-django-secondary/20">
             <c-slot name="icon"><c-icons.terminal /></c-slot>
             <c-slot name="indicator">
@@ -93,14 +97,14 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                 <c-icons.plus />
             </c-slot>
             <div x-data="{
-                         selectedTCL: false,
-                         selectedDDL: false,
-                         selectedSELECT: true,
-                         selectedINSERT: true,
-                         selectedUPDATE: true,
-                         selectedDELETE: true,
-                         selectedREVERSE: false
-                         }"
+                     selectedTCL: false,
+                     selectedDDL: false,
+                     selectedSELECT: true,
+                     selectedINSERT: true,
+                     selectedUPDATE: true,
+                     selectedDELETE: true,
+                     selectedREVERSE: false
+                 }"
                  id="query-filters"
                  class="flex justify-between items-center p-2 gap-2 bg-slate-200 border-b border-django-primary/20"
                  >

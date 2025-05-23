@@ -14,6 +14,11 @@ function getCookie(name) {
     return cookieValue;
 }
 
+window.addEventListener('resize', function() {
+    const app_state = Alpine.$data(document.querySelector('body'));
+    app_state.isSmall = window.innerWidth < 1024;
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     var app_state = Alpine.$data(document.querySelector('body'));
     var csrftoken = getCookie('csrftoken');
@@ -170,6 +175,12 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please enter some code to run or select a template');
             return;
         }
+
+        // Show results panel when running code
+        if (app_state.isSmall) {
+            app_state.showCode = false;
+        }
+        app_state.showResult = true;
 
         var payload = JSON.stringify({
             code: models_editor.getValue(),
