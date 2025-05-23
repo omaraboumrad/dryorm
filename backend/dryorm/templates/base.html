@@ -31,6 +31,7 @@
             [x-cloak] { display: none !important; }
 
             .CodeMirror { font-size: 1rem; overflow: auto; }
+            .CodeMirror-gutter { background: #44b78b1a; color: #999; }
             .cm-string { color: #164 !important; font-weight: 500 !important;}
             .cm-number { color: #164 !important; }
             .cm-def { color: #0C4B33 !important; font-weight: bold; }
@@ -51,17 +52,12 @@
     <body class="bg-django-bg h-full flex flex-col" {% block data %}{% endblock %}>
         <c-nav>
             <c-slot name="links">
-                <div class="hidden lg:flex items-center gap-2">
-                    <a class="flex items-center gap-2 text-lg text-white hover:underline" href="{% url 'list' %}">Browse</a>
-                    /
-                    <a class="text-lg text-white hover:underline cursor-pointer" href="{% url 'about' %}">About</a>
-                </div>
-                <div class="flex lg:hidden items-center gap-4">
-                    <a class="flex items-center gap-2 text-lg text-white hover:underline" href="{% url 'list' %}">
-                        <c-icons.list />
+                <div class="flex flex-col lg:flex-row items-center gap-1">
+                    <a href="{% url 'list' %}" class="px-3 lg:py-4 rounded-sm font-medium text-white hover:underline w-full">
+                        <span class="inline">Browse</span>
                     </a>
-                    <a class="text-lg text-white hover:underline cursor-pointer" href="{% url 'about' %}">
-                        <c-icons.info />
+                    <a href="{% url 'about' %}" class="px-3 lg:py-4 rounded-sm font-medium text-white hover:underline w-full">
+                        <span class="inline">About</span>
                     </a>
                 </div>
             </c-slot>
