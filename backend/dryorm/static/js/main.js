@@ -16,7 +16,13 @@ function getCookie(name) {
 
 window.addEventListener('resize', function() {
     const app_state = Alpine.$data(document.querySelector('body'));
+    const wasSmall = app_state.isSmall;
     app_state.isSmall = window.innerWidth < 1024;
+    
+    // If transitioning to small screen and both tabs are open, keep code open
+    if (!wasSmall && app_state.isSmall && app_state.showCode && app_state.showResult) {
+        app_state.showResult = false;
+    }
 });
 
 document.addEventListener('DOMContentLoaded', function() {
