@@ -26,15 +26,17 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
     </div>
 
     <div class="flex items-center justify-between gap-2 p-2 bg-django-primary text-white ">
-        <div class="w-8 h-8 border-4 border-django-secondary border-t-transparent rounded-full animate-spin" x-show="loading"></div>
         <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm font-medium" id="save">
             <c-icons.share />
         </button>
         <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm font-medium" @click="showSettings = !showSettings">
             <c-icons.cog />
         </button>
-        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm disabled:opacity-40 disabled font-medium run">
-            <c-icons.play />
+        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm disabled:opacity-40 disabled font-medium run relative inline-flex items-center justify-center">
+            <div class="w-6 h-6 border-4 border-django-primary border-t-transparent rounded-full animate-spin" x-show="loading"></div>
+            <div x-show="!loading" x-cloak>
+                <c-icons.play />
+            </div>
         </button>
     </div>
 {% endblock %}
