@@ -199,6 +199,15 @@ document.addEventListener('DOMContentLoaded', function() {
         run.disabled = true;
     }
 
+
+    template_select.addEventListener('change', function() {
+        template_select.value = this.value;
+        var template_text = templates[this.value] || '';
+        models_editor.setValue(template_text);
+        models_editor.focus();
+        window.history.pushState('Dry ORM', 'Dry ORM', '/');
+    });
+
     show_template.addEventListener('click', function() {
         dialog.showModal();
     });
