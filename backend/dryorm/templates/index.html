@@ -10,15 +10,15 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 <div class="flex items-center w-full h-full justify-between">
     <div class="flex items-center h-full bg-django-primary gap-1 p-2 rounded-sm">
         <div
-                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold select-none"
-                :class="showCode ? 'text-django-text bg-django-secondary':'text-white'"
+                class="flex items-center gap-2 text-lg h-full px-8 border border-django-secondary cursor-pointer font-semibold select-none"
+                :class="showCode ? 'text-django-text bg-django-secondary':'text-django-secondary'"
                 @click="isSmall ? (showCode = true, showResult = false) : (!showResult ? null : showCode = !showCode)"
                 >
                 <span>Code</span>
         </div>
         <div
-                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold select-none"
-                :class="showResult ? 'text-django-text bg-django-secondary':'text-white'"
+                class="flex items-center gap-2 text-lg h-full px-8 border border-django-secondary cursor-pointer font-semibold select-none"
+                :class="showResult ? 'text-django-text bg-django-secondary':'text-django-secondary'"
                 @click="isSmall ? (showResult = true, showCode = false) : (!showCode ? null : showResult = !showResult)"
                 >
                 <span>Result</span>
