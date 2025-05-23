@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var csrftoken = getCookie('csrftoken');
     var runs = document.querySelectorAll('.run');
     var save = document.getElementById('save');
-    var mobileSave = document.getElementById('mobile-save');
     var job = document.getElementById('job');
     var loaders = document.querySelectorAll('.loader');
     var output = document.getElementById('output');
@@ -28,90 +27,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var templates = JSON.parse(document.getElementById('templates').textContent);
     var template_select = document.getElementById('template-select');
     var database_select = document.getElementById('database-select');
-    var ignore_cache = document.getElementById('ignore_cache');
+    var ignore_cache = document.getElementById('ignore-cache');
     var erd_link = document.getElementById('erd');
     var query_filters = document.getElementById('query-filters');
     var query_count_number = document.getElementById('query-count-number');
     const show_template = document.getElementById('show-template');
     const dialog = document.getElementById('html-dialog');
     const iframe = document.getElementById('html-iframe');
-    const codeTab = document.getElementById('code-tab');
-    const resultTab = document.getElementById('result-tab');
-    const codeColumn = document.getElementById('code_column');
-    const rightColumn = document.getElementById('right_column');
-    const mobileSettings = document.getElementById('mobile-settings');
-    const mobileSettingsPanel = document.getElementById('mobile-settings-panel');
-    const mobileIgnoreCache = document.getElementById('mobile-ignore-cache');
-    const mobileDatabaseSelect = document.getElementById('mobile-database-select');
-    const mobileTemplateSelect = document.getElementById('mobile-template-select');
 
-    // Mobile settings panel toggle
-    if (mobileSettings && mobileSettingsPanel) {
-        mobileSettings.addEventListener('click', function() {
-            mobileSettingsPanel.classList.toggle('hidden');
-        });
-    }
-
-    // Sync mobile controls with desktop controls
-    if (mobileIgnoreCache && ignore_cache) {
-        mobileIgnoreCache.addEventListener('change', function() {
-            ignore_cache.checked = this.checked;
-        });
-    }
-
-    if (mobileDatabaseSelect && database_select) {
-        mobileDatabaseSelect.addEventListener('change', function() {
-            database_select.value = this.value;
-        });
-    }
-
-    if (mobileTemplateSelect && template_select) {
-        mobileTemplateSelect.addEventListener('change', function() {
-            template_select.value = this.value;
-            var template_text = templates[this.value] || '';
-            models_editor.setValue(template_text);
-            models_editor.focus();
-            window.history.pushState('Dry ORM', 'Dry ORM', '/');
-        });
-    }
-
-    // Sync desktop controls with mobile controls
-    if (ignore_cache && mobileIgnoreCache) {
-        ignore_cache.addEventListener('change', function() {
-            mobileIgnoreCache.checked = this.checked;
-        });
-    }
-
-    if (database_select && mobileDatabaseSelect) {
-        database_select.addEventListener('change', function() {
-            mobileDatabaseSelect.value = this.value;
-        });
-    }
-
-    if (template_select && mobileTemplateSelect) {
-        template_select.addEventListener('change', function() {
-            mobileTemplateSelect.value = this.value;
-        });
-    }
-
-    // Mobile tab switching
-    codeTab.addEventListener('click', function() {
-        codeColumn.classList.remove('hidden');
-        rightColumn.classList.add('hidden');
-        codeTab.classList.add('bg-django-tertiary', 'hover:bg-django-secondary');
-        codeTab.classList.remove('text-white');
-        resultTab.classList.remove('bg-django-tertiary', 'hover:bg-django-secondary');
-        resultTab.classList.add('text-white');
-    });
-
-    resultTab.addEventListener('click', function() {
-        codeColumn.classList.add('hidden');
-        rightColumn.classList.remove('hidden');
-        resultTab.classList.add('bg-django-tertiary', 'hover:bg-django-secondary');
-        resultTab.classList.remove('text-white');
-        codeTab.classList.remove('bg-django-tertiary', 'hover:bg-django-secondary');
-        codeTab.classList.add('text-white');
-    });
 
     // Store raw data
     let rawOutput = '';
@@ -184,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     loaders.forEach(loader => loader.classList.add('hidden'));
                     run(true);
+
                     break;
                 case 'job-timeout':
                 case 'job-oom-killed':
@@ -289,7 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     save.addEventListener('click', handleSave);
-    mobileSave.addEventListener('click', handleSave);
 
     document.querySelectorAll('#query-filters a').forEach(link => {
         link.addEventListener('click', function(event) {

@@ -3,106 +3,64 @@
 {% load static %}
 
 {% block actions %}
-<!-- Large Screens -->
-<div class="hidden lg:flex items-center gap-2">
-    <label class="items-center space-x-1">
-        <span class="text-md text-white whitespace-nowrap">Private ?</span>
-        <input type="checkbox" id="isPrivate" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
-    </label>
-    <input type="text" id="name" placeholder="Name" class="flex bg-django-primary placeholder:text-white/80 text-white px-2 py-2 rounded-sm border border-django-tertiary focus:outline-none focus:border-django-secondary">
-    <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary text-black p-4 lg:p-2 rounded-sm font-medium" id="save">
-        <c-icons.save />
-        <span class="inline">Save</span>
-    </button>
-    <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium run">
-        <c-icons.play />
-        <span class="inline">Execute</span>
-    </button>
-</div>
+<div class="flex items-center w-full h-full justify-between">
+    <div class="flex items-center h-full bg-django-primary gap-1 pt-2 rounded-sm">
+        <div
+                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold"
+                :class="showCode ? 'text-django-text bg-django-secondary':'text-white'"
+                @click="showCode = !showCode"
+                >
+                <span>Code</span>
+        </div>
+        <div
+                class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold"
+                :class="showResult ? 'text-django-text bg-django-secondary':'text-white'"
+                @click="showResult = !showResult"
+                >
+                <span>Result</span>
+        </div>
+    </div>
 
-<!-- Small Screens -->
-<div class="flex lg:hidden items-center gap-2">
+    <div class="flex items-center justify-between gap-2 p-2 bg-django-primary text-white ">
         <div class="w-8 h-8 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden loader"></div>
-    <button class="bg-django-tertiary hover:bg-django-secondary p-4 lg:p-2 rounded-sm font-medium" id="mobile-save">
-        <c-icons.share />
-    </button>
-    <button class="bg-django-tertiary hover:bg-django-secondary p-4 lg:p-2 rounded-sm font-medium" id="mobile-settings">
-        <c-icons.cog />
-    </button>
-    <button class="flex items-center gap-1 bg-django-tertiary hover:bg-django-secondary disabled:opacity-40 text-black p-4 lg:p-2 rounded-sm disabled font-medium run">
-        <c-icons.play />
-    </button>
-</div>
-{% endblock %}
-
-{% block mobile %}
-<div class="flex lg:hidden items-center h-full bg-django-primary">
-    <div class="flex items-center gap-2 text-lg h-full px-8 border-r border-r-django-text bg-django-tertiary hover:bg-django-secondary cursor-pointer" id="code-tab">
-        <span class="font-semibold">Code</span>
+        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm font-medium" id="save">
+            <c-icons.share />
+        </button>
+        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm font-medium" @click="showSettings = !showSettings">
+            <c-icons.cog />
+        </button>
+        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm disabled:opacity-40 disabled font-medium run">
+            <c-icons.play />
+        </button>
     </div>
-    <div class="flex items-center gap-2 text-lg text-white h-full px-8 hover:shadow cursor-pointer" id="result-tab">
-        <span class="font-semibold">Result</span>
-    </div>
-</div>
 {% endblock %}
 
 {% block content %}
-<!-- Mobile Settings Panel -->
-<div id="mobile-settings-panel" class="hidden lg:hidden bg-white p-4 border-b border-django-primary/20">
-    <div class="flex flex-col gap-4">
-        <!-- ignore cache -->
-        <div class="flex items-center gap-2">
-            <input type="checkbox" id="mobile-ignore-cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
-            <label for="mobile-ignore-cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
-        </div>
-        <select id="mobile-database-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
-            {% for key, database in databases.items %}
-            <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
-            {% endfor %}
-        </select>
-        <select id="mobile-template-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
-            <option value="">Select a template</option>
-            {% for key, _ in templates.items %}
-            <option value="{{key}}">{{key}}</option>
-            {% endfor %}
-        </select>
+<div class="flex flex-col md:flex-row p-4 bg-white border-b border-django-primary/20 gap-2" x-show="showSettings" x-cloak>
+    <div class="flex items-center gap-2">
+        <input type="checkbox" id="ignore-cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
+        <label for="ignore-cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
     </div>
+    <select id="database-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+        {% for key, database in databases.items %}
+        <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
+        {% endfor %}
+    </select>
+    <select id="template-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
+        <option value="">Select a template</option>
+        {% for key, _ in templates.items %}
+        <option value="{{key}}">{{key}}</option>
+        {% endfor %}
+    </select>
 </div>
 
 <div id="main_grid" class="grid grid-cols-1 lg:grid-cols-2 gap-0.5 h-full">
-    <div id="code_column" class="bg-white flex flex-col h-full overflow-hidden">
-        <c-section title="Code" display="hidden lg:flex">
-            <c-slot name="icon"><c-icons.code /></c-slot>
-            <c-slot name="indicator">
-                    <div class="w-6 h-6 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden loader"></div>
-            </c-slot>
-            <c-slot name="right">
-                <div class="flex flex-col items-start sm:flex-row items-start gap-2">
-                    <!-- ignore cache -->
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" id="ignore_cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
-                        <label for="ignore_cache" class="text-md text-django-text whitespace-nowrap">no cache</label>
-                    </div>
-                    <select id="database-select" class="w-full px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
-                        {% for key, database in databases.items %}
-                        <option value="{{key}}" {% if object.database == key %}selected{% endif %}>{{database.description}}</option>
-                        {% endfor %}
-                    </select>
-
-                    <select id="template-select" class="w-full px-2 rounded-sm border border-django-primary/50 focus:outline-none focus:border-django-secondary">
-                        <option value="">Select a template</option>
-                        {% for key, _ in templates.items %}
-                        <option value="{{key}}">{{key}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </c-slot>
-        </c-section>
+    <div id="code_column" class="bg-white flex flex-col h-full overflow-hidden" x-show="showCode" x-cloak>
         <div class="flex-1 overflow-auto">
             <textarea id="code_models">{% if object %}{{ object.code }}{% else %}{{first}}{% endif %}</textarea>
         </div>
     </div>
-    <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full overflow-auto hidden lg:flex">
+    <div id="right_column" class="bg-django-secondary/10 flex flex-col h-full overflow-auto hidden lg:flex" x-show="showResult" x-cloak>
         <c-section title="Output" id="output-section" background="bg-django-secondary/20">
             <c-slot name="icon"><c-icons.terminal /></c-slot>
             <c-slot name="indicator">
