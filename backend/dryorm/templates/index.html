@@ -2,9 +2,13 @@
 
 {% load static %}
 
+{% block data %}
+x-data="{ showSettings: false, showCode: true, showResult: false, loading: false }"
+{% endblock %}
+
 {% block actions %}
 <div class="flex items-center w-full h-full justify-between">
-    <div class="flex items-center h-full bg-django-primary gap-1 pt-2 rounded-sm">
+    <div class="flex items-center h-full bg-django-primary gap-1 p-2 rounded-sm">
         <div
                 class="flex items-center gap-2 text-lg h-full px-8 cursor-pointer font-semibold"
                 :class="showCode ? 'text-django-text bg-django-secondary':'text-white'"
@@ -22,7 +26,7 @@
     </div>
 
     <div class="flex items-center justify-between gap-2 p-2 bg-django-primary text-white ">
-        <div class="w-8 h-8 border-4 border-django-secondary border-t-transparent rounded-full animate-spin hidden loader"></div>
+        <div class="w-8 h-8 border-4 border-django-secondary border-t-transparent rounded-full animate-spin" x-show="loading"></div>
         <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm font-medium" id="save">
             <c-icons.share />
         </button>

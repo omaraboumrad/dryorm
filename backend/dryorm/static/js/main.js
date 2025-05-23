@@ -15,11 +15,11 @@ function getCookie(name) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    var app_state = Alpine.$data(document.querySelector('body'));
     var csrftoken = getCookie('csrftoken');
-    var runs = document.querySelectorAll('.run');
+    var run_button = document.querySelector('.run');
     var save = document.getElementById('save');
     var job = document.getElementById('job');
-    var loaders = document.querySelectorAll('.loader');
     var output = document.getElementById('output');
     var queries = document.getElementById('queries');
     var name = document.getElementById('name');
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         handleReturnedData(data.result.returned);
                     }
 
-                    loaders.forEach(loader => loader.classList.add('hidden'));
+                    app_state.loading = false
                     run(true);
 
                     break;
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'job-overloaded':
                     output.textContent = data.error;
                     run(true)
-                    loaders.forEach(loader => loader.classList.add('hidden'));
+                    app_state.loading = false
                     break;
                 default:
                     console.warn('Unhandled event:', data);
@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function execute() {
+        app_state.loading = true;
         output.textContent = 'loading...';
         queries.innerHTML = 'loading...';
         query_count_number.textContent = '...';
@@ -177,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         socket.send(payload);
-        loaders.forEach(loader => loader.classList.remove('hidden'));
+
         run.disabled = true;
     }
 
@@ -185,11 +186,10 @@ document.addEventListener('DOMContentLoaded', function() {
         dialog.showModal();
     });
 
-    // --- Button Handlers ---
-    runs.forEach(run => run.addEventListener('click', function(){
+    run_button.addEventListener('click', function(){
         execute()
         models_editor.focus();
-    }));
+    });
 
     // Save functionality for both desktop and mobile
     function handleSave() {
@@ -223,9 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function run(state){
-        runs.forEach(run => {
-            run.disabled = !state
-        })
+        run_button.disabled = !state
     }
 
     function colorize(query, padding = 0){

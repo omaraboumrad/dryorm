@@ -48,7 +48,7 @@
             gtag('config', 'G-MY7ZELY01L');
         </script>
     </head>
-    <body class="bg-django-bg h-full flex flex-col" x-data="{ showSettings: false, showCode: true, showResult: false }">
+    <body class="bg-django-bg h-full flex flex-col" {% block data %}{% endblock %}>
         <c-nav>
             <c-slot name="links">
                 <div class="hidden lg:flex items-center gap-2">
@@ -67,9 +67,6 @@
             </c-slot>
             <c-slot name="actions">
                 {% block actions %}{% endblock %}
-            </c-slot>
-            <c-slot name="mobile">
-                {% block mobile %}{% endblock %}
             </c-slot>
         </c-nav>
 
