@@ -8,9 +8,43 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 
 {% block actions %}
 <div class="flex items-center justify-between gap-2 pr-2 bg-django-primary text-white h-full">
-    <button class="px-1 font-medium text-white" id="save">
-        <c-icons.share class="w-9 h-9 text-white"/>
-    </button>
+    <div>
+        <button class="px-1 font-medium text-white" onclick="document.getElementById('share-dialog').showModal()">
+            <c-icons.share class="w-9 h-9 text-white"/>
+        </button>
+        <dialog id="share-dialog" class="w-[400px] p-0 border-0 rounded-sm overflow-hidden shadow-lg">
+            <div class="flex justify-between items-center p-2 rounded-sm border-b border-django-primary/20">
+                <h3 class="text-django-text font-semibold">Share</h3>
+                <button 
+                    class="px-3 py-1 text-sm text-django-textrounded-sm"
+                    onclick="document.getElementById('share-dialog').close()">
+                    ✖
+                </button>
+            </div>
+            <div class="flex flex-col items-start gap-2 p-2">
+                <input type="text" 
+                       id="name"
+                       placeholder="optional title" 
+                       class="w-full p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-django-primary focus:border-transparent">
+                    <div class="w-full flex items-center gap-2 justify-between">
+                        <div class="flex items-center gap-2">
+                        <input type="checkbox" id="isPrivate"
+                            class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
+                        <label for="isPrivate" class="text-md text-django-text whitespace-nowrap">private?</label>
+                        </div>
+                        <div class="flex items-center gap-2 justify-end">
+                <button id="save-button"
+                    class="bg-django-primary text-white p-2 rounded-sm hover:bg-django-primary-dark transition-colors">
+                    Save
+                </button>
+                <button id="save-copy-button"
+                    class="bg-django-primary text-white p-2 rounded-sm hover:bg-django-primary-dark transition-colors">
+                    Save & Copy
+                </button>
+                    </div>
+            </div>
+        </dialog>
+    </div>
     <button class="px-1 font-medium" @click="showSettings = !showSettings">
         <c-icons.cog class="w-9 h-9 text-white"/>
     </button>
@@ -24,24 +58,24 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 {% endblock %}
 
 {% block content %}
-    <div class="flex lg:hidden items-center rounded-sm w-full">
-        <div
-                class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
-                :class="showCode ? 'bg-django-primary-light':'bg-django-primary-dark'"
-                @click="isSmall ? (showCode = true, showResult = false) : (!showResult ? null : showCode = !showCode)"
-                x-cloak
-                >
-                <span>Code</span>
-        </div>
-        <div
-                class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
-                :class="showResult ? 'bg-django-primary-light':'bg-django-primary-dark'"
-                @click="isSmall ? (showResult = true, showCode = false) : (!showCode ? null : showResult = !showResult)"
-                x-cloak
-                >
-                <span>Result</span>
-        </div>
+<div class="flex lg:hidden items-center rounded-sm w-full">
+    <div
+            class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
+            :class="showCode ? 'bg-django-primary-light':'bg-django-primary-dark'"
+            @click="isSmall ? (showCode = true, showResult = false) : (!showResult ? null : showCode = !showCode)"
+            x-cloak
+            >
+            <span>Code</span>
     </div>
+    <div
+            class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
+            :class="showResult ? 'bg-django-primary-light':'bg-django-primary-dark'"
+            @click="isSmall ? (showResult = true, showCode = false) : (!showCode ? null : showResult = !showResult)"
+            x-cloak
+            >
+            <span>Result</span>
+    </div>
+</div>
 
 <div class="flex flex-col md:flex-row p-4 bg-white border-b border-django-primary/20 gap-2" x-show="showSettings" x-cloak>
     <div class="flex items-center gap-2">

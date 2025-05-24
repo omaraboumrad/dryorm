@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var app_state = Alpine.$data(document.querySelector('body'));
     var csrftoken = getCookie('csrftoken');
     var run_button = document.querySelector('.run');
-    var save = document.getElementById('save');
     var job = document.getElementById('job');
     var output = document.getElementById('output');
     var queries = document.getElementById('queries');
@@ -49,7 +48,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const show_template = document.getElementById('show-template');
     const dialog = document.getElementById('html-dialog');
     const iframe = document.getElementById('html-iframe');
-
+    const shareDialog = document.getElementById('share-dialog');
+    const shareTitleInput = shareDialog.querySelector('input[type="text"]');
+    const saveButton = shareDialog.querySelector('button:nth-of-type(1)');
+    const saveAndCopyButton = shareDialog.querySelector('button:nth-of-type(2)');
 
     // Store raw data
     let rawOutput = '';
@@ -222,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Save functionality for both desktop and mobile
-    function handleSave() {
+    function handleSave(shouldCopy = false) {
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
         formData.append('name', name.value);
@@ -236,13 +238,19 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            const slug = data.replace(/"/g, '');
+            if (shouldCopy) {
+                navigator.clipboard.writeText(window.location.origin + '/' + slug);
+            }
             name.value = '';
             isPrivate.checked = false;
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
         });
     }
 
-    save.addEventListener('click', handleSave);
+    // Add click handlers for save buttons
+    document.getElementById('save-button').addEventListener('click', () => handleSave(false));
+    document.getElementById('save-copy-button').addEventListener('click', () => handleSave(true));
 
     document.querySelectorAll('#query-filters a').forEach(link => {
         link.addEventListener('click', function(event) {
