@@ -23,6 +23,10 @@ window.addEventListener('resize', function() {
     if (!wasSmall && app_state.isSmall && app_state.showCode && app_state.showResult) {
         app_state.showResult = false;
     }
+    // If transitioning to large screen and code is open, show results panel
+    else if (wasSmall && !app_state.isSmall && app_state.showCode) {
+        app_state.showResult = true;
+    }
 });
 
 document.addEventListener('DOMContentLoaded', function() {

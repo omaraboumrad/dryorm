@@ -7,19 +7,35 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 {% endblock %}
 
 {% block actions %}
-<div class="flex items-center w-full h-full justify-between">
-    <div class="flex items-center h-full bg-django-primary gap-1 p-2 rounded-sm">
+<div class="flex items-center justify-between gap-2 pr-2 bg-django-primary text-white h-full">
+    <button class="px-1 font-medium text-white" id="save">
+        <c-icons.share class="w-9 h-9 text-white"/>
+    </button>
+    <button class="px-1 font-medium" @click="showSettings = !showSettings">
+        <c-icons.cog class="w-9 h-9 text-white"/>
+    </button>
+    <button class="px-1 disabled:opacity-40 disabled font-medium run relative inline-flex items-center justify-center">
+        <div class="w-9 h-9 border-4 border-white border-t-transparent rounded-full animate-spin" x-show="loading"></div>
+        <div x-show="!loading" x-cloak>
+            <c-icons.play class="w-9 h-9 text-white"/>
+        </div>
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="flex lg:hidden items-center rounded-sm w-full">
         <div
-                class="flex items-center gap-2 text-lg h-full px-4 md:px-8 border border-django-secondary cursor-pointer font-semibold select-none"
-                :class="showCode ? 'text-django-text bg-django-secondary':'text-django-secondary'"
+                class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
+                :class="showCode ? 'bg-django-primary-light':'bg-django-primary-dark'"
                 @click="isSmall ? (showCode = true, showResult = false) : (!showResult ? null : showCode = !showCode)"
                 x-cloak
                 >
                 <span>Code</span>
         </div>
         <div
-                class="flex items-center gap-2 text-lg h-full px-4 md:px-8 border border-django-secondary cursor-pointer font-semibold select-none"
-                :class="showResult ? 'text-django-text bg-django-secondary':'text-django-secondary'"
+                class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
+                :class="showResult ? 'bg-django-primary-light':'bg-django-primary-dark'"
                 @click="isSmall ? (showResult = true, showCode = false) : (!showCode ? null : showResult = !showResult)"
                 x-cloak
                 >
@@ -27,23 +43,6 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
         </div>
     </div>
 
-    <div class="flex items-center justify-between gap-1 pr-2 bg-django-primary text-white h-full">
-        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm font-medium" id="save">
-            <c-icons.share />
-        </button>
-        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm font-medium" @click="showSettings = !showSettings">
-            <c-icons.cog />
-        </button>
-        <button class="p-4 bg-django-tertiary hover:bg-django-secondary rounded-sm disabled:opacity-40 disabled font-medium run relative inline-flex items-center justify-center">
-            <div class="w-6 h-6 border-4 border-django-primary border-t-transparent rounded-full animate-spin" x-show="loading"></div>
-            <div x-show="!loading" x-cloak>
-                <c-icons.play />
-            </div>
-        </button>
-    </div>
-{% endblock %}
-
-{% block content %}
 <div class="flex flex-col md:flex-row p-4 bg-white border-b border-django-primary/20 gap-2" x-show="showSettings" x-cloak>
     <div class="flex items-center gap-2">
         <input type="checkbox" id="ignore-cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">

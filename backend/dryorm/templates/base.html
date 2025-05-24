@@ -15,6 +15,8 @@
                         colors: {
                             'django': {
                                 'primary': '#0C4B33',
+                                'primary-light': '#1f7963',
+                                'primary-dark': '#0f4238',
                                 'secondary': '#44B78B',
                                 'tertiary': '#47bd90',
                                 'bg': '#F8F8F8',
@@ -52,12 +54,12 @@
     <body class="bg-django-bg h-full flex flex-col" {% block data %}{% endblock %}>
         <c-nav>
             <c-slot name="links">
-                <div class="flex flex-col lg:flex-row items-center gap-1">
-                    <a href="{% url 'list' %}" class="px-3 lg:py-4 rounded-sm font-medium text-white hover:underline w-full">
-                        <span class="inline">Browse</span>
+                <div class="flex items-center gap-1">
+                    <a href="{% url 'list' %}" class="px-1 rounded-sm font-medium text-white hover:underline w-full">
+                        <c-icons.list class="w-9 h-9 text-white"/>
                     </a>
-                    <a href="{% url 'about' %}" class="px-3 lg:py-4 rounded-sm font-medium text-white hover:underline w-full">
-                        <span class="inline">About</span>
+                    <a href="{% url 'about' %}" class="px-1 rounded-sm font-medium text-white hover:underline w-full">
+                        <c-icons.info class="w-9 h-9 text-white"/>
                     </a>
                 </div>
             </c-slot>

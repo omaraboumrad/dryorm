@@ -1,12 +1,13 @@
 {% load static %}
-<nav class="flex items-center bg-django-primary">
+<nav class="flex items-center justify-between bg-django-primary">
     <a class="flex items-center gap-3 p-4 text-4xl font-bold text-white whitespace-nowrap" href="{% url 'index' %}">
         <div class="hidden md:inline">
             <c-icons.dryorm size="8" color="text-white"/>
         </div>
-        <span class="hidden md:inline">DryORM</span>
-        <span class="md:hidden text-sm">Dry<br>ORM</span>
+        <span class="">DryORM</span>
     </a>
+    <div class="flex items-center gap-2" >
     {{ links }}
     {{ actions }}
+    </div>
 </nav>
