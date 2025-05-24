@@ -225,6 +225,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Save functionality for both desktop and mobile
     function handleSave(shouldCopy = false) {
+        const errorElement = document.getElementById('save-error');
+        errorElement.classList.add('hidden');
+        
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
         formData.append('name', name.value);
@@ -236,7 +239,12 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Save failed');
+            }
+            return response.json();
+        })
         .then(data => {
             const slug = data.replace(/"/g, '');
             if (shouldCopy) {
@@ -245,6 +253,13 @@ document.addEventListener('DOMContentLoaded', function() {
             name.value = '';
             isPrivate.checked = false;
             window.history.pushState('Dry ORM', 'Dry ORM', '/' + data);
+            // Close the dialog on success
+            document.getElementById('share-dialog').close();
+        })
+        .catch(error => {
+            console.error('Error saving:', error);
+            errorElement.textContent = 'Failed to save. Please try again.';
+            errorElement.classList.remove('hidden');
         });
     }
 
@@ -410,9 +425,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleReturnedData(returned) {
         const returnedContainer = document.getElementById('returned-data');
         returnedContainer.innerHTML = '';
-        
+
         if (!returned) return;
-        
+
         if (Array.isArray(returned)) {
             // Case 1: List of dictionaries
             const table = formatReturnedData(returned);

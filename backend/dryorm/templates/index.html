@@ -8,43 +8,9 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 
 {% block actions %}
 <div class="flex items-center justify-between gap-2 pr-2 bg-django-primary text-white h-full">
-    <div>
-        <button class="px-1 font-medium text-white" onclick="document.getElementById('share-dialog').showModal()">
-            <c-icons.share class="w-9 h-9 text-white"/>
-        </button>
-        <dialog id="share-dialog" class="w-[400px] p-0 border-0 rounded-sm overflow-hidden shadow-lg">
-            <div class="flex justify-between items-center p-2 rounded-sm border-b border-django-primary/20">
-                <h3 class="text-django-text font-semibold">Share</h3>
-                <button 
-                    class="px-3 py-1 text-sm text-django-textrounded-sm"
-                    onclick="document.getElementById('share-dialog').close()">
-                    ✖
-                </button>
-            </div>
-            <div class="flex flex-col items-start gap-2 p-2">
-                <input type="text" 
-                       id="name"
-                       placeholder="optional title" 
-                       class="w-full p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-django-primary focus:border-transparent">
-                    <div class="w-full flex items-center gap-2 justify-between">
-                        <div class="flex items-center gap-2">
-                        <input type="checkbox" id="isPrivate"
-                            class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
-                        <label for="isPrivate" class="text-md text-django-text whitespace-nowrap">private?</label>
-                        </div>
-                        <div class="flex items-center gap-2 justify-end">
-                <button id="save-button"
-                    class="bg-django-primary text-white p-2 rounded-sm hover:bg-django-primary-dark transition-colors">
-                    Save
-                </button>
-                <button id="save-copy-button"
-                    class="bg-django-primary text-white p-2 rounded-sm hover:bg-django-primary-dark transition-colors">
-                    Save & Copy
-                </button>
-                    </div>
-            </div>
-        </dialog>
-    </div>
+    <button class="px-1 font-medium text-white" onclick="document.getElementById('share-dialog').showModal()">
+        <c-icons.share class="w-9 h-9 text-white"/>
+    </button>
     <button class="px-1 font-medium" @click="showSettings = !showSettings">
         <c-icons.cog class="w-9 h-9 text-white"/>
     </button>
@@ -230,6 +196,41 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
     </button>
   </div>
   <iframe id="html-iframe" class="w-full h-[calc(100%-2.5rem)] border-0"></iframe>
+</dialog>
+
+<dialog id="share-dialog" class="w-[400px] p-0 border-0 rounded-sm overflow-hidden shadow-lg">
+    <div class="flex justify-between items-center p-2 rounded-sm border-b border-django-primary/20">
+        <h3 class="text-django-text font-semibold">Save & Share</h3>
+        <button 
+            class="px-3 py-1 text-sm text-django-textrounded-sm"
+            onclick="document.getElementById('share-dialog').close()">
+            ✖
+        </button>
+    </div>
+    <div class="flex flex-col items-start gap-2 p-2">
+        <input type="text" 
+               id="name"
+               autocomplete="new-text"
+               placeholder="optional title" 
+               class="w-full p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-django-primary focus:border-transparent">
+        <div id="save-error" class="hidden w-full p-2 text-red-600 bg-red-100 border border-red-300 rounded-sm"></div>
+        <div class="w-full flex items-center gap-2 justify-between">
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="isPrivate"
+                                       class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
+                <label for="isPrivate" class="text-md text-django-text whitespace-nowrap">private?</label>
+            </div>
+            <div class="flex items-center gap-2 justify-end">
+                <button id="save-button"
+                        class="bg-django-primary text-white p-2 rounded-sm hover:bg-django-primary-dark transition-colors">
+                    Save
+                </button>
+                <button id="save-copy-button"
+                        class="bg-django-primary text-white p-2 rounded-sm hover:bg-django-primary-dark transition-colors">
+                    Save & Copy
+                </button>
+            </div>
+        </div>
 </dialog>
 
 {{ templates|json_script:'templates' }}
