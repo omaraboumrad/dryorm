@@ -84,3 +84,25 @@ The following example shows a sample of how the container will be called:
   ]
 }
 ```
+
+## FAQ
+
+### Why?
+
+Quickly test and share executable ORM snippets.
+
+### Is this an official DSF project?
+
+No, this is a personal project. The theme is inspired by Django's official website.
+
+### Can I ...?
+
+Yes you can. (Most likely ^.^)
+
+### Future?
+
+No plans beyond what you see in the issues.
+
+### Does it support other ORMs?
+
+The implementation is framework/lib agnostic, as long as you provide the executor image, you can run your code against it. DryORM [historically supported multiple executors](<https://github.com/omaraboumrad/dryorm/tree/f153aabf68f8d500317d357ceaa558da61380b2a/executors>) (Django, SQLAlchemy, Peewee), however it's been modified to prioritize Django. Nothing's stopping you from building your own executor and using it. (See the specification above)
