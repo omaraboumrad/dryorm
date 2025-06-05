@@ -15,20 +15,21 @@ class WSConsumer(AsyncWebsocketConsumer):
         pass
 
     async def receive(self, text_data):
-        connection = redis.Redis('redis')
+        connection = redis.Redis("redis")
         queue = rq.Queue(connection=connection)
 
         payload = json.loads(text_data)
-        code = payload['code']
-        ignore_cache = payload.get('ignore_cache', False)
-        database = payload.get('database', 'sqlite')
+        code = payload["code"]
+        ignore_cache = payload.get("ignore_cache", False)
+        database = payload.get("database", "sqlite")
 
-        job = queue.enqueue(tasks.run_django, self.channel_name, code, database, ignore_cache)
+        job = queue.enqueue(
+            tasks.run_django, self.channel_name, code, database, ignore_cache
+        )
 
-        reply = json.dumps(dict(
-            event=constants.JOB_FIRED_EVENT,
-            key=job.key.decode('utf-8')
-        ))
+        reply = json.dumps(
+            dict(event=constants.JOB_FIRED_EVENT, key=job.key.decode("utf-8"))
+        )
 
         await self.send(text_data=reply)
 

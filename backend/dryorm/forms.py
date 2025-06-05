@@ -9,7 +9,7 @@ class SnippetForm(ModelForm):
         model = models.Snippet
 
         fields = [
-            'name',
-            'code',
-            'private',
+            "name",
+            "code",
+            "private",
         ]

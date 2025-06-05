@@ -26,9 +26,9 @@ def generate_mermaid_erd():
 
     # First pass: collect all referenced models from executor app
     for model in apps.get_models():
-        if model._meta.app_label != 'executor':
+        if model._meta.app_label != "executor":
             continue
-            
+
         for field in model._meta.get_fields():
             if field.auto_created and not field.concrete:
                 continue
@@ -43,7 +43,9 @@ def generate_mermaid_erd():
     # Second pass: generate diagram
     for model in apps.get_models():
         # Only include executor models and auth models if referenced
-        if model._meta.app_label != 'executor' and (model not in auth_models or not include_auth_models):
+        if model._meta.app_label != "executor" and (
+            model not in auth_models or not include_auth_models
+        ):
             continue
 
         model_name = model.__name__
@@ -63,7 +65,9 @@ def generate_mermaid_erd():
                     arrow = "||--||"
                 else:  # ManyToManyField
                     arrow = "}o--o{"
-                relationships.append(f"    {model_name} {arrow} {related_model} : {rel_label}")
+                relationships.append(
+                    f"    {model_name} {arrow} {related_model} : {rel_label}"
+                )
                 # Include the relationship field in the model definition
                 mermaid.append(f"        {field_type} {field.name}")
             else:
@@ -75,4 +79,6 @@ def generate_mermaid_erd():
 
 
 def kroki_encode(text):
-    return base64.urlsafe_b64encode(zlib.compress(text.encode('utf-8'), 9)).decode('utf-8')
+    return base64.urlsafe_b64encode(zlib.compress(text.encode("utf-8"), 9)).decode(
+        "utf-8"
+    )

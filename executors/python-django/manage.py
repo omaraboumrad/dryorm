@@ -9,6 +9,7 @@ import sys
 # happened in the snippet. This block will persist
 # the previous connection/queries.
 from django import db
+
 noop = lambda *args, **kwargs: None
 db._reset_queries = noop
 db._close_old_connections = noop

@@ -10,51 +10,49 @@ from . import databases
 
 class SnippetListView(generic.ListView):
     model = models.Snippet
-    template_name = 'snippet_list.html'
+    template_name = "snippet_list.html"
     paginate_by = 10
 
     def get_queryset(self):
-        return models.Snippet.objects.filter(
-            private=False
-        ).order_by('-created')
+        return models.Snippet.objects.filter(private=False).order_by("-created")
 
 
 class SnippetDetailView(generic.DetailView):
     model = models.Snippet
-    template_name = 'index.html'
+    template_name = "index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['databases'] = databases.DATABASES
-        context['templates'] = templates.TEMPLATES
-        context['first'] = templates.TEMPLATES['basic']
+        context["databases"] = databases.DATABASES
+        context["templates"] = templates.TEMPLATES
+        context["first"] = templates.TEMPLATES["basic"]
         return context
 
 
 class SnippetHomeView(generic.TemplateView):
-    template_name = 'index.html'
+    template_name = "index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['databases'] = databases.DATABASES
-        context['templates'] = templates.TEMPLATES
-        context['first'] = templates.TEMPLATES['basic']
+        context["databases"] = databases.DATABASES
+        context["templates"] = templates.TEMPLATES
+        context["first"] = templates.TEMPLATES["basic"]
         return context
 
 
 class AboutView(generic.TemplateView):
-    template_name = 'about.html'
+    template_name = "about.html"
 
 
 def save(request):
-    if request.method != 'POST':
-        return http.HttpResponseNotAllowed('nope!')
+    if request.method != "POST":
+        return http.HttpResponseNotAllowed("nope!")
 
     instance = models.Snippet.objects.create_snippet(
-        name=request.POST.get('name'),
-        code=request.POST.get('code'),
-        database=request.POST.get('database'),
-        private=request.POST.get('private') == 'true'
+        name=request.POST.get("name"),
+        code=request.POST.get("code"),
+        database=request.POST.get("database"),
+        private=request.POST.get("private") == "true",
     )
 
     return http.HttpResponse(f'"{instance.slug}"')

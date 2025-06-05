@@ -4,24 +4,24 @@ import os
 env = os.environ.get
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-SECRET_KEY = 'fgta52w%k0^(hxp_sf9nk!abb@d!--9f@q*1!%z5b^0==*jwzy'
+SECRET_KEY = "fgta52w%k0^(hxp_sf9nk!abb@d!--9f@q*1!%z5b^0==*jwzy"
 DEBUG = True
 
-ALLOWED_HOSTS = ['testserver']
+ALLOWED_HOSTS = ["testserver"]
 
 INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'executor',
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "executor",
 ]
 
 MIDDLEWARE = []
 
 
-with open(BASE_DIR / 'executor' / 'models.py') as f:
+with open(BASE_DIR / "executor" / "models.py") as f:
     contents = f.read()
-    if 'urlpatterns' in contents:
-        ROOT_URLCONF = 'executor.models'
+    if "urlpatterns" in contents:
+        ROOT_URLCONF = "executor.models"
 
 TEMPLATES = []
 
@@ -32,69 +32,67 @@ TEMPLATES = []
 #     }
 # }
 
-match env('DB_TYPE', 'sqlite'):
-    case 'sqlite':
+match env("DB_TYPE", "sqlite"):
+    case "sqlite":
         DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
             }
         }
-    case 'postgres':
+    case "postgres":
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.postgresql_psycopg2",
-                "NAME": env('DB_NAME'),
-                "USER": env('DB_USER'),
-                "PASSWORD": env('DB_PASSWORD'),
-                "HOST": env('SERVICE_DB_HOST'),
-                "PORT": env('SERVICE_DB_PORT'),
+                "NAME": env("DB_NAME"),
+                "USER": env("DB_USER"),
+                "PASSWORD": env("DB_PASSWORD"),
+                "HOST": env("SERVICE_DB_HOST"),
+                "PORT": env("SERVICE_DB_PORT"),
             },
         }
-    case 'mariadb':
+    case "mariadb":
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.mysql",
-                "NAME": env('DB_NAME'),
-                "USER": env('DB_USER'),
-                "PASSWORD": env('DB_PASSWORD'),
-                "HOST": env('SERVICE_DB_HOST'),
-                "PORT": env('SERVICE_DB_PORT'),
+                "NAME": env("DB_NAME"),
+                "USER": env("DB_USER"),
+                "PASSWORD": env("DB_PASSWORD"),
+                "HOST": env("SERVICE_DB_HOST"),
+                "PORT": env("SERVICE_DB_PORT"),
             },
         }
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
-
-

@@ -10,21 +10,21 @@ class Executor:
     max_containers: int
 
 
-JOB_FIRED_EVENT = 'job-fired'
-JOB_DONE_EVENT = 'job-done'
-JOB_INTERNAL_ERROR_EVENT = 'job-internal-error'
-JOB_CODE_ERROR_EVENT = 'job-code-error'
-JOB_IMAGE_NOT_FOUND_ERROR_EVENT = 'job-image-not-found-error'
-JOB_OOM_KILLED_EVENT = 'job-oom-killed'
-JOB_NETWORK_DISABLED_EVENT = 'job-network-disabled'
-JOB_TIMEOUT_EVENT = 'job-timeout'
-JOB_OVERLOADED = 'job-overloaded'
+JOB_FIRED_EVENT = "job-fired"
+JOB_DONE_EVENT = "job-done"
+JOB_INTERNAL_ERROR_EVENT = "job-internal-error"
+JOB_CODE_ERROR_EVENT = "job-code-error"
+JOB_IMAGE_NOT_FOUND_ERROR_EVENT = "job-image-not-found-error"
+JOB_OOM_KILLED_EVENT = "job-oom-killed"
+JOB_NETWORK_DISABLED_EVENT = "job-network-disabled"
+JOB_TIMEOUT_EVENT = "job-timeout"
+JOB_OVERLOADED = "job-overloaded"
 
 
 EXECUTOR = Executor(
-    image='dryorm-executor/python-django',
-    key='python/django',
-    memory='75m',
-    verbose='Python - Django',
+    image="dryorm-executor/python-django",
+    key="python/django",
+    memory="75m",
+    verbose="Python - Django",
     max_containers=10,
 )

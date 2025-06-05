@@ -1,4 +1,4 @@
-DRYORM_FEATURES = '''from django.db import models
+DRYORM_FEATURES = """from django.db import models
 
 # Tabulate and Faker are available.
 from tabulate import tabulate
@@ -30,9 +30,9 @@ def run():
     # Alternatively, you can just return a list of dicts
     # to render a default "Data" table.
     # return list(Person.objects.all().values())
-'''
+"""
 
-BASIC = '''from django.db import models
+BASIC = """from django.db import models
 
 class Person(models.Model):
     name = models.CharField(max_length=100)
@@ -43,9 +43,9 @@ class Person(models.Model):
 def run():
     instance = Person.objects.create(name='John Doe')
     print(f'Created: {instance}')
-'''
+"""
 
-BULK = '''from django.db import models
+BULK = """from django.db import models
 from django.db import models
 
 class Person(models.Model):
@@ -59,9 +59,9 @@ def run():
     ])
 
     return list(Person.objects.all().values())
-'''
+"""
 
-BULK_FAKE = '''from django.db import models
+BULK_FAKE = """from django.db import models
 from tabulate import tabulate
 from faker import Faker
 
@@ -87,7 +87,7 @@ def run():
         headers='keys',
         tablefmt='psql'
     ))
-'''
+"""
 
 CSV_IMPORT = '''\
 import csv
@@ -120,7 +120,7 @@ def run():
     ))
 '''
 
-BASIC_FK = '''from django.db import models
+BASIC_FK = """from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -142,9 +142,9 @@ def run():
     print('Products per category:')
     for category in Category.objects.prefetch_related('product_set'):
         print(f'{category.name}: {category.product_set.count()} products')
-'''
+"""
 
-SELF_FK = '''from django.db import models
+SELF_FK = """from django.db import models
 
 class Employee(models.Model):
     name = models.CharField(max_length=100)
@@ -162,9 +162,9 @@ def run():
     for employee in Employee.objects.select_related('manager'):
         manager_name = employee.manager.name if employee.manager else 'None'
         print(f'{employee.name} -> {manager_name}')
-'''
+"""
 
-USER_PROFILE = '''from django.db import models
+USER_PROFILE = """from django.db import models
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -181,9 +181,9 @@ def run():
     profile = UserProfile.objects.create(user=user, bio='Hello, I am John Doe!')
 
     print(f'User: {user.username}, Profile: {profile.bio}')
-'''
+"""
 
-TABULAR_OUTPUT = '''from django.db import models
+TABULAR_OUTPUT = """from django.db import models
 from django.db import models
 
 class Person(models.Model):
@@ -201,17 +201,17 @@ def run():
         'The Does': list(Person.objects.filter(name__endswith='Doe').values()),
         'The Smiths': list(Person.objects.filter(name__endswith='Smith').values()),
     }
-'''
+"""
 
 
 TEMPLATES = {
-    'dryorm features': DRYORM_FEATURES,
-    'basic': BASIC,
-    'bulk create': BULK,
-    'bulk fake': BULK_FAKE,
-    'csv import': CSV_IMPORT,
-    'basic fk': BASIC_FK,
-    'self fk': SELF_FK,
-    'user profile': USER_PROFILE,
-    'dryorm tabular output': TABULAR_OUTPUT
+    "dryorm features": DRYORM_FEATURES,
+    "basic": BASIC,
+    "bulk create": BULK,
+    "bulk fake": BULK_FAKE,
+    "csv import": CSV_IMPORT,
+    "basic fk": BASIC_FK,
+    "self fk": SELF_FK,
+    "user profile": USER_PROFILE,
+    "dryorm tabular output": TABULAR_OUTPUT,
 }

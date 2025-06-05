@@ -4,13 +4,13 @@ import redis
 
 
 class Command(BaseCommand):
-    help = 'executes the transaction'		
+    help = "executes the transaction"
 
     def handle(self, *args, **options):
-        connection = redis.Redis('redis', 6379)
+        connection = redis.Redis("redis", 6379)
         pubsub = connection.pubsub()
-        pubsub.subscribe('back-channel')
+        pubsub.subscribe("back-channel")
 
         for item in pubsub.listen():
             print(item)
-            #self.stdout.write(item.decode('utf-8'))
+            # self.stdout.write(item.decode('utf-8'))
