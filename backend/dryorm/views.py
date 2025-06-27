@@ -1,5 +1,7 @@
 from django.views import generic
 from django import http
+
+from django.db.models import Q
 from django.http import JsonResponse
 
 from . import models
@@ -14,7 +16,18 @@ class SnippetListView(generic.ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return models.Snippet.objects.filter(private=False).order_by("-created")
+        q = self.request.GET.get("q")
+        qs_filter = Q(private=False)
+
+        if q:
+            qs_filter &= Q(name__icontains=q) | Q(code__icontains=q)
+
+        return super().get_queryset().filter(qs_filter).order_by("-created")
+
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request") == "true":
+            return ["components/snippets.html"]
+        return [self.template_name]
 
 
 class SnippetDetailView(generic.DetailView):

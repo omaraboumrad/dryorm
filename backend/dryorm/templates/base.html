@@ -30,6 +30,18 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.css">
         <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}" />
         <style>
+
+            .htmx-indicator{
+                opacity:0;
+                transition: opacity 500ms ease-in;
+            }
+            .htmx-request .htmx-indicator{
+                opacity:1;
+            }
+            .htmx-request.htmx-indicator{
+                opacity:1;
+            }
+
             [x-cloak] { display: none !important; }
 
             .CodeMirror { font-size: 1rem; overflow: auto; }
@@ -75,5 +87,6 @@
         </div>
 
         <c-footer />
+        <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
     </body>
 </html>

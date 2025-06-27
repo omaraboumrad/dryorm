@@ -2,38 +2,25 @@
 {% block title %}Dry ORM - Feed{% endblock %}
 
 {% block content %}
-<main class="flex-grow px-4 py-3">
-    <ul>
-        {% for object in object_list %}
-        <li class="border-b border-gray-200">
-            <a href="{% url 'detail' object.slug %}" class="flex items-center px-2 py-2 hover:bg-django-secondary/10 transition">
-                <div class="flex flex-col flex-grow truncate">
-                    <div class="flex items-center gap-2">
-                        <span class="text-md font-semibold text-django-primary truncate">{{ object.name }}</span>
-                        <span class="text-sm text-gray-400">{{object.database}} • {{ object.created|timesince}}</span>
-                    </div>
-                    <code class="text-md text-gray-600 font-mono truncate">{{ object.code }}</code>
-                </div>
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
+<div class="flex items-center w-full px-1 py-1 bg-white border-b border-django-primary/20">
+    <div class="htmx-indicator w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+    <input type="text"
+           name="q"
+           placeholder="Search snippets..."
+           autocomplete="off"
+           autofocus
+           class="w-full px-3 py-2 focus:outline-none"
 
-    {% if is_paginated %}
-    <nav class="mt-4 flex justify-center space-x-2 text-sm text-django-primary">
-        {% if page_obj.has_previous %}
-            <a href="?page=1" class="px-2 py-1 border border-gray-300 rounded">First</a>
-            <a href="?page={{ page_obj.previous_page_number }}" class="px-2 py-1 border border-gray-300 rounded">Prev</a>
-        {% endif %}
+           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+           hx-get="{% url "list" %}"
+           hx-include="[name='q']"
+           hx-target="#main-section"
+           hx-swap="outerHTML"
+           hx-indicator=".htmx-indicator"
+           />
+</div>
 
-        <span class="px-3 py-1">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+<c-snippets />
 
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="px-2 py-1 border border-gray-300 rounded">Next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}" class="px-2 py-1 border border-gray-300 rounded">Last</a>
-        {% endif %}
-    </nav>
-    {% endif %}
-</main>
 {% endblock %}
 

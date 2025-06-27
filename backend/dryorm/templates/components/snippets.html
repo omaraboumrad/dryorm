@@ -1,0 +1,36 @@
+<main id="main-section" class="flex-grow px-4 py-3">
+    <ul>
+        {% for object in object_list %}
+            <li class="border-b border-gray-200">
+                <a href="{% url 'detail' object.slug %}"
+                   class="flex items-center px-2 py-2 hover:bg-django-secondary/10 transition">
+                    <div class="flex flex-col flex-grow truncate">
+                        <div class="flex items-center gap-2">
+                            <span class="text-md font-semibold text-django-primary truncate">{{ object.name }}</span>
+                            <span class="text-sm text-gray-400">{{ object.database }} • {{ object.created|timesince }}</span>
+                        </div>
+                        <code class="text-md text-gray-600 font-mono truncate">{{ object.code }}</code>
+                    </div>
+                </a>
+            </li>
+        {% empty %}
+            <li class="py-4 text-gray-500">No snippets found. 😔</li>
+        {% endfor %}
+    </ul>
+    {% if is_paginated %}
+        <nav class="mt-4 flex justify-center space-x-2 text-sm text-django-primary">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="px-2 py-1 border border-gray-300 rounded">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}"
+                   class="px-2 py-1 border border-gray-300 rounded">Prev</a>
+            {% endif %}
+            <span class="px-3 py-1">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}"
+                   class="px-2 py-1 border border-gray-300 rounded">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}"
+                   class="px-2 py-1 border border-gray-300 rounded">Last</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</main>
