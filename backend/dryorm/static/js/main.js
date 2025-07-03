@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // job.textContent = 'connected';
             run(true)
             // if url has "?run" then run the code
-            if (window.location.search.includes('?run')) {
+            if (window.location.search.includes('?run') || window.location.endsWith("/run")) {
                 execute();
             }
         }
