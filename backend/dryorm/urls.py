@@ -10,4 +10,5 @@ urlpatterns = [
     path("browse", views.list_snippets, name="list"),
     path("save", views.save, name="save"),
     path("<slug:slug>", views.detail, name="detail"),
+    path("<slug:slug>/run", views.detail, name="detail", kwargs={"run": True}),
 ]
