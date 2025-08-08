@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup copy buttons for static sections
     setupCopyButton(document.querySelector('[data-section="output-section"] .copy-indicator'), () => rawOutput);
     setupCopyButton(document.querySelector('[data-section="queries-section"] .copy-indicator'), () => {
-        return rawQueries.map(q => `${q.sql}`).join('\n\n');
+        return rawQueries.map(q => `-- ${q.time}s\n${q.sql}`).join('\n\n');
     });
 
     // --- Code Area ---
@@ -336,12 +336,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (filters.selectedREVERSE) filtered.reverse();
 
-        queries.innerHTML = filtered.length
-            ? filtered.map(q => {
-                const pad = q.time.toString().length + 2;
-                return `<span class="font-semibold text-django-primary/80">${q.time}s</span> ${colorize(q.sql, pad)}\n\n`;
-            }).join('')
-            : '<span class="p-2 text-lg">No queries</span>';
+        if (filtered.length === 0) {
+            queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
+            return;
+        }
+
+        // Clear the container and create individual collapsible query elements
+        queries.innerHTML = '';
+        
+        filtered.forEach((q, index) => {
+            const types = getTypes(q.sql);
+            const typeLabel = types.length > 0 ? types[0] : 'QUERY';
+            const previewLines = q.sql.split('\n').slice(0, 2);
+            const preview = previewLines.join(' ').substring(0, 60);
+            const hasMoreContent = q.sql.split('\n').length > 2 || q.sql.length > 60;
+            
+            // Create the query container
+            const queryDiv = document.createElement('div');
+            queryDiv.className = 'border-b border-django-primary/10 last:border-b-0 mb-2';
+            queryDiv.setAttribute('x-data', '{ expanded: false }');
+            
+            queryDiv.innerHTML = `
+                <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-django-secondary/10 rounded-sm" 
+                     @click="expanded = !expanded">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <span class="text-xs px-2 py-1 rounded bg-django-primary/20 text-django-primary font-medium whitespace-nowrap">${typeLabel}</span>
+                        <span class="font-semibold text-django-primary/80 whitespace-nowrap">${q.time}s</span>
+                        <span class="text-sm text-django-text truncate">${preview}${hasMoreContent ? '...' : ''}</span>
+                    </div>
+                    <div class="flex items-center ml-2">
+                        <svg x-show="!expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg x-show="expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </div>
+                </div>
+                <div x-show="expanded" x-cloak class="px-3 pb-3">
+                    <div class="bg-django-secondary/10 p-3 rounded border">
+                        <pre class="whitespace-pre-wrap text-sm font-mono text-django-text overflow-auto">${colorize(q.sql)}</pre>
+                    </div>
+                </div>
+            `;
+            
+            queries.appendChild(queryDiv);
+        });
     }
 
 
