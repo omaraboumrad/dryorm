@@ -1,7 +1,7 @@
 title = "DryORM Features"
 
 [[chapters]]
-title = "Getting Started - Basic Model Creation"
+title = "Basic Model Creation"
 content = """from django.db import models
 
 class Person(models.Model):
@@ -15,7 +15,7 @@ def run():
     print(f'Created: {instance}')"""
 
 [[chapters]]
-title = "Bulk Operations - Creating Multiple Records"
+title = "Bulk Create"
 content = """from django.db import models
 
 class Person(models.Model):
@@ -31,7 +31,7 @@ def run():
     return list(Person.objects.all().values())"""
 
 [[chapters]]
-title = "Working with Faker - Generate Test Data"
+title = "Faker - Test Data"
 content = """from django.db import models
 from tabulate import tabulate
 from faker import Faker
@@ -60,7 +60,7 @@ def run():
     ))"""
 
 [[chapters]]
-title = "CSV Import - Loading Data from Files"
+title = "CSV Import"
 content = """import csv
 from io import StringIO
 
@@ -90,7 +90,7 @@ def run():
     ))"""
 
 [[chapters]]
-title = "Foreign Keys - Basic Relationships"
+title = "Foreign Keys"
 content = """from django.db import models
 
 class Category(models.Model):
@@ -115,7 +115,7 @@ def run():
         print(f'{category.name}: {category.product_set.count()} products')"""
 
 [[chapters]]
-title = "Self-Referencing Foreign Keys"
+title = "Self Foreign Keys"
 content = """from django.db import models
 
 class Employee(models.Model):
@@ -136,7 +136,7 @@ def run():
         print(f'{employee.name} -> {manager_name}')"""
 
 [[chapters]]
-title = "One-to-One Relationships - User Profiles"
+title = "One-to-One Relationships"
 content = """from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -156,7 +156,7 @@ def run():
     print(f'User: {user.username}, Profile: {profile.bio}')"""
 
 [[chapters]]
-title = "Tabular Output - Organizing Results"
+title = "Tabular Output"
 content = """from django.db import models
 
 class Person(models.Model):
@@ -176,7 +176,7 @@ def run():
     }"""
 
 [[chapters]]
-title = "Complete Feature Showcase"
+title = "Complete Showcase"
 content = """from django.db import models
 
 # Tabulate and Faker are available.
