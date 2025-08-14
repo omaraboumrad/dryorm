@@ -12,16 +12,16 @@ ALLOWED_HOSTS = ["testserver"]
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "executor",
+    "app.apps.BaseAppConfig",
 ]
 
 MIDDLEWARE = []
 
 
-with open(BASE_DIR / "executor" / "models.py") as f:
+with open(BASE_DIR / "app" / "models.py") as f:
     contents = f.read()
     if "urlpatterns" in contents:
-        ROOT_URLCONF = "executor.models"
+        ROOT_URLCONF = "app.models"
 
 TEMPLATES = []
 

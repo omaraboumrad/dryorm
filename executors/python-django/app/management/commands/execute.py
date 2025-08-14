@@ -10,7 +10,7 @@ from django.db import connection
 import sqlparse
 from . import mermaid
 
-from executor.models import run
+from app.models import run
 
 
 def format_ddl(sql):
@@ -25,7 +25,7 @@ def collect_ddl():
     sqlmigrate_out = io.StringIO()
     with contextlib.redirect_stdout(sqlmigrate_out):
         try:
-            call_command("sqlmigrate", "executor", "0001", stdout=sqlmigrate_out)
+            call_command("sqlmigrate", "app", "0001", stdout=sqlmigrate_out)
         except CommandError:
             # Handle the case where the migration file does not exist
             return []
