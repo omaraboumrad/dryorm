@@ -1,13 +1,13 @@
-<main id="main-section" class="flex-grow px-4 py-3">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<main id="main-section" class="flex-1 overflow-y-auto">
+    <ul>
         {% for object in object_list %}
-            <div class="border border-gray-200 rounded-lg bg-white shadow-sm" x-data="{ expanded: false }">
-                <div class="flex items-center p-3 hover:bg-django-secondary/10 transition cursor-pointer" @click="expanded = !expanded">
+            <li class="border-b border-gray-200" x-data="{ expanded: false }">
+                <div class="flex items-center px-4 py-3 hover:bg-django-secondary/10 transition cursor-pointer" @click="expanded = !expanded">
                     <div class="flex flex-col flex-grow truncate">
                         <div class="flex items-center gap-2">
-                            <a href="{% url 'detail' object.slug %}" class="text-md font-semibold text-django-primary truncate hover:underline" @click.stop>{{ object.name }}</a>
+                            <a href="{% url 'detail' object.slug %}" class="text-lg font-semibold text-django-primary truncate hover:underline" @click.stop>{{ object.name }}</a>
+                            <span class="text-sm text-gray-400">{{ object.database }} • {{ object.created|timesince }}</span>
                         </div>
-                        <div class="text-sm text-gray-400 mt-1">{{ object.database }} • {{ object.created|timesince }}</div>
                     </div>
                     <div class="ml-2 p-1">
                         <svg class="w-4 h-4 transform transition-transform" :class="{ 'rotate-90': expanded }" fill="currentColor" viewBox="0 0 20 20">
@@ -30,11 +30,11 @@
                     </div>
                     {% endwith %}
                 </div>
-            </div>
+            </li>
         {% empty %}
-            <div class="col-span-2 py-8 text-center text-gray-500">No snippets found. 😔</div>
+            <li class="py-8 text-center text-gray-500">No snippets found. 😔</li>
         {% endfor %}
-    </div>
+    </ul>
     {% if is_paginated %}
         <nav class="mt-4 flex justify-center space-x-2 text-sm text-django-primary">
             {% if page_obj.has_previous %}

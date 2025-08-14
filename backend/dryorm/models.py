@@ -89,4 +89,8 @@ class Snippet(models.Model):
                 if class_match:
                     classes.append(class_match.group(1))
         
-        return {"imports": list(set(imports)), "classes": classes}
+        # Filter out django.db.models and ensure unique items
+        filtered_imports = [imp for imp in set(imports) if imp != "django.db.models"]
+        unique_classes = list(set(classes))
+        
+        return {"imports": filtered_imports, "classes": unique_classes}
