@@ -100,67 +100,96 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                 <c-icons.plus />
             </c-slot>
             <div x-data="{
-                     selectedTCL: false,
-                     selectedDDL: false,
-                     selectedSELECT: true,
-                     selectedINSERT: true,
-                     selectedUPDATE: true,
-                     selectedDELETE: true,
-                     selectedREVERSE: false
-                 }"
+                         selectedTCL: false,
+                         selectedDDL: false,
+                         selectedSELECT: true,
+                         selectedINSERT: true,
+                         selectedUPDATE: true,
+                         selectedDELETE: true,
+                         selectedREVERSE: false
+                         }"
                  id="query-filters"
-                 class="flex justify-between items-center p-2 gap-2 bg-slate-200 border-b border-django-primary/20"
+                 class="flex flex-row justify-between items-center p-2 border-b border-django-primary/20"
                  >
-                 <div>
-                     <a
-                             href="#"
+                 <div class="flex gap-2">
+                     <button
                              @click.prevent="selectedTCL = !selectedTCL"
-                             :class="selectedTCL ? 'bg-django-primary/80 text-white' : 'text-django-text'"
-                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             ><span class="hidden md:inline">TCL</span><span class="md:hidden">TCL</span><span class="count" data-type="TCL"></span></a>
-                     <a
-                             href="#"
+                             :class="selectedTCL ? 'bg-django-primary text-white' : 'text-django-text hover:bg-django-secondary/20'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">TCL</span>
+                             <span class="xl:hidden">T</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="TCL"></span>
+                     </button>
+
+                     <button
                              @click.prevent="selectedDDL = !selectedDDL"
-                             :class="selectedDDL ? 'bg-django-primary/80 text-white' : 'text-django-text'"
-                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             ><span class="hidden md:inline">DDL</span><span class="md:hidden">DDL</span><span class="count" data-type="DDL"></span></a>
+                             :class="selectedDDL ? 'bg-django-primary text-white' : 'text-django-text hover:bg-django-secondary/20'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">DDL</span>
+                             <span class="xl:hidden">D</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="DDL"></span>
+                     </button>
 
-                     <a
-                             href="#"
+                     <button
                              @click.prevent="selectedSELECT = !selectedSELECT"
-                             :class="selectedSELECT ? 'bg-django-primary/80 text-white' : 'text-django-text'"
-                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             ><span class="hidden md:inline">SELECT</span><span class="md:hidden">S</span><span class="count" data-type="SELECT"></span></a>
+                             :class="selectedSELECT ? 'bg-django-primary text-white' : 'text-django-text hover:bg-django-secondary/20'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">SELECT</span>
+                             <span class="xl:hidden">S</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="SELECT"></span>
+                     </button>
 
-                     <a
-                             href="#"
+                     <button
                              @click.prevent="selectedINSERT = !selectedINSERT"
-                             :class="selectedINSERT ? 'bg-django-primary/80 text-white' : 'text-django-text'"
-                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             ><span class="hidden md:inline">INSERT</span><span class="md:hidden">I</span><span class="count" data-type="INSERT"></span></a>
+                             :class="selectedINSERT ? 'bg-django-primary text-white' : 'text-django-text hover:bg-django-secondary/20'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">INSERT</span>
+                             <span class="xl:hidden">I</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="INSERT"></span>
+                     </button>
 
-                     <a
-                             href="#"
+                     <button
                              @click.prevent="selectedUPDATE = !selectedUPDATE"
-                             :class="selectedUPDATE ? 'bg-django-primary/80 text-white' : 'text-django-text'"
-                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             ><span class="hidden md:inline">UPDATE</span><span class="md:hidden">U</span><span class="count" data-type="UPDATE"></span></a>
+                             :class="selectedUPDATE ? 'bg-django-primary text-white' : 'text-django-text hover:bg-django-secondary/20'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">UPDATE</span>
+                             <span class="xl:hidden">U</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="UPDATE"></span>
+                     </button>
 
-                     <a
-                             href="#"
+                     <button
                              @click.prevent="selectedDELETE = !selectedDELETE"
-                             :class="selectedDELETE ? 'bg-django-primary/80 text-white' : 'text-django-text'"
-                             class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                             ><span class="hidden md:inline">DELETE</span><span class="md:hidden">D</span><span class="count" data-type="DELETE"></span></a>
-                    <a
-                            href="#"
-                            @click.prevent="selectedREVERSE = !selectedREVERSE"
-                            :class="selectedREVERSE ? 'bg-slate-500 text-white' : 'text-django-text'"
-                            class="font-medium text-django-text uppercase border border-slate-300 rounded-sm px-2"
-                            ><span class="hidden md:inline">REVERSE</span><span class="md:hidden">R</span></a>
+                             :class="selectedDELETE ? 'bg-django-primary text-white' : 'text-django-text hover:bg-django-secondary/20'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">DELETE</span>
+                             <span class="xl:hidden">D</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="DELETE"></span>
+                     </button>
+
+                     <button
+                             @click.prevent="selectedREVERSE = !selectedREVERSE"
+                             :class="selectedREVERSE ? 'bg-django-tertiary text-white' : 'text-django-text hover:bg-django-secondary/20'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <c-icons.reverse class="w-5 h-5" />
+                     </button>
                  </div>
-                <span id="query-count" class="text-django-primary font-semibold text-sm"><span class="hidden md:inline">Queries</span><span class="md:hidden">Q</span> (<span id="query-count-number">0</span>)</span>
-            </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+        <span id="query-count" class="inline-flex items-center px-2 py-1 text-sm font-semibold text-django-primary">
+            <span class="hidden md:inline">Queries</span>
+            <span class="md:hidden">Q</span>
+            <span class="ml-1">(<span id="query-count-number">0</span>)</span>
+        </span>
+    </div>
+</div>
+
 
             <div id="queries" class="p-2 text-django-text">No queries.</div>
         </c-section>

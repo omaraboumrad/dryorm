@@ -267,8 +267,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('save-button').addEventListener('click', () => handleSave(false));
     document.getElementById('save-copy-button').addEventListener('click', () => handleSave(true));
 
-    document.querySelectorAll('#query-filters a').forEach(link => {
-        link.addEventListener('click', function(event) {
+    document.querySelectorAll('#query-filters button').forEach(button => {
+        button.addEventListener('click', function(event) {
             event.preventDefault(); 
             const state = Alpine.$data(query_filters);
             fillQueries(queries, rawQueries, state);
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Update filter labels
-        document.querySelectorAll('#query-filters a .count').forEach(span => {
+        document.querySelectorAll('#query-filters button .count').forEach(span => {
             const type = span.getAttribute('data-type');
             const count = counts[type] || 0;
             span.textContent = count > 0 ? ` (${count})` : '';
