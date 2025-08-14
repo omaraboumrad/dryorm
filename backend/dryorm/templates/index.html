@@ -3,11 +3,14 @@
 {% load static %}
 
 {% block data %}
-x-data="{ showSettings: false, showCode: true, showResult: false, loading: false, isSmall: window.innerWidth < 1024 }"
+x-data="{ showSettings: false, showCode: true, showResult: false, loading: false, isSmall: window.innerWidth < 1024, showJourneyNav: false, currentJourney: null, currentChapter: null }"
 {% endblock %}
 
 {% block actions %}
 <div class="flex items-center justify-between gap-2 pr-2 bg-django-primary text-white h-full">
+    <button class="px-1 font-medium text-white" @click="showJourneyNav = !showJourneyNav">
+        <c-icons.list class="w-9 h-9 text-white"/>
+    </button>
     <button class="px-1 font-medium text-white" onclick="document.getElementById('share-dialog').showModal()">
         <c-icons.share class="w-9 h-9 text-white"/>
     </button>
@@ -24,6 +27,14 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 {% endblock %}
 
 {% block content %}
+<!-- Journey Navigation Panel -->
+<div class="bg-django-secondary/10 border-r border-django-primary/20 w-80 flex-shrink-0 overflow-y-auto" x-show="showJourneyNav" x-cloak>
+    <div id="journey-list" class="p-4">
+        <!-- Journey list will be populated by JavaScript -->
+    </div>
+</div>
+
+<div class="flex flex-col flex-1">
 <div class="flex lg:hidden items-center rounded-sm w-full">
     <div
             class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
@@ -195,6 +206,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
         </c-section>
     </div>
 </div>
+</div>
 
 <template id="returned_data_template">
     <div class="collapsible-section" x-data="{ open: false }">
@@ -263,6 +275,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 </dialog>
 
 {{ templates|json_script:'templates' }}
+{{ journeys|json_script:'journeys' }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
 

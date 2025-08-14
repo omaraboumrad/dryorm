@@ -1,5 +1,8 @@
 from django.views import generic
 from django import http
+import os
+import tomllib
+from django.conf import settings
 
 from django.db.models import Q
 from django.http import JsonResponse
@@ -39,6 +42,7 @@ class SnippetDetailView(generic.DetailView):
         context["databases"] = databases.DATABASES
         context["templates"] = templates.TEMPLATES
         context["first"] = templates.TEMPLATES["basic"]
+        context["journeys"] = load_journeys()
         return context
 
 
@@ -50,6 +54,7 @@ class SnippetHomeView(generic.TemplateView):
         context["databases"] = databases.DATABASES
         context["templates"] = templates.TEMPLATES
         context["first"] = templates.TEMPLATES["basic"]
+        context["journeys"] = load_journeys()
         return context
 
 
@@ -69,6 +74,43 @@ def save(request):
     )
 
     return http.HttpResponse(f'"{instance.slug}"')
+
+
+def load_journeys():
+    journeys_path = os.path.join(settings.BASE_DIR, 'data', 'journeys')
+    journeys = {}
+    
+    if os.path.exists(journeys_path):
+        for filename in os.listdir(journeys_path):
+            if filename.endswith('.toml'):
+                file_path = os.path.join(journeys_path, filename)
+                try:
+                    with open(file_path, 'rb') as f:
+                        journey_data = tomllib.load(f)
+                    
+                    slug = filename[:-5]  # Remove .toml extension
+                    journeys[slug] = {
+                        'title': journey_data.get('title', slug),
+                        'slug': slug,
+                        'chapters': journey_data.get('chapters', [])
+                    }
+                    
+                    # Add slugs to chapters for easier navigation
+                    for i, chapter in enumerate(journeys[slug]['chapters']):
+                        chapter['slug'] = f"chapter-{i+1}"
+                        
+                except Exception as e:
+                    print(f"Error loading journey {filename}: {e}")
+    
+    return journeys
+
+
+def journeys_api(request):
+    if request.method != "GET":
+        return http.HttpResponseNotAllowed(["GET"])
+    
+    journeys = load_journeys()
+    return JsonResponse(journeys)
 
 
 # Define templates as a dictionary

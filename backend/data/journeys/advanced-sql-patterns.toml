@@ -1,0 +1,578 @@
+title = "Advanced SQL Patterns with Django"
+
+[[chapters]]
+title = "Window functions and ranking"
+content = """
+from django.db import models
+from django.db.models import F, Q, Window, Avg, Sum, Count, Rank, DenseRank, RowNumber
+from django.db.models.functions import Lag, Lead, FirstValue, LastValue
+from decimal import Decimal
+from datetime import date, timedelta
+
+class Department(models.Model):
+    name = models.CharField(max_length=100)
+    budget = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    def __str__(self):
+        return self.name
+
+class Employee(models.Model):
+    name = models.CharField(max_length=100)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='employees')
+    salary = models.DecimalField(max_digits=10, decimal_places=2)
+    hire_date = models.DateField()
+    performance_score = models.DecimalField(max_digits=4, decimal_places=2, null=True)
+    
+    def __str__(self):
+        return self.name
+
+class Sale(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='sales')
+    sale_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    product_category = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return f"{self.employee.name} - ${self.amount}"
+
+def run():
+    # Create departments
+    engineering = Department.objects.create(name='Engineering', budget=Decimal('500000'))
+    sales_dept = Department.objects.create(name='Sales', budget=Decimal('300000'))
+    marketing = Department.objects.create(name='Marketing', budget=Decimal('200000'))
+    
+    # Create employees
+    alice = Employee.objects.create(
+        name='Alice Johnson', department=engineering, 
+        salary=Decimal('95000'), hire_date=date(2020, 1, 15),
+        performance_score=Decimal('4.2')
+    )
+    bob = Employee.objects.create(
+        name='Bob Smith', department=engineering,
+        salary=Decimal('88000'), hire_date=date(2019, 3, 10),
+        performance_score=Decimal('3.8')
+    )
+    carol = Employee.objects.create(
+        name='Carol Davis', department=sales_dept,
+        salary=Decimal('75000'), hire_date=date(2021, 6, 1),
+        performance_score=Decimal('4.5')
+    )
+    dave = Employee.objects.create(
+        name='Dave Wilson', department=sales_dept,
+        salary=Decimal('82000'), hire_date=date(2018, 11, 20),
+        performance_score=Decimal('4.0')
+    )
+    
+    # Create sales records
+    Sale.objects.create(employee=carol, sale_date=date(2024, 1, 15), amount=Decimal('15000'), product_category='Software')
+    Sale.objects.create(employee=carol, sale_date=date(2024, 2, 10), amount=Decimal('22000'), product_category='Hardware')
+    Sale.objects.create(employee=dave, sale_date=date(2024, 1, 20), amount=Decimal('18000'), product_category='Software')
+    Sale.objects.create(employee=dave, sale_date=date(2024, 2, 5), amount=Decimal('12000'), product_category='Services')
+    
+    # Window functions for ranking employees by salary within departments
+    employees_ranked = Employee.objects.annotate(
+        salary_rank=Window(
+            expression=Rank(),
+            partition_by=[F('department')],
+            order_by=F('salary').desc()
+        ),
+        salary_dense_rank=Window(
+            expression=DenseRank(),
+            partition_by=[F('department')],
+            order_by=F('salary').desc()
+        ),
+        row_number=Window(
+            expression=RowNumber(),
+            partition_by=[F('department')],
+            order_by=F('salary').desc()
+        ),
+        dept_avg_salary=Window(
+            expression=Avg('salary'),
+            partition_by=[F('department')]
+        )
+    ).select_related('department')
+    
+    print("Employee Salary Rankings by Department:")
+    for emp in employees_ranked.order_by('department__name', 'salary_rank'):
+        print(f"  {emp.name} ({emp.department.name}): ${emp.salary} - Rank: {emp.salary_rank}, Dept Avg: ${emp.dept_avg_salary:.2f}")
+    
+    # Running totals and lag/lead functions
+    sales_with_running_totals = Sale.objects.annotate(
+        running_total=Window(
+            expression=Sum('amount'),
+            partition_by=[F('employee')],
+            order_by=F('sale_date')
+        ),
+        previous_sale=Window(
+            expression=Lag('amount', offset=1),
+            partition_by=[F('employee')],
+            order_by=F('sale_date')
+        ),
+        next_sale=Window(
+            expression=Lead('amount', offset=1),
+            partition_by=[F('employee')],
+            order_by=F('sale_date')
+        )
+    ).select_related('employee')
+    
+    print("\\nSales with Running Totals:")
+    for sale in sales_with_running_totals.order_by('employee__name', 'sale_date'):
+        prev = f"${sale.previous_sale}" if sale.previous_sale else "N/A"
+        next_val = f"${sale.next_sale}" if sale.next_sale else "N/A"
+        print(f"  {sale.employee.name}: ${sale.amount} (Running: ${sale.running_total}) Prev: {prev}, Next: {next_val}")
+"""
+
+[[chapters]]
+title = "Complex subqueries and CTEs"
+content = """
+from django.db import models, connection
+from django.db.models import OuterRef, Subquery, Exists, Q, F, Count, Avg, Sum, Max
+from django.db.models.functions import Coalesce
+from decimal import Decimal
+from datetime import date, timedelta
+
+class Customer(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    registration_date = models.DateField()
+    is_premium = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.name
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    stock_quantity = models.PositiveIntegerField()
+    
+    def __str__(self):
+        return self.name
+
+class Order(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
+    order_date = models.DateField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled')
+    ], default='pending')
+    
+    def __str__(self):
+        return f"Order {self.id} - {self.customer.name}"
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=8, decimal_places=2)
+    
+    def __str__(self):
+        return f"{self.quantity}x {self.product.name}"
+
+def run():
+    # Create sample data
+    alice = Customer.objects.create(
+        name='Alice Johnson', email='alice@example.com',
+        registration_date=date(2023, 1, 15), is_premium=True
+    )
+    bob = Customer.objects.create(
+        name='Bob Smith', email='bob@example.com',
+        registration_date=date(2023, 6, 10), is_premium=False
+    )
+    charlie = Customer.objects.create(
+        name='Charlie Brown', email='charlie@example.com',
+        registration_date=date(2024, 1, 5), is_premium=True
+    )
+    
+    laptop = Product.objects.create(name='Gaming Laptop', category='Electronics', price=Decimal('1299.99'), stock_quantity=25)
+    mouse = Product.objects.create(name='Wireless Mouse', category='Electronics', price=Decimal('29.99'), stock_quantity=100)
+    book = Product.objects.create(name='Python Guide', category='Books', price=Decimal('39.99'), stock_quantity=50)
+    
+    # Create orders
+    order1 = Order.objects.create(
+        customer=alice, order_date=date(2024, 1, 10),
+        total_amount=Decimal('1329.98'), status='completed'
+    )
+    OrderItem.objects.create(order=order1, product=laptop, quantity=1, unit_price=laptop.price)
+    OrderItem.objects.create(order=order1, product=mouse, quantity=1, unit_price=mouse.price)
+    
+    order2 = Order.objects.create(
+        customer=bob, order_date=date(2024, 1, 15),
+        total_amount=Decimal('69.98'), status='completed'
+    )
+    OrderItem.objects.create(order=order2, product=mouse, quantity=1, unit_price=mouse.price)
+    OrderItem.objects.create(order=order2, product=book, quantity=1, unit_price=book.price)
+    
+    order3 = Order.objects.create(
+        customer=charlie, order_date=date(2024, 2, 1),
+        total_amount=Decimal('29.99'), status='pending'
+    )
+    OrderItem.objects.create(order=order3, product=mouse, quantity=1, unit_price=mouse.price)
+    
+    # 1. Find customers with their latest order total using subquery
+    latest_order_subquery = Order.objects.filter(
+        customer=OuterRef('pk')
+    ).order_by('-order_date')
+    
+    customers_with_latest_order = Customer.objects.annotate(
+        latest_order_total=Subquery(
+            latest_order_subquery.values('total_amount')[:1]
+        ),
+        latest_order_date=Subquery(
+            latest_order_subquery.values('order_date')[:1]
+        ),
+        total_orders=Count('orders')
+    )
+    
+    print("Customers with Latest Order Info:")
+    for customer in customers_with_latest_order:
+        latest_total = customer.latest_order_total or Decimal('0')
+        latest_date = customer.latest_order_date or "Never"
+        print(f"  {customer.name}: Latest order ${latest_total} on {latest_date} (Total orders: {customer.total_orders})")
+    
+    # 2. Find customers who have ordered products in multiple categories
+    customers_multi_category = Customer.objects.annotate(
+        distinct_categories=Count(
+            'orders__items__product__category',
+            distinct=True
+        )
+    ).filter(distinct_categories__gt=1)
+    
+    print("\\nCustomers who ordered from multiple categories:")
+    for customer in customers_multi_category:
+        print(f"  {customer.name}: {customer.distinct_categories} categories")
+    
+    # 3. Products with their best-selling month using window functions and subqueries
+    # This is a complex query that would typically use a CTE in raw SQL
+    
+    # First, let's find products that have been ordered
+    products_with_sales = Product.objects.filter(
+        Exists(OrderItem.objects.filter(product=OuterRef('pk')))
+    ).annotate(
+        total_quantity_sold=Coalesce(
+            Sum('orderitem__quantity'),
+            0
+        ),
+        total_revenue=Coalesce(
+            Sum(F('orderitem__quantity') * F('orderitem__unit_price')),
+            Decimal('0')
+        ),
+        unique_customers=Count('orderitem__order__customer', distinct=True)
+    )
+    
+    print("\\nProduct Sales Summary:")
+    for product in products_with_sales:
+        print(f"  {product.name}: {product.total_quantity_sold} units sold, "
+              f"${product.total_revenue} revenue, {product.unique_customers} unique customers")
+    
+    # 4. Complex filtering: Premium customers who have spent more than average
+    avg_spending_subquery = Customer.objects.aggregate(
+        avg_total=Avg('orders__total_amount')
+    )['avg_total'] or Decimal('0')
+    
+    high_value_premium_customers = Customer.objects.filter(
+        is_premium=True
+    ).annotate(
+        total_spent=Coalesce(Sum('orders__total_amount'), Decimal('0'))
+    ).filter(
+        total_spent__gt=avg_spending_subquery
+    )
+    
+    print(f"\\nPremium customers spending above average (${avg_spending_subquery:.2f}):")
+    for customer in high_value_premium_customers:
+        print(f"  {customer.name}: ${customer.total_spent}")
+    
+    # 5. Raw SQL with CTE for complex analysis (when Django ORM isn't enough)
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH monthly_sales AS (
+                SELECT 
+                    p.id,
+                    p.name,
+                    p.category,
+                    DATE_TRUNC('month', o.order_date) as month,
+                    SUM(oi.quantity) as monthly_quantity,
+                    SUM(oi.quantity * oi.unit_price) as monthly_revenue
+                FROM dryorm_product p
+                JOIN dryorm_orderitem oi ON p.id = oi.product_id
+                JOIN dryorm_order o ON oi.order_id = o.id
+                WHERE o.status = 'completed'
+                GROUP BY p.id, p.name, p.category, DATE_TRUNC('month', o.order_date)
+            ),
+            ranked_months AS (
+                SELECT 
+                    *,
+                    ROW_NUMBER() OVER (PARTITION BY id ORDER BY monthly_revenue DESC) as revenue_rank
+                FROM monthly_sales
+            )
+            SELECT name, category, month, monthly_quantity, monthly_revenue
+            FROM ranked_months 
+            WHERE revenue_rank = 1
+            ORDER BY monthly_revenue DESC;
+        """)
+        
+        print("\\nBest performing month for each product (Raw SQL with CTE):")
+        for row in cursor.fetchall():
+            name, category, month, quantity, revenue = row
+            print(f"  {name} ({category}): {month.strftime('%Y-%m')} - {quantity} units, ${revenue}")
+"""
+
+[[chapters]]
+title = "Performance optimization techniques"
+content = """
+from django.db import models, transaction
+from django.db.models import Prefetch, Count, Q, F, Case, When, Value
+from django.db.models.functions import Coalesce
+from django.core.cache import cache
+from django.utils import timezone
+from decimal import Decimal
+import time
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    bio = models.TextField(blank=True)
+    
+    def __str__(self):
+        return self.name
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True)
+    
+    def __str__(self):
+        return self.name
+
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='articles')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='articles')
+    published_date = models.DateTimeField()
+    view_count = models.PositiveIntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.title
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['published_date', 'is_featured']),
+            models.Index(fields=['category', 'published_date']),
+            models.Index(fields=['author', 'published_date']),
+        ]
+
+class Comment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
+    author_name = models.CharField(max_length=100)
+    content = models.TextField()
+    created_date = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Comment by {self.author_name}"
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['article', 'is_approved']),
+        ]
+
+def run():
+    # Create sample data efficiently using bulk_create
+    print("Creating sample data...")
+    
+    # Authors
+    authors_data = [
+        Author(name='John Doe', bio='Tech writer'),
+        Author(name='Jane Smith', bio='Science journalist'),
+        Author(name='Mike Johnson', bio='Business analyst'),
+    ]
+    Author.objects.bulk_create(authors_data)
+    
+    # Categories
+    categories_data = [
+        Category(name='Technology', slug='technology'),
+        Category(name='Science', slug='science'),
+        Category(name='Business', slug='business'),
+    ]
+    Category.objects.bulk_create(categories_data)
+    
+    # Get created objects
+    authors = list(Author.objects.all())
+    categories = list(Category.objects.all())
+    
+    # Create articles with bulk_create for better performance
+    articles_data = []
+    for i in range(10):
+        articles_data.append(Article(
+            title=f'Article {i+1}',
+            content=f'This is the content of article {i+1}. ' * 50,  # Longer content
+            author=authors[i % len(authors)],
+            category=categories[i % len(categories)],
+            published_date=timezone.now() - timezone.timedelta(days=i),
+            view_count=100 + i * 10,
+            is_featured=(i % 3 == 0)
+        ))
+    
+    Article.objects.bulk_create(articles_data)
+    
+    # Create comments
+    articles = list(Article.objects.all())
+    comments_data = []
+    for i, article in enumerate(articles[:5]):  # Comments on first 5 articles
+        for j in range(3):  # 3 comments per article
+            comments_data.append(Comment(
+                article=article,
+                author_name=f'Commenter {j+1}',
+                content=f'This is comment {j+1} on article {article.title}',
+                is_approved=(j % 2 == 0)
+            ))
+    
+    Comment.objects.bulk_create(comments_data)
+    
+    print("Sample data created!")
+    
+    # 1. INEFFICIENT: N+1 query problem
+    print("\\n=== INEFFICIENT APPROACH (N+1 queries) ===")
+    start_time = time.time()
+    
+    articles = Article.objects.all()[:5]
+    for article in articles:
+        # This causes additional queries for each article
+        print(f"{article.title} by {article.author.name} in {article.category.name}")
+        comment_count = article.comments.filter(is_approved=True).count()
+        print(f"  Approved comments: {comment_count}")
+    
+    inefficient_time = time.time() - start_time
+    print(f"Time taken: {inefficient_time:.4f} seconds")
+    
+    # 2. EFFICIENT: Using select_related and prefetch_related
+    print("\\n=== EFFICIENT APPROACH (Optimized queries) ===")
+    start_time = time.time()
+    
+    # select_related for ForeignKey relationships (JOINs)
+    # prefetch_related for reverse ForeignKey and ManyToMany relationships
+    articles_optimized = Article.objects.select_related(
+        'author', 'category'
+    ).prefetch_related(
+        Prefetch(
+            'comments',
+            queryset=Comment.objects.filter(is_approved=True),
+            to_attr='approved_comments'
+        )
+    )[:5]
+    
+    for article in articles_optimized:
+        print(f"{article.title} by {article.author.name} in {article.category.name}")
+        print(f"  Approved comments: {len(article.approved_comments)}")
+    
+    efficient_time = time.time() - start_time
+    print(f"Time taken: {efficient_time:.4f} seconds")
+    print(f"Performance improvement: {inefficient_time/efficient_time:.1f}x faster")
+    
+    # 3. Using annotations to avoid additional queries
+    print("\\n=== USING ANNOTATIONS ===")
+    start_time = time.time()
+    
+    articles_with_stats = Article.objects.select_related(
+        'author', 'category'
+    ).annotate(
+        approved_comment_count=Count(
+            'comments', 
+            filter=Q(comments__is_approved=True)
+        ),
+        total_comment_count=Count('comments'),
+        comment_approval_ratio=Case(
+            When(
+                total_comment_count=0,
+                then=Value(0.0)
+            ),
+            default=F('approved_comment_count') * 100.0 / F('total_comment_count'),
+            output_field=models.FloatField()
+        )
+    )[:5]
+    
+    for article in articles_with_stats:
+        print(f"{article.title} by {article.author.name}")
+        print(f"  Comments: {article.approved_comment_count}/{article.total_comment_count} approved "
+              f"({article.comment_approval_ratio:.1f}%)")
+    
+    annotation_time = time.time() - start_time
+    print(f"Time taken: {annotation_time:.4f} seconds")
+    
+    # 4. Bulk operations for updates
+    print("\\n=== BULK OPERATIONS ===")
+    start_time = time.time()
+    
+    # INEFFICIENT: Update each article individually
+    # for article in Article.objects.all():
+    #     article.view_count += 1
+    #     article.save()
+    
+    # EFFICIENT: Bulk update
+    Article.objects.all().update(
+        view_count=F('view_count') + 1
+    )
+    
+    bulk_time = time.time() - start_time
+    print(f"Bulk update time: {bulk_time:.4f} seconds")
+    
+    # 5. Query optimization with indexes and database functions
+    print("\\n=== OPTIMIZED COMPLEX QUERIES ===")
+    start_time = time.time()
+    
+    # Complex query with proper indexing
+    featured_articles_with_stats = Article.objects.filter(
+        is_featured=True,  # Uses index
+        published_date__gte=timezone.now() - timezone.timedelta(days=30)  # Uses index
+    ).select_related(
+        'author', 'category'
+    ).annotate(
+        approved_comments=Count('comments', filter=Q(comments__is_approved=True)),
+        engagement_score=F('view_count') + F('approved_comments') * 10
+    ).order_by('-engagement_score')
+    
+    print("Top featured articles by engagement:")
+    for article in featured_articles_with_stats:
+        print(f"  {article.title}: {article.engagement_score} engagement score")
+    
+    complex_time = time.time() - start_time
+    print(f"Complex query time: {complex_time:.4f} seconds")
+    
+    # 6. Caching strategies
+    print("\\n=== CACHING EXAMPLE ===")
+    cache_key = 'article_stats'
+    cached_stats = cache.get(cache_key)
+    
+    if cached_stats is None:
+        print("Cache miss - calculating stats...")
+        start_time = time.time()
+        
+        stats = {
+            'total_articles': Article.objects.count(),
+            'total_authors': Author.objects.count(),
+            'featured_count': Article.objects.filter(is_featured=True).count(),
+            'avg_views': Article.objects.aggregate(avg_views=models.Avg('view_count'))['avg_views']
+        }
+        
+        # Cache for 5 minutes
+        cache.set(cache_key, stats, 300)
+        cached_stats = stats
+        
+        calc_time = time.time() - start_time
+        print(f"Stats calculated in {calc_time:.4f} seconds")
+    else:
+        print("Cache hit - using cached stats")
+    
+    print(f"Stats: {cached_stats}")
+    
+    print("\\n=== PERFORMANCE TIPS DEMONSTRATED ===")
+    print("1. Use select_related() for ForeignKey relationships")
+    print("2. Use prefetch_related() for reverse FK and M2M relationships")
+    print("3. Use annotations to move calculations to the database")
+    print("4. Use bulk operations for mass updates")
+    print("5. Add proper database indexes")
+    print("6. Implement caching for expensive calculations")
+    print("7. Use Prefetch objects for complex prefetch scenarios")
+"""

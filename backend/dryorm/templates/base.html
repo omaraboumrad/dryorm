@@ -80,10 +80,8 @@
             </c-slot>
         </c-nav>
 
-        <div class="flex-1 overflow-hidden">
-            <div class="h-full overflow-y-auto">
-                {% block content %}{% endblock %}
-            </div>
+        <div class="flex flex-1 overflow-hidden">
+            {% block content %}{% endblock %}
         </div>
 
         <c-footer />

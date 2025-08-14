@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var name = document.getElementById('name');
     var isPrivate = document.getElementById('isPrivate');
     var templates = JSON.parse(document.getElementById('templates').textContent);
+    var journeys = JSON.parse(document.getElementById('journeys').textContent);
     var template_select = document.getElementById('template-select');
     var database_select = document.getElementById('database-select');
     var ignore_cache = document.getElementById('ignore-cache');
@@ -165,6 +166,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     connect();
     models_editor.focus();
+    
+    // Journey functionality
+    initializeJourneys();
+    handleJourneyNavigation();
 
 
     function execute() {
@@ -522,6 +527,130 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 return '';
             });
+        });
+    }
+
+    function initializeJourneys() {
+        const journeyList = document.getElementById('journey-list');
+        
+        Object.values(journeys).forEach(journey => {
+            const journeyDiv = document.createElement('div');
+            journeyDiv.className = 'mb-4';
+            journeyDiv.setAttribute('x-data', '{ expanded: false }');
+            
+            journeyDiv.innerHTML = `
+                <div class="p-3 cursor-pointer hover:bg-django-secondary/20 transition-colors journey-header" 
+                     data-journey-slug="${journey.slug}"
+                     @click="expanded = !expanded">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-django-text">${journey.title}</h3>
+                        <svg x-show="!expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg x-show="expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </div>
+                </div>
+                <div x-show="expanded" x-cloak class="chapter-list">
+                    ${journey.chapters.map((chapter, index) => `
+                        <div class="p-2 pl-6 hover:bg-django-secondary/20 cursor-pointer chapter-item"
+                             data-journey-slug="${journey.slug}"
+                             data-chapter-slug="${chapter.slug}"
+                             data-chapter-index="${index}">
+                            <span class="text-sm text-django-text">${chapter.title}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            journeyList.appendChild(journeyDiv);
+        });
+        
+        // Add click handlers for chapters
+        document.querySelectorAll('.chapter-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const journeySlug = this.dataset.journeySlug;
+                const chapterSlug = this.dataset.chapterSlug;
+                const chapterIndex = parseInt(this.dataset.chapterIndex);
+                
+                loadChapter(journeySlug, chapterIndex);
+                updateUrl(journeySlug, chapterSlug);
+                
+                // Visual feedback
+                document.querySelectorAll('.chapter-item').forEach(c => c.classList.remove('bg-django-secondary/30'));
+                this.classList.add('bg-django-secondary/30');
+            });
+        });
+    }
+    
+    function loadChapter(journeySlug, chapterIndex) {
+        const journey = journeys[journeySlug];
+        if (journey && journey.chapters[chapterIndex]) {
+            const chapter = journey.chapters[chapterIndex];
+            models_editor.setValue(chapter.content);
+            app_state.currentJourney = journeySlug;
+            app_state.currentChapter = chapterIndex;
+        }
+    }
+    
+    function updateUrl(journeySlug, chapterSlug) {
+        const newUrl = `/j/${journeySlug}#${chapterSlug}`;
+        window.history.pushState({ journeySlug, chapterSlug }, '', newUrl);
+    }
+    
+    function handleJourneyNavigation() {
+        // Handle initial URL if it's a journey URL
+        const path = window.location.pathname;
+        const hash = window.location.hash.substring(1);
+        
+        if (path.startsWith('/j/')) {
+            const journeySlug = path.split('/')[2];
+            app_state.showJourneyNav = true;
+            
+            if (hash) {
+                const chapterSlug = hash;
+                const journey = journeys[journeySlug];
+                if (journey) {
+                    const chapterIndex = journey.chapters.findIndex(c => c.slug === chapterSlug);
+                    if (chapterIndex >= 0) {
+                        loadChapter(journeySlug, chapterIndex);
+                        setTimeout(() => {
+                            const chapterElement = document.querySelector(`[data-chapter-slug="${chapterSlug}"]`);
+                            if (chapterElement) {
+                                chapterElement.classList.add('bg-django-secondary/30');
+                                // Expand the journey section using Alpine
+                                const journeyDiv = chapterElement.closest('[x-data]');
+                                if (journeyDiv) {
+                                    Alpine.store = Alpine.store || {};
+                                    const alpineData = Alpine.$data(journeyDiv);
+                                    alpineData.expanded = true;
+                                }
+                            }
+                        }, 100);
+                    }
+                }
+            } else {
+                // Load first chapter if no hash
+                const journey = journeys[journeySlug];
+                if (journey && journey.chapters.length > 0) {
+                    loadChapter(journeySlug, 0);
+                    updateUrl(journeySlug, journey.chapters[0].slug);
+                }
+            }
+        }
+        
+        // Handle browser back/forward
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.journeySlug) {
+                const journey = journeys[event.state.journeySlug];
+                if (journey) {
+                    const chapterIndex = journey.chapters.findIndex(c => c.slug === event.state.chapterSlug);
+                    if (chapterIndex >= 0) {
+                        loadChapter(event.state.journeySlug, chapterIndex);
+                    }
+                }
+            }
         });
     }
 });

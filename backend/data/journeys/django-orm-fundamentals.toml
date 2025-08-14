@@ -1,0 +1,334 @@
+title = "Django ORM Fundamentals"
+
+[[chapters]]
+title = "Creating and migrating models"
+content = """
+from django.db import models
+
+class Author(models.Model):
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField(unique=True)
+    birth_date = models.DateField()
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    isbn = models.CharField(max_length=13, unique=True)
+    publication_date = models.DateField()
+    pages = models.PositiveIntegerField()
+    
+    def __str__(self):
+        return self.title
+
+def run():
+    # Create an author
+    author = Author.objects.create(
+        first_name='George',
+        last_name='Orwell',
+        email='george@example.com',
+        birth_date='1903-06-25'
+    )
+    print(f'Created author: {author}')
+    
+    # Create a book
+    book = Book.objects.create(
+        title='1984',
+        author=author,
+        isbn='9780451524935',
+        publication_date='1949-06-08',
+        pages=328
+    )
+    print(f'Created book: {book}')
+"""
+
+[[chapters]]
+title = "Basic CRUD operations"
+content = """
+from django.db import models
+
+class Publisher(models.Model):
+    name = models.CharField(max_length=100)
+    address = models.TextField()
+    city = models.CharField(max_length=50)
+    founded = models.DateField()
+    
+    def __str__(self):
+        return self.name
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    in_stock = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.title
+
+def run():
+    # CREATE operations
+    publisher = Publisher.objects.create(
+        name='Penguin Books',
+        address='375 Hudson Street',
+        city='New York',
+        founded='1935-07-30'
+    )
+    
+    book1 = Book.objects.create(
+        title='The Great Gatsby',
+        publisher=publisher,
+        price=12.99,
+        in_stock=True
+    )
+    
+    book2 = Book.objects.create(
+        title='To Kill a Mockingbird',
+        publisher=publisher,
+        price=14.50,
+        in_stock=False
+    )
+    
+    print(f'Created: {book1.title} and {book2.title}')
+    
+    # READ operations
+    all_books = Book.objects.all()
+    print(f'All books: {list(all_books)}')
+    
+    in_stock_books = Book.objects.filter(in_stock=True)
+    print(f'In stock: {list(in_stock_books)}')
+    
+    expensive_books = Book.objects.filter(price__gt=13.00)
+    print(f'Expensive books: {list(expensive_books)}')
+    
+    # UPDATE operations
+    book1.price = 13.99
+    book1.save()
+    print(f'Updated {book1.title} price to ${book1.price}')
+    
+    # Bulk update
+    Book.objects.filter(in_stock=False).update(in_stock=True)
+    print('Updated all out-of-stock books to in-stock')
+    
+    # DELETE operations
+    Book.objects.filter(price__gt=14.00).delete()
+    print('Deleted expensive books')
+    
+    remaining = Book.objects.count()
+    print(f'Remaining books: {remaining}')
+"""
+
+[[chapters]]
+title = "Field lookups and filtering"
+content = """
+from django.db import models
+from datetime import date
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = "Categories"
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    created_date = models.DateField(auto_now_add=True)
+    description = models.TextField()
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.name
+
+def run():
+    # Create categories and products
+    electronics = Category.objects.create(name='Electronics', description='Electronic gadgets')
+    books = Category.objects.create(name='Books', description='Physical and digital books')
+    
+    Product.objects.create(name='Laptop Pro', category=electronics, price=1299.99, 
+                          description='High-performance laptop for professionals')
+    Product.objects.create(name='Wireless Mouse', category=electronics, price=29.99,
+                          description='Ergonomic wireless mouse')
+    Product.objects.create(name='Python Guide', category=books, price=39.99,
+                          description='Complete guide to Python programming')
+    Product.objects.create(name='Django Handbook', category=books, price=45.00,
+                          description='Master Django web development')
+    
+    print('=== EXACT LOOKUPS ===')
+    laptop = Product.objects.get(name='Laptop Pro')
+    print(f'Found: {laptop.name} - ${laptop.price}')
+    
+    print('\\n=== COMPARISON LOOKUPS ===')
+    expensive = Product.objects.filter(price__gt=50)
+    print(f'Expensive products: {list(expensive)}')
+    
+    affordable = Product.objects.filter(price__lte=40)
+    print(f'Affordable products: {list(affordable)}')
+    
+    price_range = Product.objects.filter(price__range=(30, 50))
+    print(f'Mid-range products: {list(price_range)}')
+    
+    print('\\n=== TEXT LOOKUPS ===')
+    python_products = Product.objects.filter(name__icontains='python')
+    print(f'Python-related: {list(python_products)}')
+    
+    starts_with_d = Product.objects.filter(name__startswith='D')
+    print(f'Names starting with D: {list(starts_with_d)}')
+    
+    ends_with_mouse = Product.objects.filter(name__iendswith='mouse')
+    print(f'Names ending with mouse: {list(ends_with_mouse)}')
+    
+    print('\\n=== RELATIONSHIP LOOKUPS ===')
+    electronics_products = Product.objects.filter(category__name='Electronics')
+    print(f'Electronics: {list(electronics_products)}')
+    
+    book_category_products = Product.objects.filter(category__name__icontains='book')
+    print(f'Book category products: {list(book_category_products)}')
+    
+    print('\\n=== DATE LOOKUPS ===')
+    today_products = Product.objects.filter(created_date=date.today())
+    print(f'Created today: {list(today_products)}')
+    
+    print('\\n=== NULL/EMPTY LOOKUPS ===')
+    no_description = Product.objects.filter(description__isnull=True)
+    print(f'No description: {list(no_description)}')
+    
+    empty_description = Product.objects.filter(description__exact='')
+    print(f'Empty description: {list(empty_description)}')
+    
+    print('\\n=== BOOLEAN LOOKUPS ===')
+    active_products = Product.objects.filter(is_active=True)
+    print(f'Active products: {list(active_products)}')
+    
+    print('\\n=== COMBINING FILTERS ===')
+    affordable_electronics = Product.objects.filter(
+        category__name='Electronics',
+        price__lt=100,
+        is_active=True
+    )
+    print(f'Affordable electronics: {list(affordable_electronics)}')
+"""
+
+[[chapters]]
+title = "Ordering and limiting results"
+content = """
+from django.db import models
+from decimal import Decimal
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    birth_year = models.IntegerField()
+    country = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return self.name
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    publication_year = models.IntegerField()
+    pages = models.IntegerField()
+    rating = models.DecimalField(max_digits=3, decimal_places=2)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    
+    def __str__(self):
+        return self.title
+
+def run():
+    # Create authors
+    tolkien = Author.objects.create(name='J.R.R. Tolkien', birth_year=1892, country='UK')
+    orwell = Author.objects.create(name='George Orwell', birth_year=1903, country='UK')
+    hemingway = Author.objects.create(name='Ernest Hemingway', birth_year=1899, country='USA')
+    
+    # Create books
+    Book.objects.create(title='The Hobbit', author=tolkien, publication_year=1937, 
+                       pages=310, rating=Decimal('4.7'), price=Decimal('12.99'))
+    Book.objects.create(title='The Fellowship of the Ring', author=tolkien, 
+                       publication_year=1954, pages=423, rating=Decimal('4.8'), price=Decimal('14.99'))
+    Book.objects.create(title='1984', author=orwell, publication_year=1949,
+                       pages=328, rating=Decimal('4.6'), price=Decimal('13.99'))
+    Book.objects.create(title='Animal Farm', author=orwell, publication_year=1945,
+                       pages=112, rating=Decimal('4.4'), price=Decimal('9.99'))
+    Book.objects.create(title='The Old Man and the Sea', author=hemingway, 
+                       publication_year=1952, pages=127, rating=Decimal('4.2'), price=Decimal('11.99'))
+    
+    print('=== BASIC ORDERING ===')
+    # Order by single field (ascending by default)
+    by_title = Book.objects.all().order_by('title')
+    print('Books by title:')
+    for book in by_title:
+        print(f'  {book.title}')
+    
+    # Order by field (descending)
+    by_rating_desc = Book.objects.all().order_by('-rating')
+    print('\\nBooks by rating (highest first):')
+    for book in by_rating_desc:
+        print(f'  {book.title}: {book.rating}')
+    
+    print('\\n=== MULTIPLE FIELD ORDERING ===')
+    # Order by multiple fields
+    by_author_then_year = Book.objects.all().order_by('author__name', 'publication_year')
+    print('Books by author, then publication year:')
+    for book in by_author_then_year:
+        print(f'  {book.author.name}: {book.title} ({book.publication_year})')
+    
+    # Mixed ascending/descending
+    by_year_desc_rating_asc = Book.objects.all().order_by('-publication_year', 'rating')
+    print('\\nBooks by year (newest first), then rating (lowest first):')
+    for book in by_year_desc_rating_asc:
+        print(f'  {book.title}: {book.publication_year}, rating {book.rating}')
+    
+    print('\\n=== LIMITING RESULTS ===')
+    # Get first 3 books
+    first_three = Book.objects.all().order_by('title')[:3]
+    print('First 3 books alphabetically:')
+    for book in first_three:
+        print(f'  {book.title}')
+    
+    # Get books 2-4 (slicing with offset)
+    middle_books = Book.objects.all().order_by('publication_year')[1:4]
+    print('\\nBooks 2-4 by publication year:')
+    for book in middle_books:
+        print(f'  {book.title} ({book.publication_year})')
+    
+    print('\\n=== FIRST/LAST/EARLIEST/LATEST ===')
+    # Get first book (alphabetically)
+    first_book = Book.objects.all().order_by('title').first()
+    print(f'First book alphabetically: {first_book.title if first_book else "None"}')
+    
+    # Get last book (alphabetically)  
+    last_book = Book.objects.all().order_by('title').last()
+    print(f'Last book alphabetically: {last_book.title if last_book else "None"}')
+    
+    # Get earliest published book
+    earliest = Book.objects.earliest('publication_year')
+    print(f'Earliest published: {earliest.title} ({earliest.publication_year})')
+    
+    # Get latest published book
+    latest = Book.objects.latest('publication_year')
+    print(f'Latest published: {latest.title} ({latest.publication_year})')
+    
+    print('\\n=== COMPLEX ORDERING ===')
+    # Order by related field
+    by_author_birth_year = Book.objects.all().order_by('author__birth_year', 'title')
+    print('Books by author birth year, then title:')
+    for book in by_author_birth_year:
+        print(f'  {book.author.name} ({book.author.birth_year}): {book.title}')
+    
+    # Order by calculated field (pages per dollar)
+    from django.db.models import F
+    best_value = Book.objects.annotate(
+        pages_per_dollar=F('pages') / F('price')
+    ).order_by('-pages_per_dollar')
+    
+    print('\\nBest value books (most pages per dollar):')
+    for book in best_value:
+        print(f'  {book.title}: {book.pages_per_dollar:.1f} pages/$')
+"""
