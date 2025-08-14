@@ -13,7 +13,7 @@ from . import databases
 class SnippetListView(generic.ListView):
     model = models.Snippet
     template_name = "snippet_list.html"
-    paginate_by = 10
+    paginate_by = 20
 
     def get_queryset(self):
         q = self.request.GET.get("q")

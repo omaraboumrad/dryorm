@@ -1,17 +1,35 @@
 <main id="main-section" class="flex-grow px-4 py-3">
     <ul>
         {% for object in object_list %}
-            <li class="border-b border-gray-200">
-                <a href="{% url 'detail' object.slug %}"
-                   class="flex items-center px-2 py-2 hover:bg-django-secondary/10 transition">
+            <li class="border-b border-gray-200" x-data="{ expanded: false }">
+                <div class="flex items-center px-2 py-2 hover:bg-django-secondary/10 transition cursor-pointer" @click="expanded = !expanded">
                     <div class="flex flex-col flex-grow truncate">
                         <div class="flex items-center gap-2">
-                            <span class="text-md font-semibold text-django-primary truncate">{{ object.name }}</span>
+                            <a href="{% url 'detail' object.slug %}" class="text-md font-semibold text-django-primary truncate hover:underline" @click.stop>{{ object.name }}</a>
                             <span class="text-sm text-gray-400">{{ object.database }} • {{ object.created|timesince }}</span>
                         </div>
-                        <code class="text-md text-gray-600 font-mono truncate">{{ object.code }}</code>
                     </div>
-                </a>
+                    <div class="ml-2 p-1">
+                        <svg class="w-4 h-4 transform transition-transform" :class="{ 'rotate-90': expanded }" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="px-4 py-2 border-t text-xs" x-show="expanded">
+                    {% with parsed=object.parse_code %}
+                    <div class="flex flex-wrap gap-1">
+                        {% for import in parsed.imports %}
+                            <span class="px-1.5 py-0.5 bg-django-secondary/20 text-django-text rounded-full">{{ import }}</span>
+                        {% endfor %}
+                        {% for class in parsed.classes %}
+                            <span class="px-1.5 py-0.5 bg-django-primary/20 text-django-primary rounded-full">{{ class }}</span>
+                        {% endfor %}
+                        {% if not parsed.imports and not parsed.classes %}
+                            <span class="text-gray-500">No imports or classes found</span>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                </div>
             </li>
         {% empty %}
             <li class="py-4 text-gray-500">No snippets found. 😔</li>
