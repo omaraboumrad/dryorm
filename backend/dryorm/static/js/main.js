@@ -27,6 +27,7 @@ window.addEventListener('resize', function() {
     else if (wasSmall && !app_state.isSmall && app_state.showCode) {
         app_state.showResult = true;
     }
+    
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -580,6 +581,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Visual feedback
                 document.querySelectorAll('.chapter-item').forEach(c => c.classList.remove('bg-django-secondary/30'));
                 this.classList.add('bg-django-secondary/30');
+                
+                // Focus code editor after chapter loads
+                setTimeout(() => {
+                    if (typeof models_editor !== 'undefined' && models_editor) {
+                        models_editor.focus();
+                    }
+                }, 100);
             });
         });
     }
@@ -636,6 +644,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (journey && journey.chapters.length > 0) {
                     loadChapter(journeySlug, 0);
                     updateUrl(journeySlug, journey.chapters[0].slug);
+                    
+                    // Expand the journey section and highlight first chapter
+                    setTimeout(() => {
+                        const firstChapterSlug = journey.chapters[0].slug;
+                        const chapterElement = document.querySelector(`[data-chapter-slug="${firstChapterSlug}"]`);
+                        if (chapterElement) {
+                            chapterElement.classList.add('bg-django-secondary/30');
+                            // Expand the journey section using Alpine
+                            const journeyDiv = chapterElement.closest('[x-data]');
+                            if (journeyDiv) {
+                                const alpineData = Alpine.$data(journeyDiv);
+                                alpineData.expanded = true;
+                            }
+                        }
+                    }, 100);
                 }
             }
         }

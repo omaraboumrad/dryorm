@@ -8,8 +8,8 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 
 {% block actions %}
 <div class="flex items-center justify-between gap-2 pr-2 bg-django-primary text-white h-full">
-    <button class="px-1 font-medium text-white" @click="showJourneyNav = !showJourneyNav">
-        <c-icons.list class="w-9 h-9 text-white"/>
+    <button class="px-1 font-medium text-white hidden lg:block" @click="showJourneyNav = !showJourneyNav">
+        <c-icons.journey class="w-9 h-9 text-white"/>
     </button>
     <button class="px-1 font-medium text-white" onclick="document.getElementById('share-dialog').showModal()">
         <c-icons.share class="w-9 h-9 text-white"/>
@@ -27,14 +27,18 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 {% endblock %}
 
 {% block content %}
-<!-- Journey Navigation Panel -->
-<div class="bg-django-secondary/10 border-r border-django-primary/20 w-80 flex-shrink-0 overflow-y-auto" x-show="showJourneyNav" x-cloak>
+<!-- Journey Navigation Panel - Desktop Only -->
+<div class="bg-django-secondary/10 border-r border-django-primary/20 w-80 flex-shrink-0 overflow-y-auto hidden lg:block" 
+     x-show="showJourneyNav" 
+     x-cloak>
     <div id="journey-list" class="p-4">
         <!-- Journey list will be populated by JavaScript -->
     </div>
 </div>
 
 <div class="flex flex-col flex-1">
+
+<!-- Mobile CODE/RESULT Tab Navigation -->
 <div class="flex lg:hidden items-center rounded-sm w-full">
     <div
             class="flex justify-center items-center text-lg w-full p-2 cursor-pointer font-semibold text-white select-none"
@@ -72,7 +76,9 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
     </select>
 </div>
 
-<div class="flex items-center gap-0.5 h-full">
+<!-- CODE/RESULT Panel Container -->
+<div class="flex items-center gap-0.5 flex-1 h-full overflow-hidden">
+    <!-- Code Panel -->
     <div class="bg-white flex flex-col h-full w-full overflow-hidden" 
          x-show="!isSmall ? showCode : (showCode && !showResult)" 
          x-cloak>
@@ -80,6 +86,8 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
             <textarea id="code_models">{% if object %}{{ object.code }}{% else %}{{first}}{% endif %}</textarea>
         </div>
     </div>
+    
+    <!-- Result Panel -->
     <div class="bg-django-secondary/10 flex flex-col h-full w-full overflow-auto" 
          x-show="!isSmall ? showResult : (showResult && !showCode)" 
          x-cloak>
