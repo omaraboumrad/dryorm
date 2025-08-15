@@ -1,0 +1,285 @@
+title = "Relationships"
+order = 2
+
+[[chapters]]
+title = "Foreign Keys"
+content = """from django.db import models
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+def run():
+    author = Author.objects.create(name='Tech Writer')
+
+    # Create posts
+    Post.objects.bulk_create([
+        Post(title='Django Basics', content='Learn Django fundamentals', author=author),
+        Post(title='Python Tips', content='Useful Python tricks', author=author),
+    ])
+
+    # Can also create posts from reverse relationship
+    author.post_set.create(
+        title='Advanced Django',
+        content='Deep dive into Django features'
+    )
+
+    # Access related objects
+    print(f'Posts by {author.name}:')
+    for post in author.post_set.all():
+        print(f'- {post.title}')
+
+    # Reverse foreign key lookup
+    post = Post.objects.first()
+    print(f'Post "{post.title}" by {post.author.name}')
+"""
+
+[[chapters]]
+title = "One To One"
+content = """from django.db import models
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+
+class AuthorProfile(models.Model):
+    author = models.OneToOneField(Author, on_delete=models.CASCADE, related_name='profile')
+    bio = models.TextField()
+    website = models.URLField(blank=True)
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+def run():
+    # Create author and profile
+    author = Author.objects.create(name='Jane Developer')
+    profile = AuthorProfile.objects.create(
+        author=author,
+        bio='Full-stack developer with 5 years experience',
+        website='https://janedev.com',
+    )
+
+    # Create a post
+    Post.objects.create(
+        author=author,
+        title='My Development Journey',
+        content='How I became a developer'
+    )
+
+    # Access one-to-one relationships
+    print('Author:', author.name)
+    print('Bio:', author.profile.bio)
+    print('Website:', author.profile.website)
+
+    # Access from profile to author
+    print(f'Profile belongs to:', profile.author.name)
+    print(f'Author has {author.post_set.count()} post(s)')
+"""
+
+[[chapters]]
+title = "Many To Many"
+content = """from django.db import models
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    tags = models.ManyToManyField(Tag, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+def run():
+    author = Author.objects.create(name='Tech Blogger')
+
+    # Create tags
+    django_tag = Tag.objects.create(name='django')
+    python_tag = Tag.objects.create(name='python')
+    web_tag = Tag.objects.create(name='web-development')
+
+    # Create post and assign tags
+    post1 = Post.objects.create(
+        author=author,
+        title='Django ORM Guide',
+        content='Comprehensive guide',
+    )
+    post1.tags.add(django_tag, python_tag, web_tag)
+
+    post2 = Post.objects.create(
+        author=author,
+        title='Python Best Practices',
+        content='Clean code tips'
+    )
+    post2.tags.add(python_tag)
+
+    # Query many-to-many relationships
+    print(f'Tags for "{post1.title}":')
+    for tag in post1.tags.all():
+        print(f'- {tag.name}')
+
+    print(f'Posts tagged with "python":')
+    for post in python_tag.post_set.all():
+        print(f'- {post.title}')
+
+    # Filter by many-to-many fields
+    django_posts = Post.objects.filter(tags__name='django')
+    print(f'Posts with Django tag:')
+    for post in django_posts:
+        print(f'- {post.title}')
+"""
+
+[[chapters]]
+title = "Model Inheritance"
+content = """from django.db import models
+from django.utils import timezone
+
+# Abstract Base Classes
+class TimestampedModel(models.Model):
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True  # This model won't create a database table
+
+class AuthoredModel(TimestampedModel):
+    author_name = models.CharField(max_length=100)
+    author_email = models.EmailField()
+
+    class Meta:
+        abstract = True
+
+# Multi-table Inheritance
+class Content(TimestampedModel):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+
+    def __str__(self):
+        return self.title
+
+class Post(Content):  # Inherits from Content (multi-table inheritance)
+    content = models.TextField()
+    view_count = models.PositiveIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
+
+    def get_type(self):
+        return "Blog Post"
+
+class Video(Content):  # Also inherits from Content
+    duration = models.PositiveIntegerField(help_text="Duration in seconds")
+    video_url = models.URLField()
+    thumbnail = models.URLField(blank=True)
+
+    def get_type(self):
+        return "Video"
+
+# Proxy Models
+class PublishedPostManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=True)
+
+class PublishedPost(Post):
+    objects = PublishedPostManager()
+
+    class Meta:
+        proxy = True  # Same database table as Post
+        ordering = ['-created_at']
+
+    def get_absolute_url(self):
+        return f'/posts/{self.slug}/'
+
+class DraftPost(Post):
+    objects = models.Manager()
+
+    class Meta:
+        proxy = True
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=False)
+
+# Using Abstract Base Classes
+class Comment(AuthoredModel):  # Inherits created_at, updated_at, author_name, author_email
+    content = models.TextField()
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    is_approved = models.BooleanField(default=False)
+
+class Review(AuthoredModel):  # Same fields as Comment but different purpose
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+    content = models.TextField()
+    video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='reviews')
+
+def run():
+    print('=== Multi-table Inheritance ===')
+    # Create content using inherited models
+    post = Post.objects.create(
+        title='Django Inheritance Guide',
+        slug='django-inheritance',
+        content='Learning about model inheritance in Django',
+        view_count=150,
+        is_published=True
+    )
+
+    video = Video.objects.create(
+        title='Django Video Tutorial',
+        slug='django-video',
+        duration=1800,  # 30 minutes
+        video_url='https://example.com/video.mp4'
+    )
+
+    print(f'Created post: {post.title} (Type: {post.get_type()})')
+    print(f'Created video: {video.title} (Type: {video.get_type()})')
+    print(f'Post created at: {post.created_at}')
+    print(f'Video created at: {video.created_at}')
+
+    # Both inherit from Content, so we can query all content
+    all_content = Content.objects.all()
+    print(f'All content items: {all_content.count()}')
+    for content in all_content:
+        print(f'- {content.title}')
+
+    print('=== Proxy Models ===')
+    # Create a draft post
+    draft = Post.objects.create(
+        title='Draft Article',
+        slug='draft-article',
+        content='This is a draft',
+        is_published=False
+    )
+
+    # Use proxy models with different managers
+    print(f'All posts: {Post.objects.count()}')
+    print(f'Published posts: {PublishedPost.objects.count()}')
+
+    # Proxy models have same data but can have different methods
+    published_post = PublishedPost.objects.first()
+    if published_post:
+        print(f'Published post URL: {published_post.get_absolute_url()}')
+
+    print('=== Abstract Base Classes ===')
+    # Create comment using inherited timestamp and author fields
+    comment = Comment.objects.create(
+        post=post,
+        author_name='John Reader',
+        author_email='john@example.com',
+        content='Great explanation of inheritance!',
+        is_approved=True
+    )
+
+    review = Review.objects.create(
+        video=video,
+        author_name='Jane Viewer',
+        author_email='jane@example.com',
+        content='Very helpful tutorial',
+        rating=5
+    )
+"""

@@ -7,44 +7,32 @@ content = """from django.db import models
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField()
-
-    def __str__(self):
-        return self.name
 
 def run():
     # Single object creation
-    author = Author.objects.create(name='Jane Doe', email='jane@example.com')
-    print(f'Created author: {author}')
-    print(f'Author email: {author.email}')
+    author = Author.objects.create(name='Jane Doe')
+    print('Created', author.name)
 
     # Bulk creation - more efficient for multiple objects
-    authors_data = [
-        Author(name='Alice Johnson', email='alice@example.com'),
-        Author(name='Bob Smith', email='bob@example.com'),
-        Author(name='Charlie Brown', email='charlie@example.com'),
-    ]
-
-    # bulk_create() creates multiple objects in a single database query
-    created_authors = Author.objects.bulk_create(authors_data)
-    print(f'Bulk created {len(created_authors)} authors')
-
-    # Show all authors
-    all_authors = Author.objects.all()
-    print(f'Total authors in database: {all_authors.count()}')
-    for author in all_authors:
-        print(f'- {author.name} ({author.email})')"""
+    authors = Author.objects.bulk_create([
+        Author(name='Alice Johnson'),
+        Author(name='Bob Smith'),
+        Author(name='Charlie Brown'),
+    ])
+    print('Bulk created:', len(authors), 'authors')
+"""
 
 [[chapters]]
-title = "Simple operations"
+title = "Simple model operations"
 content = """from django.db import models
-from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     bio = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    birth_date = models.DateTimeField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -52,12 +40,16 @@ class Author(models.Model):
 
 def run():
     # Create
-    author = Author.objects.create(name='Alice Johnson', email='alice@example.com')
-    print(f'Created: {author}')
+    author = Author.objects.create(
+        name='John Smith',
+        email='john@example.com',
+        bio='Experienced technical writer',
+        birth_date='1985-05-15'
+    )
 
     # Read
-    found_author = Author.objects.get(email='alice@example.com')
-    print(f'Found: {found_author}')
+    found_author = Author.objects.get(email='john@example.com')
+    print('Found:', found_author)
 
     # Update
     found_author.bio = 'Updated bio content'
@@ -67,104 +59,68 @@ def run():
     # Delete
     found_author.delete()
     print('Author deleted')
-    print(f'Total authors: {Author.objects.count()}')"""
-
-[[chapters]]
-title = "Field types and defaults"
-content = """from django.db import models
-from django.utils import timezone
-
-class Author(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    bio = models.TextField(blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
-
-def run():
-    author = Author.objects.create(
-        name='John Smith',
-        email='john@example.com',
-        bio='Experienced technical writer',
-        birth_date='1985-05-15'
-    )
-    print(f'Created: {author}')
-    print(f'Created at: {author.created_at}')
-    print(f'Bio: {author.bio}')"""
+    print('Total:', Author.objects.count())
+"""
 
 
 [[chapters]]
 title = "Filtering data"
 content = """from django.db import models
-from django.utils import timezone
 from datetime import timedelta
+from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
 
 def run():
-    # Create test data
     Author.objects.bulk_create([
-        Author(name='John Doe', email='john@example.com'),
-        Author(name='Jane Smith', email='jane@example.com', is_active=False),
-        Author(name='Bob Wilson', email='bob@example.com'),
+        Author(name='John Doe'),
+        Author(name='Jane Smith', is_active=False),
+        Author(name='Barry White'),
+        Author(name='John Wilson')
     ])
 
     # Basic filtering
     active_authors = Author.objects.filter(is_active=True)
-    print('Active authors:')
-    for author in active_authors:
-        print(f'- {author.name}')
+    print('Active:', active_authors)
 
-    # Field lookups
     john_authors = Author.objects.filter(name__icontains='john')
-    print('Authors with "john" in name:')
-    for author in john_authors:
-        print(f'- {author.name}')
+    print('Johns:', john_authors)
 
     # Multiple conditions
     recent_active = Author.objects.filter(
         is_active=True,
         created_at__gte=timezone.now() - timedelta(days=1)
     )
-    print(f'Recent active authors: {recent_active.count()}')"""
+    print(f'Recent active:', recent_active.count())
+"""
 
 [[chapters]]
 title = "Ordering and limiting Results"
 content = """from django.db import models
-from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     article_count = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.name
 
 def run():
     # Create test data
     Author.objects.bulk_create([
-        Author(name='Alice', email='alice@example.com', article_count=5),
-        Author(name='Bob', email='bob@example.com', article_count=12),
-        Author(name='Charlie', email='charlie@example.com', article_count=3),
-        Author(name='Diana', email='diana@example.com', article_count=8),
+        Author(name='Alice', article_count=5),
+        Author(name='Bob', article_count=12),
+        Author(name='Bobby', article_count=3),
+        Author(name='Diana', article_count=8),
     ])
 
     # Order by article count (descending)
     top_authors = Author.objects.order_by('-article_count')
-    print('Authors ordered by article count (highest first):')
+    print('Top authors by article count:')
     for author in top_authors:
         print(f'- {author.name}: {author.article_count} articles')
 
@@ -178,17 +134,16 @@ def run():
     top_2_authors = Author.objects.order_by('-article_count')[:2]
     print('Top 2 authors by article count:')
     for author in top_2_authors:
-        print(f'- {author.name}: {author.article_count} articles')"""
+        print(f'- {author.name}: {author.article_count} articles')
+"""
 
 [[chapters]]
 title = "Querying with Q"
 content = """from django.db import models
 from django.db.models import Q
-from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
     article_count = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -196,11 +151,11 @@ class Author(models.Model):
         return self.name
 
 def run():
-    # Create test data
     Author.objects.bulk_create([
-        Author(name='Active Writer', email='active@example.com', article_count=10, is_active=True),
-        Author(name='Inactive Expert', email='inactive@example.com', article_count=50, is_active=False),
-        Author(name='New Author', email='new@example.com', article_count=2, is_active=True),
+        Author(name='Active Writer', article_count=10, is_active=True),
+        Author(name='Inactive Expert', article_count=50, is_active=False),
+        Author(name='New Active Author', article_count=22, is_active=False),
+        Author(name='New Author', article_count=2, is_active=False),
     ])
 
     # OR condition: active authors OR authors with many articles
@@ -221,172 +176,10 @@ def run():
 
     # Complex nested conditions
     complex_query = Author.objects.filter(
-        Q(is_active=True) & (Q(article_count__gte=10) | Q(name__icontains='expert'))
+        Q(is_active=True) & (
+            Q(article_count__gte=10) | Q(name__icontains='expert')
+        )
     )
     print('Complex query (active AND (10+ articles OR "expert" in name)):')
     for author in complex_query:
         print(f'- {author.name}')"""
-
-[[chapters]]
-title = "Relationships - ForeignKey"
-content = """from django.db import models
-from django.utils import timezone
-
-class Author(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-
-    def __str__(self):
-        return self.name
-
-class Category(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
-
-class Post(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='posts')
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.title
-
-def run():
-    # Create related objects
-    author = Author.objects.create(name='Tech Writer', email='tech@example.com')
-    category = Category.objects.create(name='Technology', description='Tech-related posts')
-
-    # Create posts
-    Post.objects.bulk_create([
-        Post(title='Django Basics', content='Learn Django fundamentals', author=author, category=category),
-        Post(title='Python Tips', content='Useful Python tricks', author=author, category=category),
-    ])
-
-    # Access related objects
-    print(f'Posts by {author.name}:')
-    for post in author.posts.all():
-        print(f'- {post.title}')
-
-    print(f'Posts in {category.name} category:')
-    for post in category.posts.all():
-        print(f'- {post.title}')
-
-    # Reverse foreign key lookup
-    post = Post.objects.first()
-    print(f'Post "{post.title}" by {post.author.name} in {post.category.name}')"""
-
-[[chapters]]
-title = "Relationships - ManyToMany"
-content = """from django.db import models
-from django.utils import timezone
-
-class Author(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-
-    def __str__(self):
-        return self.name
-
-class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
-
-class Post(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
-    tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.title
-
-def run():
-    # Create objects
-    author = Author.objects.create(name='Tech Blogger', email='blogger@example.com')
-
-    # Create tags
-    django_tag = Tag.objects.create(name='django')
-    python_tag = Tag.objects.create(name='python')
-    web_tag = Tag.objects.create(name='web-development')
-
-    # Create post and assign tags
-    post1 = Post.objects.create(title='Django ORM Guide', content='Comprehensive guide', author=author)
-    post1.tags.add(django_tag, python_tag, web_tag)
-
-    post2 = Post.objects.create(title='Python Best Practices', content='Clean code tips', author=author)
-    post2.tags.add(python_tag)
-
-    # Query many-to-many relationships
-    print(f'Tags for "{post1.title}":')
-    for tag in post1.tags.all():
-        print(f'- {tag.name}')
-
-    print(f'Posts tagged with "python":')
-    for post in python_tag.posts.all():
-        print(f'- {post.title}')
-
-    # Filter by many-to-many fields
-    django_posts = Post.objects.filter(tags__name='django')
-    print(f'Posts with Django tag:')
-    for post in django_posts:
-        print(f'- {post.title}')"""
-
-[[chapters]]
-title = "Relationships - OneToOne"
-content = """from django.db import models
-from django.utils import timezone
-
-class Author(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-
-    def __str__(self):
-        return self.name
-
-class AuthorProfile(models.Model):
-    author = models.OneToOneField(Author, on_delete=models.CASCADE, related_name='profile')
-    bio = models.TextField()
-    website = models.URLField(blank=True)
-    twitter_handle = models.CharField(max_length=50, blank=True)
-
-    def __str__(self):
-        return f'{self.author.name} Profile'
-
-class Post(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.title
-
-def run():
-    # Create author and profile
-    author = Author.objects.create(name='Jane Developer', email='jane@example.com')
-    profile = AuthorProfile.objects.create(
-        author=author,
-        bio='Full-stack developer with 5 years experience',
-        website='https://janedev.com',
-        twitter_handle='@janedev'
-    )
-
-    # Create a post
-    Post.objects.create(title='My Development Journey', content='How I became a developer', author=author)
-
-    # Access one-to-one relationships
-    print(f'Author: {author.name}')
-    print(f'Bio: {author.profile.bio}')
-    print(f'Website: {author.profile.website}')
-
-    # Access from profile to author
-    print(f'Profile belongs to: {profile.author.name}')
-    print(f'Author has {author.posts.count()} post(s)')"""
