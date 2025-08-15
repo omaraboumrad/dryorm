@@ -1,0 +1,174 @@
+title = "Django ORM Fundamentals"
+order = 1
+
+[[chapters]]
+title = "Basic Model Creation"
+content = """from django.db import models
+
+class Person(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+def run():
+    instance = Person.objects.create(name='John Doe')
+    print(f'Created: {instance}')"""
+
+[[chapters]]
+title = "Create and Read Objects"
+content = """from django.db import models
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.title
+
+def run():
+    Book.objects.create(title='Django Unleashed')
+    book = Book.objects.get(title='Django Unleashed')
+    print(f'Found: {book}')"""
+
+[[chapters]]
+title = "Filtering and Ordering"
+content = """from django.db import models
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+
+def run():
+    Product.objects.bulk_create([
+        Product(name='Laptop', price=1000),
+        Product(name='Mouse', price=20),
+        Product(name='Keyboard', price=50),
+    ])
+    products = Product.objects.filter(price__gte=50).order_by('-price')
+    print(list(products.values()))"""
+
+[[chapters]]
+title = "Complex Queries with Q Objects"
+content = """from django.db import models
+from django.db.models import Q
+
+class Movie(models.Model):
+    title = models.CharField(max_length=100)
+    year = models.PositiveIntegerField()
+
+def run():
+    Movie.objects.bulk_create([
+        Movie(title='The Matrix', year=1999),
+        Movie(title='The Matrix Reloaded', year=2003),
+        Movie(title='Inception', year=2010),
+    ])
+    results = Movie.objects.filter(Q(year__lt=2000) | Q(title__icontains='Inception'))
+    print(list(results.values()))"""
+
+[[chapters]]
+title = "Foreign Keys (One-to-Many)"
+content = """from django.db import models
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+
+def run():
+    a = Author.objects.create(name='George Orwell')
+    Book.objects.create(title='1984', author=a)
+    Book.objects.create(title='Animal Farm', author=a)
+    print(list(a.book_set.values()))"""
+
+[[chapters]]
+title = "Many-to-Many Relationships"
+content = """from django.db import models
+
+class Student(models.Model):
+    name = models.CharField(max_length=100)
+
+class Course(models.Model):
+    name = models.CharField(max_length=100)
+    students = models.ManyToManyField(Student)
+
+def run():
+    alice = Student.objects.create(name='Alice')
+    bob = Student.objects.create(name='Bob')
+    math = Course.objects.create(name='Math')
+    math.students.add(alice, bob)
+    print(list(math.students.values()))"""
+
+[[chapters]]
+title = "Aggregation and Annotation"
+content = """from django.db import models
+from django.db.models import Count
+
+class Post(models.Model):
+    category = models.CharField(max_length=50)
+
+def run():
+    Post.objects.bulk_create([
+        Post(category='Tech'),
+        Post(category='Tech'),
+        Post(category='Food'),
+    ])
+    counts = Post.objects.values('category').annotate(total=Count('id'))
+    print(list(counts))"""
+
+[[chapters]]
+title = "Custom Managers"
+content = """from django.db import models
+
+class PublishedManager(models.Manager):
+    def published(self):
+        return self.filter(is_published=True)
+
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    is_published = models.BooleanField(default=False)
+
+    objects = models.Manager()  # default
+    published_articles = PublishedManager()  # custom
+
+def run():
+    Article.objects.bulk_create([
+        Article(title='Intro to Django', is_published=True),
+        Article(title='Secret Draft', is_published=False),
+    ])
+    print(list(Article.published_articles.published().values()))"""
+
+[[chapters]]
+title = "Transactions"
+content = """from django.db import models, transaction
+
+class Payment(models.Model):
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+
+def run():
+    try:
+        with transaction.atomic():
+            Payment.objects.create(amount=100)
+            Payment.objects.create(amount='INVALID')  # will fail
+    except Exception:
+        print('Transaction rolled back')
+    print(list(Payment.objects.values()))"""
+
+[[chapters]]
+title = "Raw SQL Queries"
+content = """from django.db import models, connection
+
+class City(models.Model):
+    name = models.CharField(max_length=100)
+
+def run():
+    City.objects.bulk_create([
+        City(name='London'),
+        City(name='Paris'),
+    ])
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT name FROM myapp_city')
+        rows = cursor.fetchall()
+    print(rows)"""
+

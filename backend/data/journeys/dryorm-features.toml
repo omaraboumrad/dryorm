@@ -1,5 +1,5 @@
 title = "DryORM Features"
-order = 1
+order = 3
 
 [[chapters]]
 title = "Basic Model Creation"
