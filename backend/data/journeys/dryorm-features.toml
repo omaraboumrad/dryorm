@@ -210,3 +210,68 @@ def run():
     # Alternatively, you can just return a list of dicts
     # to render a default "Data" table.
     # return list(Person.objects.all().values())"""
+
+
+[[chapters]]
+title = "Template Rendering"
+content = """
+from django.db import models
+from django.shortcuts import render
+from django.test import Client
+from django.urls import path
+from faker import Faker
+
+fake = Faker()
+
+class Person(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    job = models.CharField(max_length=100)
+    address = models.TextField()
+    company = models.CharField(max_length=100)
+
+
+def show_person(request):
+    people = Person.objects.all()
+    return render(request, "person.html", {"people": people})
+
+urlpatterns = [
+    path("person/", show_person),
+]
+
+def run():
+    Person.objects.bulk_create([
+        Person(
+            name=fake.name(),
+            email=fake.email(),
+            job=fake.job(),
+            address=fake.address(),
+            company=fake.company()
+        )
+        for _ in range(10)
+    ])
+
+    # Template
+    with open("templates/person.html", "w") as f:
+        f.write(\"\"\"
+    {% extends 'base.html' %}
+    {% block content %}
+    <div class="p-6">
+      <h1 class="text-2xl font-bold mb-4">People</h1>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for person in people %}
+          <div class="p-4 border rounded shadow bg-white">
+            <h2 class="text-xl font-semibold">{{ person.name }}</h2>
+            <p class="text-gray-600 text-sm">{{ person.email }}</p>
+            <p class="text-gray-700">{{ person.job }}</p>
+            <p class="text-gray-500 text-sm">{{ person.company }}</p>
+            <p class="text-xs text-gray-400 mt-2">{{ person.address }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endblock %}
+    \"\"\")
+
+    return Client().get("/person/").content.decode()
+"""
