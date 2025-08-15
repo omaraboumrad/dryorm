@@ -170,7 +170,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Journey functionality
     initializeJourneys();
-    handleJourneyNavigation();
+    
+    // Wait for journeys to be initialized before handling navigation
+    setTimeout(() => {
+        handleJourneyNavigation();
+    }, 100);
 
 
     function execute() {
@@ -615,6 +619,35 @@ document.addEventListener('DOMContentLoaded', function() {
         if (path.startsWith('/j/')) {
             const journeySlug = path.split('/')[2];
             app_state.showJourneyNav = true;
+            
+            // Handle /j/ without specific journey - redirect to first journey and chapter
+            if (!journeySlug || journeySlug === '') {
+                // Find the journey with the lowest order value
+                const firstJourney = Object.values(journeys).reduce((prev, current) => {
+                    return (prev.order || 999) < (current.order || 999) ? prev : current;
+                });
+                
+                if (firstJourney && firstJourney.chapters.length > 0) {
+                    const firstChapter = firstJourney.chapters[0];
+                    loadChapter(firstJourney.slug, 0);
+                    updateUrl(firstJourney.slug, firstChapter.slug);
+                    
+                    // Expand the journey section and highlight first chapter
+                    setTimeout(() => {
+                        const chapterElement = document.querySelector(`[data-chapter-slug="${firstChapter.slug}"]`);
+                        if (chapterElement) {
+                            chapterElement.classList.add('bg-django-secondary/30');
+                            // Expand the journey section using Alpine
+                            const journeyDiv = chapterElement.closest('[x-data]');
+                            if (journeyDiv) {
+                                const alpineData = Alpine.$data(journeyDiv);
+                                alpineData.expanded = true;
+                            }
+                        }
+                    }, 200);
+                }
+                return;
+            }
             
             if (hash) {
                 const chapterSlug = hash;
