@@ -2,7 +2,7 @@ title = "Fundamentals"
 order = 1
 
 [[chapters]]
-title = "Model Creation"
+title = "Defining models"
 content = """from django.db import models
 
 class Author(models.Model):
@@ -36,7 +36,7 @@ def run():
         print(f'- {author.name} ({author.email})')"""
 
 [[chapters]]
-title = "CRUD Operations"
+title = "Simple operations"
 content = """from django.db import models
 from django.utils import timezone
 
@@ -70,7 +70,7 @@ def run():
     print(f'Total authors: {Author.objects.count()}')"""
 
 [[chapters]]
-title = "Field Types & Options"
+title = "Field types and defaults"
 content = """from django.db import models
 from django.utils import timezone
 
@@ -98,7 +98,7 @@ def run():
 
 
 [[chapters]]
-title = "Filtering"
+title = "Filtering data"
 content = """from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -140,7 +140,7 @@ def run():
     print(f'Recent active authors: {recent_active.count()}')"""
 
 [[chapters]]
-title = "Ordering & Limiting Results"
+title = "Ordering and limiting Results"
 content = """from django.db import models
 from django.utils import timezone
 
@@ -228,7 +228,7 @@ def run():
         print(f'- {author.name}')"""
 
 [[chapters]]
-title = "Foreign Keys (One-to-Many)"
+title = "Relationships - ForeignKey"
 content = """from django.db import models
 from django.utils import timezone
 
@@ -281,7 +281,7 @@ def run():
     print(f'Post "{post.title}" by {post.author.name} in {post.category.name}')"""
 
 [[chapters]]
-title = "Many-to-Many Relationships"
+title = "Relationships - ManyToMany"
 content = """from django.db import models
 from django.utils import timezone
 
@@ -340,7 +340,7 @@ def run():
         print(f'- {post.title}')"""
 
 [[chapters]]
-title = "One-to-One Relationships"
+title = "Relationships - OneToOne"
 content = """from django.db import models
 from django.utils import timezone
 
