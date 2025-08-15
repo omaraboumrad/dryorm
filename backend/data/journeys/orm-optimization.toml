@@ -1,0 +1,540 @@
+title = "Optimization Techniques"
+order = 1
+
+[[chapters]]
+title = "Bulk Operations"
+content = """from django.db import models
+from django.utils import timezone
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    post_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
+    view_count = models.PositiveIntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.title
+
+def run():
+    # Create test authors
+    authors = [
+        Author(name='Author 1', email='author1@example.com'),
+        Author(name='Author 2', email='author2@example.com'),
+        Author(name='Author 3', email='author3@example.com'),
+    ]
+
+    # Bulk create - single database query instead of multiple INSERTs
+    print('=== Bulk Create ===')
+    Author.objects.bulk_create(authors)
+    print(f'Created {len(authors)} authors with bulk_create')
+
+    # Get created authors for posts
+    author_objects = list(Author.objects.all())
+
+    # Create many posts using bulk_create
+    posts = []
+    for i in range(10):
+        posts.append(Post(
+            title=f'Post {i+1}',
+            content=f'Content for post {i+1}',
+            author=author_objects[i % len(author_objects)],
+            view_count=i * 10
+        ))
+
+    Post.objects.bulk_create(posts)
+    print(f'Created {len(posts)} posts with bulk_create')
+
+    # Bulk update - update multiple records in single query
+    print('=== Bulk Update ===')
+    updated_count = Post.objects.filter(view_count__gte=50).update(is_featured=True)
+    print(f'Updated {updated_count} posts to featured status')
+
+    # Update with F expressions for atomic operations
+    Post.objects.all().update(view_count=models.F('view_count') + 10)
+    print('Incremented view_count for all posts by 10')
+
+    # Bulk update with calculated values
+    from django.db.models import Count
+
+    # Update author post counts
+    for author in Author.objects.annotate(actual_count=Count('posts')):
+        Author.objects.filter(pk=author.pk).update(post_count=author.actual_count)
+
+    print('Updated author post counts')
+
+    # Bulk delete
+    print('=== Bulk Delete ===')
+    deleted_count = Post.objects.filter(view_count__lt=30).delete()
+    print(f'Deleted {deleted_count[0]} posts with low view counts')
+
+    # Update or create in bulk
+    print('=== Update or Create ===')
+    author, created = Author.objects.update_or_create(
+        email='newauthor@example.com',
+        defaults={'name': 'New Author Updated'}
+    )
+    print(f'Author {"created" if created else "updated"}: {author.name}')
+
+    # Display final statistics
+    print('=== Final Statistics ===')
+    authors_with_counts = Author.objects.annotate(actual_posts=Count('posts'))
+    for author in authors_with_counts:
+        print(f'{author.name}: {author.post_count} stored count, {author.actual_posts} actual posts')"""
+
+
+
+[[chapters]]
+title = "Query Optimization"
+content = """from django.db import models
+from django.utils import timezone
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
+    tags = models.ManyToManyField(Tag, related_name='posts')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.title
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author_name = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f'Comment by {self.author_name}'
+
+def run():
+    # Create test data
+    author = Author.objects.create(name='Tech Writer', email='tech@example.com')
+    category = Category.objects.create(name='Programming')
+    tag1 = Tag.objects.create(name='python')
+    tag2 = Tag.objects.create(name='django')
+
+    post1 = Post.objects.create(title='Python Basics', content='Learning Python', author=author, category=category)
+    post1.tags.add(tag1, tag2)
+
+    post2 = Post.objects.create(title='Django Advanced', content='Advanced Django', author=author, category=category)
+    post2.tags.add(tag2)
+
+    Comment.objects.bulk_create([
+        Comment(post=post1, author_name='Reader1', content='Great post!'),
+        Comment(post=post1, author_name='Reader2', content='Very helpful'),
+        Comment(post=post2, author_name='Reader3', content='Thanks for sharing'),
+    ])
+
+    print('=== Without optimization (multiple database queries) ===')
+    posts = Post.objects.all()
+    for post in posts:
+        # Each access triggers a separate database query
+        print(f'{post.title} by {post.author.name} in {post.category.name}')
+
+    print('=== With select_related (single JOIN query) ===')
+    posts_optimized = Post.objects.select_related('author', 'category')
+    for post in posts_optimized:
+        # Author and category data already loaded, no additional queries
+        print(f'{post.title} by {post.author.name} in {post.category.name}')
+
+    print('=== With prefetch_related for many-to-many and reverse foreign keys ===')
+    posts_with_related = Post.objects.select_related('author', 'category').prefetch_related('tags', 'comments')
+
+    for post in posts_with_related:
+        tag_names = ', '.join(tag.name for tag in post.tags.all())
+        comment_count = post.comments.count()
+        print(f'{post.title} - Tags: {tag_names} - Comments: {comment_count}')
+
+    print('=== Complex prefetch with filtering ===')
+    from django.db.models import Prefetch
+
+    # Prefetch only recent comments
+    recent_comments = Comment.objects.filter(created_at__gte=timezone.now() - timezone.timedelta(days=7))
+    posts_with_recent_comments = Post.objects.prefetch_related(
+        Prefetch('comments', queryset=recent_comments, to_attr='recent_comments')
+    )
+
+    for post in posts_with_recent_comments:
+        print(f'{post.title} has {len(post.recent_comments)} recent comments')"""
+
+[[chapters]]
+title = "Database Indexes"
+content = """from django.db import models
+from django.utils import timezone
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)  # Unique constraint creates index automatically
+    username = models.CharField(max_length=50, db_index=True)  # Single field index
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),  # Single field index
+            models.Index(fields=['name', 'email']),  # Composite index
+            models.Index(fields=['-username']),  # Descending index
+        ]
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)  # Unique creates index
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')  # FK creates index
+    status = models.CharField(max_length=20, choices=[('draft', 'Draft'), ('published', 'Published')])
+    view_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)  # Single field index
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        indexes = [
+            # Composite indexes for common query patterns
+            models.Index(fields=['status', 'created_at']),  # Filter by status, order by date
+            models.Index(fields=['author', 'status']),      # Posts by author with status
+            models.Index(fields=['status', '-view_count']), # Popular published posts
+            models.Index(fields=['created_at', 'author']),  # Recent posts by author
+
+            # Partial index (PostgreSQL only) - only index published posts
+            models.Index(
+                fields=['created_at'],
+                condition=models.Q(status='published'),
+                name='published_posts_created_idx'
+            ),
+
+            # Functional index example (PostgreSQL)
+            models.Index(
+                models.functions.Upper('title'),
+                name='post_title_upper_idx'
+            ),
+        ]
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author_email = models.EmailField()
+    content = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+    is_approved = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            # Index for filtering approved comments by post
+            models.Index(fields=['post', 'is_approved', 'created_at']),
+            # Index for finding comments by email
+            models.Index(fields=['author_email']),
+        ]
+
+def run():
+    # Create test data
+    author = Author.objects.create(
+        name='Performance Tester',
+        email='perf@example.com',
+        username='perftest'
+    )
+
+    # Create posts with various statuses and dates
+    posts_data = [
+        {'title': 'Recent Published', 'slug': 'recent-published', 'status': 'published', 'view_count': 100},
+        {'title': 'Old Published', 'slug': 'old-published', 'status': 'published', 'view_count': 500},
+        {'title': 'Recent Draft', 'slug': 'recent-draft', 'status': 'draft', 'view_count': 0},
+        {'title': 'Popular Post', 'slug': 'popular-post', 'status': 'published', 'view_count': 1000},
+    ]
+
+    for i, post_data in enumerate(posts_data):
+        post = Post.objects.create(
+            title=post_data['title'],
+            slug=post_data['slug'],
+            content='Sample content for performance testing',
+            author=author,
+            status=post_data['status'],
+            view_count=post_data['view_count']
+        )
+
+        # Make some posts older
+        if 'Old' in post_data['title']:
+            post.created_at = timezone.now() - timezone.timedelta(days=30)
+            post.save()
+
+    print('=== Queries that benefit from indexes ===')
+
+    # These queries will use the indexes we defined
+
+    # 1. Query using author username index
+    author_by_username = Author.objects.filter(username='perftest').first()
+    print(f'Found author by username: {author_by_username.name}')
+
+    # 2. Query using composite index (status + created_at)
+    recent_published = Post.objects.filter(
+        status='published',
+        created_at__gte=timezone.now() - timezone.timedelta(days=7)
+    ).order_by('-created_at')
+    print(f'Recent published posts: {recent_published.count()}')
+
+    # 3. Query using author + status index
+    author_posts = Post.objects.filter(author=author, status='published')
+    print(f'Published posts by author: {author_posts.count()}')
+
+    # 4. Query using status + view_count index
+    popular_posts = Post.objects.filter(status='published').order_by('-view_count')[:2]
+    print('Top popular posts:')
+    for post in popular_posts:
+        print(f'- {post.title}')
+
+    # 5. Query using created_at index
+    all_recent = Post.objects.filter(created_at__gte=timezone.now() - timezone.timedelta(days=1))
+    print(f'All recent posts: {all_recent.count()}')
+"""
+
+[[chapters]]
+title = "Database Transactions"
+content = """from django.db import models, transaction
+from django.db import IntegrityError
+from django.utils import timezone
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    post_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
+    view_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.title
+
+class PostView(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='views')
+    ip_address = models.GenericIPAddressField()
+    viewed_at = models.DateTimeField(default=timezone.now)
+
+def create_post_with_author_update(title, content, author):
+    \"\"\"Create a post and update author's post count atomically\"\"\"
+    with transaction.atomic():
+        # Create the post
+        post = Post.objects.create(
+            title=title,
+            content=content,
+            author=author
+        )
+
+        # Update author's post count
+        author.post_count += 1
+        author.save()
+
+        return post
+
+def record_post_view_atomic(post, ip_address):
+    \"\"\"Record a post view and increment view count atomically\"\"\"
+    with transaction.atomic():
+        # Record the view
+        PostView.objects.create(post=post, ip_address=ip_address)
+
+        # Increment post view count
+        post.view_count += 1
+        post.save()
+
+def bulk_create_posts_atomic(author, post_data_list):
+    \"\"\"Create multiple posts and update author count in a transaction\"\"\"
+    with transaction.atomic():
+        posts = []
+        for post_data in post_data_list:
+            posts.append(Post(
+                title=post_data['title'],
+                content=post_data['content'],
+                author=author
+            ))
+
+        # Bulk create posts
+        created_posts = Post.objects.bulk_create(posts)
+
+        # Update author's post count
+        author.post_count += len(created_posts)
+        author.save()
+
+        return created_posts
+
+def run():
+    print('=== Basic Transactions ===')
+
+    # Create test author
+    author = Author.objects.create(name='Transaction Tester', email='trans@example.com')
+
+    # Test atomic post creation with author update
+    try:
+        post1 = create_post_with_author_update(
+            title='First Atomic Post',
+            content='Testing atomic operations',
+            author=author
+        )
+        print(f'Created post: {post1.title}')
+
+        # Refresh author from database to see updated count
+        author.refresh_from_db()
+        print(f'Author post count: {author.post_count}')
+
+    except Exception as e:
+        print(f'Transaction failed: {e}')
+
+    print('=== Transaction Rollback on Error ===')
+
+    # Test transaction rollback
+    initial_post_count = Post.objects.count()
+    initial_author_count = author.post_count
+
+    try:
+        with transaction.atomic():
+            # This will succeed
+            Post.objects.create(
+                title='This will be rolled back',
+                content='Content',
+                author=author
+            )
+
+            # This will fail due to duplicate email
+            Author.objects.create(name='Duplicate', email='trans@example.com')  # Same email as existing author
+
+    except IntegrityError as e:
+        print(f'Transaction rolled back due to: {e}')
+
+    # Verify rollback
+    final_post_count = Post.objects.count()
+    print(f'Post count before: {initial_post_count}, after: {final_post_count}')
+    print(f'Author count unchanged: {initial_author_count} -> {author.post_count}')
+
+    print('=== Nested Transactions (Savepoints) ===')
+
+    try:
+        with transaction.atomic():  # Outer transaction
+            post2 = Post.objects.create(
+                title='Outer Transaction Post',
+                content='This will be saved',
+                author=author
+            )
+
+            try:
+                with transaction.atomic():  # Inner transaction (savepoint)
+                    Post.objects.create(
+                        title='Inner Transaction Post',
+                        content='This will be rolled back',
+                        author=author
+                    )
+                    # Force an error
+                    raise ValueError('Simulated error in inner transaction')
+
+            except ValueError as e:
+                print(f'Inner transaction failed: {e}')
+                print('But outer transaction continues...')
+
+            # Outer transaction continues and commits
+            author.post_count += 1
+            author.save()
+
+    except Exception as e:
+        print(f'Outer transaction failed: {e}')
+
+    print('=== Performance: Bulk Operations in Transactions ===')
+
+    # Create multiple posts atomically
+    post_data = [
+        {'title': 'Bulk Post 1', 'content': 'Content 1'},
+        {'title': 'Bulk Post 2', 'content': 'Content 2'},
+        {'title': 'Bulk Post 3', 'content': 'Content 3'},
+    ]
+
+    created_posts = bulk_create_posts_atomic(author, post_data)
+    print(f'Created {len(created_posts)} posts atomically')
+
+    author.refresh_from_db()
+    print(f'Final author post count: {author.post_count}')
+
+    print('=== Transaction Decorators ===')
+
+    @transaction.atomic
+    def create_post_with_views(title, content, author, view_ips):
+        \"\"\"Function decorated with transaction.atomic\"\"\"
+        post = Post.objects.create(title=title, content=content, author=author)
+
+        for ip in view_ips:
+            PostView.objects.create(post=post, ip_address=ip)
+            post.view_count += 1
+
+        post.save()
+        return post
+
+    # Use decorated function
+    post_with_views = create_post_with_views(
+        title='Post with Views',
+        content='Content with simulated views',
+        author=author,
+        view_ips=['192.168.1.1', '192.168.1.2', '10.0.0.1']
+    )
+
+    print(f'Created post "{post_with_views.title}" with {post_with_views.view_count} views')
+
+    print('=== Manual Transaction Control ===')
+
+    # Manual transaction control for complex logic
+    transaction.set_autocommit(False)  # Turn off autocommit
+
+    try:
+        post3 = Post.objects.create(
+            title='Manual Transaction Post',
+            content='Using manual transaction control',
+            author=author
+        )
+
+        # Some complex business logic here...
+        if post3.title:  # Simple condition for demo
+            transaction.commit()
+            print('Manual transaction committed')
+        else:
+            transaction.rollback()
+            print('Manual transaction rolled back')
+
+    except Exception as e:
+        transaction.rollback()
+        print(f'Manual transaction rolled back due to error: {e}')
+    finally:
+        transaction.set_autocommit(True)  # Restore autocommit
+"""
