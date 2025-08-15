@@ -1,4 +1,5 @@
 title = "Django ORM Fundamentals"
+order = 2
 
 [[chapters]]
 title = "1. Defining Your First Model"
