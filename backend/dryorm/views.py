@@ -2,6 +2,7 @@ from django.views import generic
 from django import http
 import os
 import tomllib
+import re
 from django.conf import settings
 
 from django.db.models import Q
@@ -76,9 +77,18 @@ def save(request):
     return http.HttpResponse(f'"{instance.slug}"')
 
 
+def slugify(text):
+    """Convert text to a URL-friendly slug."""
+    # Remove or replace special characters, convert to lowercase
+    slug = re.sub(r'[^\w\s-]', '', text.lower())
+    # Replace spaces and multiple dashes with single dashes
+    slug = re.sub(r'[-\s]+', '-', slug)
+    # Strip leading/trailing dashes
+    return slug.strip('-')
+
 def load_journeys():
     journeys_path = os.path.join(settings.BASE_DIR, 'data', 'journeys')
-    journeys = {}
+    journeys_list = []
     
     if os.path.exists(journeys_path):
         for filename in os.listdir(journeys_path):
@@ -89,18 +99,25 @@ def load_journeys():
                         journey_data = tomllib.load(f)
                     
                     slug = filename[:-5]  # Remove .toml extension
-                    journeys[slug] = {
+                    journey = {
                         'title': journey_data.get('title', slug),
                         'slug': slug,
-                        'chapters': journey_data.get('chapters', [])
+                        'chapters': journey_data.get('chapters', []),
+                        'order': journey_data.get('order', 999)  # Default to high number if no order
                     }
                     
-                    # Add slugs to chapters for easier navigation
-                    for i, chapter in enumerate(journeys[slug]['chapters']):
-                        chapter['slug'] = f"chapter-{i+1}"
+                    # Add slugs to chapters based on their titles
+                    for chapter in journey['chapters']:
+                        chapter['slug'] = slugify(chapter['title'])
+                    
+                    journeys_list.append(journey)
                         
                 except Exception as e:
                     print(f"Error loading journey {filename}: {e}")
+    
+    # Sort by order field and convert to dict
+    journeys_list.sort(key=lambda x: x['order'])
+    journeys = {journey['slug']: journey for journey in journeys_list}
     
     return journeys
 
