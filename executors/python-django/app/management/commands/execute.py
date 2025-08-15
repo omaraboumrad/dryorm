@@ -10,7 +10,7 @@ from django.db import connection
 import sqlparse
 from . import mermaid
 
-from app.models import run
+from app import models
 
 
 def format_ddl(sql):
@@ -54,7 +54,10 @@ class Command(BaseCommand):
 
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            returned = run()
+            if hasattr(models, "run"):
+                returned = models.run()
+            else:
+                returned = {}
 
         erd = mermaid.kroki_encode(mermaid.generate_mermaid_erd())
 
