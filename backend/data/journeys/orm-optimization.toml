@@ -56,20 +56,17 @@ def run():
     print('Updated author post counts')
 
     # Bulk delete
-    print('=== Bulk Delete ===')
     deleted_count = Post.objects.filter(view_count__lt=30).delete()
     print(f'Deleted {deleted_count[0]} posts with low view counts')
 
     # Update or create in bulk
-    print('=== Update or Create ===')
     author, created = Author.objects.update_or_create(
         email='newauthor@example.com',
         defaults={'name': 'New Author Updated'}
     )
     print(f'Author {"created" if created else "updated"}: {author.name}')
 
-    # Display final statistics
-    print('=== Final Statistics ===')
+    # Final Statistics
     authors_with_counts = Author.objects.annotate(actual_posts=models.Count('posts'))
     for author in authors_with_counts:
         print(f'{author.name}: {author.post_count} stored count, {author.actual_posts} actual posts')
@@ -77,8 +74,21 @@ def run():
 
 [[chapters]]
 title = "Query Optimization"
-content = """from django.db import models
+content = """
+from django.db import models
 from django.utils import timezone
+from django.db import connection
+from contextlib import contextmanager
+
+# -- Ignore this function - It's used for utility
+@contextmanager
+def count_queries(description):
+    initial_count = len(connection.queries)
+    yield
+    final_count = len(connection.queries)
+    print(f"{description}: {final_count - initial_count} queries executed")
+
+# --
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
@@ -97,61 +107,53 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tag)
     created_at = models.DateTimeField(auto_now_add=True)
 
-class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    author_name = models.CharField(max_length=100)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
 def run():
+
     author = Author.objects.create(name='Tech Writer')
     category = Category.objects.create(name='Programming')
+    post1 = Post.objects.create(title='Python Basics', content='Learning Python', author=author, category=category)
+    post2 = Post.objects.create(title='Django Advanced', content='Advanced Django', author=author, category=category)
+    post3 = Post.objects.create(title='Ruby Advanced', content='Advanced RoR', author=author, category=category)
+
+    # Select Related Optimization
+
+    with count_queries("author / category without optimization"):
+        posts = Post.objects.all()
+        for post in posts:
+            # Each access triggers a separate database query
+            result = f'{post.title} by {post.author.name} in {post.category.name}'
+
+    with count_queries("author / category with select_related"):
+        posts = Post.objects.select_related('author', 'category')
+        for post in posts:
+            # Author and category data already loaded, no additional queries
+            f'{post.title} by {post.author.name} in {post.category.name}'
+
+    # Prefetch Optimization
+
     tag1 = Tag.objects.create(name='python')
     tag2 = Tag.objects.create(name='django')
+    tag3 = Tag.objects.create(name='oop')
+    tag4 = Tag.objects.create(name='best practices')
+    post1.tags.add(tag1, tag2, tag3)
+    post2.tags.add(tag1, tag2, tag4)
+    post3.tags.add(tag3, tag4)
 
-    post1 = Post.objects.create(title='Python Basics', content='Learning Python', author=author, category=category)
-    post1.tags.add(tag1, tag2)
+    with count_queries("tags without optimization"):
+        posts = Post.objects.all()
 
-    post2 = Post.objects.create(title='Django Advanced', content='Advanced Django', author=author, category=category)
-    post2.tags.add(tag2)
+        for post in posts:
+            tag_names = ', '.join(tag.name for tag in post.tags.all())
+            f'{post.title} - Tags: {tag_names}'
 
-    Comment.objects.bulk_create([
-        Comment(post=post1, author_name='Reader1', content='Great post!'),
-        Comment(post=post1, author_name='Reader2', content='Very helpful'),
-        Comment(post=post2, author_name='Reader3', content='Thanks for sharing'),
-    ])
+    with count_queries("tags with prefetch_related"):
+        posts = Post.objects.prefetch_related('tags')
 
-    print('=== Without optimization (multiple database queries) ===')
-    posts = Post.objects.all()
-    for post in posts:
-        # Each access triggers a separate database query
-        print(f'{post.title} by {post.author.name} in {post.category.name}')
+        for post in posts:
+            tag_names = ', '.join(tag.name for tag in post.tags.all())
+            f'{post.title} - Tags: {tag_names}'
 
-    print('=== With select_related (single JOIN query) ===')
-    posts_optimized = Post.objects.select_related('author', 'category')
-    for post in posts_optimized:
-        # Author and category data already loaded, no additional queries
-        print(f'{post.title} by {post.author.name} in {post.category.name}')
-
-    print('=== With prefetch_related for many-to-many and reverse foreign keys ===')
-    posts_with_related = Post.objects.select_related('author', 'category').prefetch_related('tags', 'comments')
-
-    for post in posts_with_related:
-        tag_names = ', '.join(tag.name for tag in post.tags.all())
-        comment_count = post.comments.count()
-        print(f'{post.title} - Tags: {tag_names} - Comments: {comment_count}')
-
-    print('=== Complex prefetch with filtering ===')
-    from django.db.models import Prefetch
-
-    # Prefetch only recent comments
-    recent_comments = Comment.objects.filter(created_at__gte=timezone.now() - timezone.timedelta(days=7))
-    posts_with_recent_comments = Post.objects.prefetch_related(
-        Prefetch('comments', queryset=recent_comments, to_attr='recent_comments')
-    )
-
-    for post in posts_with_recent_comments:
-        print(f'{post.title} has {len(post.recent_comments)} recent comments')"""
+"""
 
 [[chapters]]
 title = "Indexing"
