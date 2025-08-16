@@ -2,23 +2,16 @@ title = "Advanced Features"
 order = 3
 
 [[chapters]]
-title = "Annotation & Aggregation"
+title = "Aggregation"
 content = """from django.db import models
 from django.db.models import Count, Avg, Sum, Max, Min, F, Q, Case, When
 from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-
-    def __str__(self):
-        return self.name
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
@@ -30,13 +23,9 @@ class Post(models.Model):
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
-    def __str__(self):
-        return self.title
-
 def run():
-    # Create test data
-    author1 = Author.objects.create(name='Alice Writer', email='alice@example.com')
-    author2 = Author.objects.create(name='Bob Blogger', email='bob@example.com')
+    author1 = Author.objects.create(name='Alice Writer')
+    author2 = Author.objects.create(name='Bob Blogger')
 
     tech_cat = Category.objects.create(name='Technology')
     life_cat = Category.objects.create(name='Lifestyle')
@@ -53,11 +42,11 @@ def run():
     avg_word_count = Post.objects.aggregate(avg_words=Avg('word_count'))
     total_views = Post.objects.aggregate(total_views=Sum('view_count'))
 
-    print(f'Total posts: {total_posts}')
+    print('Total posts:', total_posts)
     average_words = avg_word_count["avg_words"]
-    print(f'Average word count: {average_words:.1f}')
+    print('Average word count:', average_words)
     total_view_count = total_views["total_views"]
-    print(f'Total views: {total_view_count}')
+    print('Total views:', total_view_count)
 
     # Annotation - add calculated fields to queryset
     authors_with_stats = Author.objects.annotate(
@@ -92,42 +81,35 @@ def run():
         print(f'Category {category.name}: {category.post_count} posts, {category.total_words} total words')"""
 
 [[chapters]]
-title = "Model Methods & Properties"
+title = "Methods & Properties"
 content = """from django.db import models
 from django.utils import timezone
 from django.urls import reverse
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse('author-detail', kwargs={'pk': self.pk})
-
     @property
     def post_count(self):
-        return self.posts.count()
+        return self.post_set.count()
 
     def recent_posts(self, days=7):
         cutoff = timezone.now() - timezone.timedelta(days=days)
-        return self.posts.filter(created_at__gte=cutoff)
+        return self.post_set.filter(created_at__gte=cutoff)
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now)
     published = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
-
-    def get_absolute_url(self):
-        return reverse('post-detail', kwargs={'pk': self.pk})
 
     @property
     def word_count(self):
@@ -144,7 +126,7 @@ class Post(models.Model):
 
 def run():
     # Create test data
-    author = Author.objects.create(name='Content Creator', email='creator@example.com')
+    author = Author.objects.create(name='Content Creator')
     post = Post.objects.create(
         title='Long Form Article',
         content='This is a long article with many words. ' * 50,  # ~300 words
@@ -169,7 +151,6 @@ from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
 
     def __str__(self):
         return self.name
@@ -201,8 +182,8 @@ class Post(models.Model):
 
 def run():
     # Create test data
-    author1 = Author.objects.create(name='Zoe Writer', email='zoe@example.com')
-    author2 = Author.objects.create(name='Alice Blogger', email='alice@example.com')
+    author1 = Author.objects.create(name='Zoe Writer')
+    author2 = Author.objects.create(name='Alice Blogger')
 
     Post.objects.create(title='First Post', slug='first-post', content='Content', author=author1, published=True)
     Post.objects.create(title='Second Post', slug='second-post', content='More content', author=author2, published=True)
