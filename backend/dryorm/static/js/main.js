@@ -18,7 +18,7 @@ window.addEventListener('resize', function() {
     const app_state = Alpine.$data(document.querySelector('body'));
     const wasSmall = app_state.isSmall;
     app_state.isSmall = window.innerWidth < 1024;
-    
+
     // If transitioning to small screen and both tabs are open, keep code open
     if (!wasSmall && app_state.isSmall && app_state.showCode && app_state.showResult) {
         app_state.showResult = false;
@@ -27,7 +27,7 @@ window.addEventListener('resize', function() {
     else if (wasSmall && !app_state.isSmall && app_state.showCode) {
         app_state.showResult = true;
     }
-    
+
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -167,10 +167,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     connect();
     models_editor.focus();
-    
+
     // Journey functionality
     initializeJourneys();
-    
+
     // Wait for journeys to be initialized before handling navigation
     setTimeout(() => {
         handleJourneyNavigation();
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleSave(shouldCopy = false) {
         const errorElement = document.getElementById('save-error');
         errorElement.classList.add('hidden');
-        
+
         var formData = new FormData();
         formData.append('code', models_editor.getValue());
         formData.append('name', name.value);
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('#query-filters button').forEach(button => {
         button.addEventListener('click', function(event) {
-            event.preventDefault(); 
+            event.preventDefault();
             const state = Alpine.$data(query_filters);
             fillQueries(queries, rawQueries, state);
         });
@@ -347,32 +347,32 @@ document.addEventListener('DOMContentLoaded', function() {
         if (filters.selectedREVERSE) filtered.reverse();
 
         if (filtered.length === 0) {
-            queries.innerHTML = '<span class="p-2 text-lg">No queries</span>';
+            queries.innerHTML = '<span class="p-2 text-sm">No queries</span>';
             return;
         }
 
         // Clear the container and create individual collapsible query elements
         queries.innerHTML = '';
-        
+
         filtered.forEach((q, index) => {
             const types = getTypes(q.sql);
             const typeLabel = types.length > 0 ? types[0] : 'QUERY';
             const previewLines = q.sql.split('\n').slice(0, 2);
             const preview = previewLines.join(' ').substring(0, 60);
             const hasMoreContent = q.sql.split('\n').length > 2 || q.sql.length > 60;
-            
+
             // Create the query container
             const queryDiv = document.createElement('div');
             queryDiv.className = 'border-b border-django-primary/10 last:border-b-0 mb-2';
             queryDiv.setAttribute('x-data', '{ expanded: false }');
-            
+
             queryDiv.innerHTML = `
-                <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-django-secondary/10 rounded-sm" 
+                <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-django-secondary/10 rounded-sm"
                      @click="expanded = !expanded">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         <span class="text-xs px-2 py-1 rounded bg-django-primary/20 text-django-primary font-medium whitespace-nowrap">${typeLabel}</span>
-                        <span class="font-semibold text-django-primary/80 whitespace-nowrap">${q.time}s</span>
-                        <span class="text-sm text-django-text truncate">${preview}${hasMoreContent ? '...' : ''}</span>
+                        <span class="text-xs font-semibold text-django-primary/80 whitespace-nowrap">${q.time}s</span>
+                        <span class="text-xs text-django-text truncate">${preview}${hasMoreContent ? '...' : ''}</span>
                     </div>
                     <div class="flex items-center ml-2">
                         <svg x-show="!expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -385,11 +385,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div x-show="expanded" x-cloak class="px-3 pb-3">
                     <div class="bg-django-secondary/10 p-3 rounded border">
-                        <pre class="whitespace-pre-wrap text-sm font-mono text-django-text overflow-auto">${colorize(q.sql)}</pre>
+                        <pre class="whitespace-pre-wrap text-xs font-mono text-django-text overflow-auto">${colorize(q.sql)}</pre>
                     </div>
                 </div>
             `;
-            
+
             queries.appendChild(queryDiv);
         });
     }
@@ -537,14 +537,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initializeJourneys() {
         const journeyList = document.getElementById('journey-list');
-        
+
         Object.values(journeys).forEach(journey => {
             const journeyDiv = document.createElement('div');
             journeyDiv.className = 'mb-4';
             journeyDiv.setAttribute('x-data', '{ expanded: false }');
-            
+
             journeyDiv.innerHTML = `
-                <div class="p-3 cursor-pointer hover:bg-django-secondary/20 transition-colors journey-header" 
+                <div class="p-3 cursor-pointer hover:bg-django-secondary/20 transition-colors journey-header"
                      data-journey-slug="${journey.slug}"
                      @click="expanded = !expanded">
                     <div class="flex items-center justify-between">
@@ -568,24 +568,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     `).join('')}
                 </div>
             `;
-            
+
             journeyList.appendChild(journeyDiv);
         });
-        
+
         // Add click handlers for chapters
         document.querySelectorAll('.chapter-item').forEach(item => {
             item.addEventListener('click', function() {
                 const journeySlug = this.dataset.journeySlug;
                 const chapterSlug = this.dataset.chapterSlug;
                 const chapterIndex = parseInt(this.dataset.chapterIndex);
-                
+
                 loadChapter(journeySlug, chapterIndex);
                 updateUrl(journeySlug, chapterSlug);
-                
+
                 // Visual feedback
                 document.querySelectorAll('.chapter-item').forEach(c => c.classList.remove('bg-django-secondary/30'));
                 this.classList.add('bg-django-secondary/30');
-                
+
                 // Focus code editor after chapter loads
                 setTimeout(() => {
                     if (typeof models_editor !== 'undefined' && models_editor) {
@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
+
     function loadChapter(journeySlug, chapterIndex) {
         const journey = journeys[journeySlug];
         if (journey && journey.chapters[chapterIndex]) {
@@ -605,33 +605,33 @@ document.addEventListener('DOMContentLoaded', function() {
             app_state.currentChapter = chapterIndex;
         }
     }
-    
+
     function updateUrl(journeySlug, chapterSlug) {
         const newUrl = `/j/${journeySlug}#${chapterSlug}`;
         window.history.pushState({ journeySlug, chapterSlug }, '', newUrl);
     }
-    
+
     function handleJourneyNavigation() {
         // Handle initial URL if it's a journey URL
         const path = window.location.pathname;
         const hash = window.location.hash.substring(1);
-        
+
         if (path.startsWith('/j/')) {
             const journeySlug = path.split('/')[2];
             app_state.showJourneyNav = true;
-            
+
             // Handle /j/ without specific journey - redirect to first journey and chapter
             if (!journeySlug || journeySlug === '') {
                 // Find the journey with the lowest order value
                 const firstJourney = Object.values(journeys).reduce((prev, current) => {
                     return (prev.order || 999) < (current.order || 999) ? prev : current;
                 });
-                
+
                 if (firstJourney && firstJourney.chapters.length > 0) {
                     const firstChapter = firstJourney.chapters[0];
                     loadChapter(firstJourney.slug, 0);
                     updateUrl(firstJourney.slug, firstChapter.slug);
-                    
+
                     // Expand the journey section and highlight first chapter
                     setTimeout(() => {
                         const chapterElement = document.querySelector(`[data-chapter-slug="${firstChapter.slug}"]`);
@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 return;
             }
-            
+
             if (hash) {
                 const chapterSlug = hash;
                 const journey = journeys[journeySlug];
@@ -677,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (journey && journey.chapters.length > 0) {
                     loadChapter(journeySlug, 0);
                     updateUrl(journeySlug, journey.chapters[0].slug);
-                    
+
                     // Expand the journey section and highlight first chapter
                     setTimeout(() => {
                         const firstChapterSlug = journey.chapters[0].slug;
@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-        
+
         // Handle browser back/forward
         window.addEventListener('popstate', function(event) {
             if (event.state && event.state.journeySlug) {
