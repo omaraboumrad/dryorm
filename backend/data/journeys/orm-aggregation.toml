@@ -1,0 +1,130 @@
+title = "Aggregation"
+order = 3
+
+[[chapters]]
+title = "Basic Aggregation"
+content = """from django.db import models
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    word_count = models.PositiveIntegerField(default=0)
+    view_count = models.PositiveIntegerField(default=0)
+    published = models.BooleanField(default=False)
+
+def run():
+
+    Post.objects.bulk_create([
+        Post(title='Django Tips', word_count=500, view_count=100, published=True),
+        Post(title='Python Tricks', word_count=800, view_count=200, published=True),
+        Post(title='Draft Post', word_count=300, view_count=0, published=False),
+    ])
+
+    total_posts = Post.objects.count()
+    stats = Post.objects.aggregate(
+        avg_words=models.Avg('word_count'),
+        total_views=models.Sum('view_count'),
+        max_views=models.Max('view_count'),
+        min_words=models.Min('word_count')
+    )
+
+    print('Total posts:', total_posts)
+    print('Average words:', stats["avg_words"])
+    print('Total views:', stats["total_views"])
+    print('Most viewed:', stats["max_views"])
+    print('Shortest post:', stats["min_words"])
+"""
+
+[[chapters]]
+title = "Annotation"
+content = """from django.db import models
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
+    word_count = models.PositiveIntegerField(default=0)
+    view_count = models.PositiveIntegerField(default=0)
+    published = models.BooleanField(default=False)
+
+def run():
+    author1 = Author.objects.create(name='Alice Writer')
+    author2 = Author.objects.create(name='Bob Blogger')
+
+    Post.objects.bulk_create([
+        Post(title='Django Tips', author=author1, word_count=500, view_count=100, published=True),
+        Post(title='Python Tricks', author=author1, word_count=800, view_count=200, published=True),
+        Post(title='Life Balance', author=author2, word_count=600, view_count=50, published=True),
+        Post(title='Draft Post', author=author2, word_count=300, view_count=0, published=False),
+    ])
+
+    # Annotation - add calculated fields to queryset
+    authors_with_stats = Author.objects.annotate(
+        post_count=models.Count('posts'),
+        published_posts=models.Count('posts', filter=models.Q(posts__published=True)),
+        total_views=models.Sum('posts__view_count')
+    )
+
+    for author in authors_with_stats:
+        print(f'{author.name}: {author.post_count} posts, {author.published_posts} published, {author.total_views} views')
+
+    # Filter based on aggregated values
+    prolific_authors = Author.objects.annotate(
+        post_count=models.Count('posts')
+    ).filter(post_count__gte=2)
+
+    print(f'Authors with 2+ posts: {prolific_authors.count()}')"""
+
+[[chapters]]
+title = "Grouping"
+content = """
+from django.db import models
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    word_count = models.PositiveIntegerField(default=0)
+    view_count = models.PositiveIntegerField(default=0)
+    published = models.BooleanField(default=False)
+
+def run():
+    tech_cat = Category.objects.create(name='Technology')
+    life_cat = Category.objects.create(name='Lifestyle')
+    news_cat = Category.objects.create(name='News')
+
+    Post.objects.bulk_create([
+        Post(title='Django Tips', category=tech_cat, word_count=500, view_count=150, published=True),
+        Post(title='Python Tricks', category=tech_cat, word_count=800, view_count=80, published=True),
+        Post(title='Life Balance', category=life_cat, word_count=600, view_count=30, published=True),
+        Post(title='Breaking News', category=news_cat, word_count=200, view_count=500, published=True),
+        Post(title='Tech Draft', category=tech_cat, word_count=300, view_count=0, published=False),
+    ])
+
+    print('> Category Statistics (GROUP BY)')
+    category_stats = Category.objects.annotate(
+        post_count=models.Count('post'),
+        published_count=models.Count('post', filter=models.Q(post__published=True)),
+        total_words=models.Sum('post__word_count'),
+        avg_views=models.Avg('post__view_count')
+    ).order_by('name')
+
+    for category in category_stats:
+        print(
+            f'{category.name}: {category.post_count} posts, '
+            f'{category.published_count} published, '
+            f'{category.total_words} words, '
+            f'{category.avg_views:.1f} avg views'
+        )
+
+    print('> Active Categories (HAVING)')
+    active_categories = Category.objects.annotate(
+        post_count=models.Count('post')
+    ).filter(post_count__gte=2)
+
+    for category in active_categories:
+        print(f'Active {category.name}: {category.post_count} posts')
+"""
