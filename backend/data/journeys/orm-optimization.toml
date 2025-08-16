@@ -4,15 +4,11 @@ order = 4
 [[chapters]]
 title = "Bulk Operations"
 content = """from django.db import models
-from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     post_count = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.name
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
@@ -20,54 +16,41 @@ class Post(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
     view_count = models.PositiveIntegerField(default=0)
     is_featured = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.title
+    created_at = models.DateTimeField(auto_now_add=True)
 
 def run():
-    # Create test authors
-    authors = [
+
+    # Bulk create - authors
+    authors = Author.objects.bulk_create([
         Author(name='Author 1', email='author1@example.com'),
         Author(name='Author 2', email='author2@example.com'),
         Author(name='Author 3', email='author3@example.com'),
-    ]
+    ])
+    print(f'Created {len(authors)} authors')
 
-    # Bulk create - single database query instead of multiple INSERTs
-    print('=== Bulk Create ===')
-    Author.objects.bulk_create(authors)
-    print(f'Created {len(authors)} authors with bulk_create')
-
-    # Get created authors for posts
     author_objects = list(Author.objects.all())
 
-    # Create many posts using bulk_create
-    posts = []
-    for i in range(10):
-        posts.append(Post(
+    # Bulk create - posts
+    posts = Post.objects.bulk_create([
+        Post(
             title=f'Post {i+1}',
             content=f'Content for post {i+1}',
             author=author_objects[i % len(author_objects)],
             view_count=i * 10
-        ))
-
-    Post.objects.bulk_create(posts)
-    print(f'Created {len(posts)} posts with bulk_create')
+        ) for i in range(10)
+    ])
+    print(f'Created {len(posts)} posts')
 
     # Bulk update - update multiple records in single query
-    print('=== Bulk Update ===')
     updated_count = Post.objects.filter(view_count__gte=50).update(is_featured=True)
-    print(f'Updated {updated_count} posts to featured status')
+    print(f'Updated {updated_count} posts')
 
     # Update with F expressions for atomic operations
     Post.objects.all().update(view_count=models.F('view_count') + 10)
     print('Incremented view_count for all posts by 10')
 
-    # Bulk update with calculated values
-    from django.db.models import Count
-
     # Update author post counts
-    for author in Author.objects.annotate(actual_count=Count('posts')):
+    for author in Author.objects.annotate(actual_count=models.Count('posts')):
         Author.objects.filter(pk=author.pk).update(post_count=author.actual_count)
 
     print('Updated author post counts')
@@ -87,11 +70,10 @@ def run():
 
     # Display final statistics
     print('=== Final Statistics ===')
-    authors_with_counts = Author.objects.annotate(actual_posts=Count('posts'))
+    authors_with_counts = Author.objects.annotate(actual_posts=models.Count('posts'))
     for author in authors_with_counts:
-        print(f'{author.name}: {author.post_count} stored count, {author.actual_posts} actual posts')"""
-
-
+        print(f'{author.name}: {author.post_count} stored count, {author.actual_posts} actual posts')
+"""
 
 [[chapters]]
 title = "Query Optimization"
@@ -100,46 +82,29 @@ from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-
-    def __str__(self):
-        return self.name
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.name
-
 class Tag(models.Model):
     name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
-    tags = models.ManyToManyField(Tag, related_name='posts')
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.title
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    tags = models.ManyToManyField(Tag)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     author_name = models.CharField(max_length=100)
     content = models.TextField()
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f'Comment by {self.author_name}'
+    created_at = models.DateTimeField(auto_now_add=True)
 
 def run():
-    # Create test data
-    author = Author.objects.create(name='Tech Writer', email='tech@example.com')
+    author = Author.objects.create(name='Tech Writer')
     category = Category.objects.create(name='Programming')
     tag1 = Tag.objects.create(name='python')
     tag2 = Tag.objects.create(name='django')
@@ -189,7 +154,7 @@ def run():
         print(f'{post.title} has {len(post.recent_comments)} recent comments')"""
 
 [[chapters]]
-title = "Database Indexes"
+title = "Indexing"
 content = """from django.db import models
 from django.utils import timezone
 
@@ -320,33 +285,26 @@ def run():
 """
 
 [[chapters]]
-title = "Database Transactions"
+title = "Transactions"
 content = """from django.db import models, transaction
 from django.db import IntegrityError
-from django.utils import timezone
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     post_count = models.IntegerField(default=0)
 
-    def __str__(self):
-        return self.name
-
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='posts')
     view_count = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.title
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class PostView(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='views')
     ip_address = models.GenericIPAddressField()
-    viewed_at = models.DateTimeField(default=timezone.now)
+    viewed_at = models.DateTimeField(auto_now_add=True)
 
 def create_post_with_author_update(title, content, author):
     \"\"\"Create a post and update author's post count atomically\"\"\"
