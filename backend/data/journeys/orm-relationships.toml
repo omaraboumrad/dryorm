@@ -17,7 +17,7 @@ class Post(models.Model):
 def run():
     author = Author.objects.create(name='Tech Writer')
 
-    # Create posts
+    # Create posts and assign author
     Post.objects.bulk_create([
         Post(title='Django Basics', content='Learn Django fundamentals', author=author),
         Post(title='Python Tips', content='Useful Python tricks', author=author),
@@ -29,14 +29,15 @@ def run():
         content='Deep dive into Django features'
     )
 
-    # Access related objects
+    # Access foreign key relationships
+    post = Post.objects.first()
+    print(f'Post "{post.title}" by {post.author.name}')
+
+    # Or in reverse
     print(f'Posts by {author.name}:')
     for post in author.post_set.all():
         print(f'- {post.title}')
 
-    # Reverse foreign key lookup
-    post = Post.objects.first()
-    print(f'Post "{post.title}" by {post.author.name}')
 """
 
 [[chapters]]
@@ -58,7 +59,6 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 def run():
-    # Create author and profile
     author = Author.objects.create(name='Jane Developer')
     profile = AuthorProfile.objects.create(
         author=author,
@@ -123,18 +123,19 @@ def run():
     )
     post2.tags.add(python_tag)
 
-    # Query many-to-many relationships
     print(f'Tags for "{post1.title}":')
+
     for tag in post1.tags.all():
         print(f'- {tag.name}')
 
     print(f'Posts tagged with "python":')
+
     for post in python_tag.post_set.all():
         print(f'- {post.title}')
 
-    # Filter by many-to-many fields
-    django_posts = Post.objects.filter(tags__name='django')
     print(f'Posts with Django tag:')
+
+    django_posts = Post.objects.filter(tags__name='django')
     for post in django_posts:
         print(f'- {post.title}')
 """

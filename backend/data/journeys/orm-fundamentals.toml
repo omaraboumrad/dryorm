@@ -118,21 +118,18 @@ def run():
         Author(name='Diana', article_count=8),
     ])
 
-    # Order by article count (descending)
-    top_authors = Author.objects.order_by('-article_count')
     print('Top authors by article count:')
+    top_authors = Author.objects.order_by('-article_count')
     for author in top_authors:
         print(f'- {author.name}: {author.article_count} articles')
 
-    # Multiple ordering
-    authors_by_name_then_count = Author.objects.order_by('name', '-article_count')
     print('Authors ordered by name, then by article count:')
+    authors_by_name_then_count = Author.objects.order_by('name', '-article_count')
     for author in authors_by_name_then_count:
         print(f'- {author.name}: {author.article_count} articles')
 
-    # Limiting results
-    top_2_authors = Author.objects.order_by('-article_count')[:2]
     print('Top 2 authors by article count:')
+    top_2_authors = Author.objects.order_by('-article_count')[:2]
     for author in top_2_authors:
         print(f'- {author.name}: {author.article_count} articles')
 """
@@ -158,28 +155,28 @@ def run():
         Author(name='New Author', article_count=2, is_active=False),
     ])
 
-    # OR condition: active authors OR authors with many articles
+    print('Active or prolific authors (active=True OR articles>=20):')
+
     prolific_or_active = Author.objects.filter(
         Q(is_active=True) | Q(article_count__gte=20)
     )
-    print('Active or prolific authors (active=True OR articles>=20):')
     for author in prolific_or_active:
         print(f'- {author.name}: {author.article_count} articles, active={author.is_active}')
 
-    # AND condition with NOT
+    print('Authors with 5+ articles (excluding "new" in name):')
+
     specific_authors = Author.objects.filter(
         Q(article_count__gte=5) & ~Q(name__icontains='new')
     )
-    print('Authors with 5+ articles (excluding "new" in name):')
     for author in specific_authors:
         print(f'- {author.name}: {author.article_count} articles')
 
-    # Complex nested conditions
+    print('Complex query (active AND (10+ articles OR "expert" in name)):')
+
     complex_query = Author.objects.filter(
         Q(is_active=True) & (
             Q(article_count__gte=10) | Q(name__icontains='expert')
         )
     )
-    print('Complex query (active AND (10+ articles OR "expert" in name)):')
     for author in complex_query:
         print(f'- {author.name}')"""
