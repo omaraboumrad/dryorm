@@ -10,6 +10,7 @@
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
+                darkMode: 'class',
                 theme: {
                     extend: {
                         colors: {
@@ -52,6 +53,22 @@
             .cm-keyword { color: #0C4B33 !important; font-weight: bold; }
             .cm-builtin { color: #0C4B33 !important;}
             .cm-comment { color: gray !important;}
+
+            /* Dark mode styles for CodeMirror */
+            .dark .CodeMirror {
+                background: #0f2e1e !important;
+                color: #d1fae5 !important;
+            }
+            .dark .CodeMirror-gutter {
+                background: #1a5c34 !important;
+                color: #86efac !important;
+            }
+            .dark .cm-string { color: #6ee7b7 !important; }
+            .dark .cm-number { color: #6ee7b7 !important; }
+            .dark .cm-def { color: #34d399 !important; font-weight: bold; }
+            .dark .cm-keyword { color: #34d399 !important; font-weight: bold; }
+            .dark .cm-builtin { color: #34d399 !important;}
+            .dark .cm-comment { color: #86efac !important;}
         </style>
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MY7ZELY01L"></script>
@@ -63,7 +80,7 @@
             gtag('config', 'G-MY7ZELY01L');
         </script>
     </head>
-    <body class="bg-django-bg h-full flex flex-col" {% block data %}{% endblock %}>
+    <body class="bg-django-bg dark:bg-green-950 h-full flex flex-col" {% block data %}{% endblock %}>
         <c-nav>
             <c-slot name="links">
                 <div class="flex items-center gap-1">

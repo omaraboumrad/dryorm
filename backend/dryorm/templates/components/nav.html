@@ -1,5 +1,5 @@
 {% load static %}
-<nav class="flex items-center justify-between bg-django-primary">
+<nav class="flex items-center justify-between bg-django-primary dark:bg-green-900">
     <a class="flex items-center gap-3 p-4 text-4xl font-bold text-white whitespace-nowrap" href="{% url 'index' %}">
         <div class="hidden md:inline">
             <c-icons.dryorm size="8" color="text-white"/>
@@ -9,5 +9,14 @@
     <div class="flex items-center gap-2" >
     {{ links }}
     {{ actions }}
+    <button id="theme-toggle" class="px-2 py-2 rounded-sm font-medium text-white hover:bg-django-primary-light transition-colors" title="Toggle dark mode">
+        <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5V3m0 18v-2M7.05 7.05 5.636 5.636m12.728 12.728L16.95 16.95M5 12H3m18 0h-2M7.05 16.95l-1.414 1.414M18.364 5.636 16.95 7.05M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/>
+
+        </svg>
+        <svg id="theme-toggle-light-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2L13.09 8.26L20 9L14 14.74L15.18 21.02L10 17.77L4.82 21.02L6 14.74L0 9L6.91 8.26L10 2Z" fill-rule="evenodd" clip-rule="evenodd"></path>
+        </svg>
+    </button>
     </div>
 </nav>

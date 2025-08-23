@@ -33,6 +33,39 @@ window.addEventListener('resize', function() {
 document.addEventListener('DOMContentLoaded', function() {
     var app_state = Alpine.$data(document.querySelector('body'));
     var csrftoken = getCookie('csrftoken');
+
+    // Dark mode functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+    // Check for saved theme preference or default to 'light' mode
+    const theme = localStorage.getItem('theme') || 'light';
+    
+    // Apply theme and update icons
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            darkIcon.classList.add('hidden');
+            lightIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            lightIcon.classList.add('hidden');
+            darkIcon.classList.remove('hidden');
+        }
+    }
+
+    // Initialize theme
+    applyTheme(theme);
+
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
     var run_button = document.querySelector('.run');
     var job = document.getElementById('job');
     var output = document.getElementById('output');
@@ -298,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const highlightedLines = lines.map((line, index) => {
             const highlighted = line.replace(/\b\w+\b/g, (token) => {
                 return keywords.has(token.toUpperCase())
-                    ? `<span class="font-bold text-django-primary">${token}</span>`
+                    ? `<span class="font-bold text-django-primary dark:text-green-300">${token}</span>`
                     : token;
             });
             // Add padding to all lines except the first one
@@ -363,29 +396,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Create the query container
             const queryDiv = document.createElement('div');
-            queryDiv.className = 'border-b border-django-primary/10 last:border-b-0 mb-2';
+            queryDiv.className = 'border-b border-django-primary/10 dark:border-green-700 last:border-b-0 mb-2';
             queryDiv.setAttribute('x-data', '{ expanded: false }');
 
             queryDiv.innerHTML = `
-                <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-django-secondary/10 rounded-sm"
+                <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-django-secondary/10 dark:hover:bg-green-700 rounded-sm"
                      @click="expanded = !expanded">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <span class="text-xs px-2 py-1 rounded bg-django-primary/20 text-django-primary font-medium whitespace-nowrap">${typeLabel}</span>
-                        <span class="text-xs font-semibold text-django-primary/80 whitespace-nowrap">${q.time}s</span>
-                        <span class="text-xs text-django-text truncate">${preview}${hasMoreContent ? '...' : ''}</span>
+                        <span class="text-xs px-2 py-1 rounded bg-django-primary/20 text-django-primary dark:bg-green-700 dark:text-green-100 font-medium whitespace-nowrap">${typeLabel}</span>
+                        <span class="text-xs font-semibold text-django-primary/80 dark:text-green-100 whitespace-nowrap">${q.time}s</span>
+                        <span class="text-xs text-django-text dark:text-green-100 truncate">${preview}${hasMoreContent ? '...' : ''}</span>
                     </div>
                     <div class="flex items-center ml-2">
-                        <svg x-show="!expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg x-show="!expanded" class="w-4 h-4 text-django-text dark:text-green-100 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                        <svg x-show="expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg x-show="expanded" class="w-4 h-4 text-django-text dark:text-green-100 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                         </svg>
                     </div>
                 </div>
                 <div x-show="expanded" x-cloak class="px-3 pb-3">
-                    <div class="bg-django-secondary/10 p-3 rounded border">
-                        <pre class="whitespace-pre-wrap text-xs font-mono text-django-text overflow-auto">${colorize(q.sql)}</pre>
+                    <div class="bg-django-secondary/10 dark:bg-[#1a4d35] p-3 rounded border dark:border-green-600">
+                        <pre class="whitespace-pre-wrap text-xs font-mono text-django-text dark:text-green-100 overflow-auto">${colorize(q.sql)}</pre>
                     </div>
                 </div>
             `;
@@ -449,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
             headerRow.className = '';
             headers.forEach(header => {
                 const th = document.createElement('th');
-                th.className = 'p-1 bg-slate-200 border border-slate-300 text-left';
+                th.className = 'p-1 bg-slate-200 dark:bg-green-800 border border-slate-300 dark:border-green-600 text-left text-django-text dark:text-green-100';
                 th.textContent = header;
                 headerRow.appendChild(th);
             });
@@ -460,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const row = document.createElement('tr');
                 headers.forEach(header => {
                     const td = document.createElement('td');
-                    td.className = 'p-1 bg-slate-100 border border-slate-300';
+                    td.className = 'p-1 bg-slate-100 dark:bg-green-900 border border-slate-300 dark:border-green-600 text-django-text dark:text-green-100';
                     td.textContent = item[header] !== undefined ? item[header] : '';
                     row.appendChild(td);
                 });
@@ -544,26 +577,26 @@ document.addEventListener('DOMContentLoaded', function() {
             journeyDiv.setAttribute('x-data', '{ expanded: false }');
 
             journeyDiv.innerHTML = `
-                <div class="p-3 cursor-pointer hover:bg-django-secondary/20 transition-colors journey-header"
+                <div class="p-3 cursor-pointer hover:bg-django-secondary/20 dark:hover:bg-green-800/50 transition-colors journey-header"
                      data-journey-slug="${journey.slug}"
                      @click="expanded = !expanded">
                     <div class="flex items-center justify-between">
-                        <h3 class="font-semibold text-django-text">${journey.title}</h3>
-                        <svg x-show="!expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <h3 class="font-semibold text-django-text dark:text-green-200">${journey.title}</h3>
+                        <svg x-show="!expanded" class="w-4 h-4 text-django-text dark:text-green-100 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                        <svg x-show="expanded" class="w-4 h-4 text-django-text transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg x-show="expanded" class="w-4 h-4 text-django-text dark:text-green-100 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                         </svg>
                     </div>
                 </div>
                 <div x-show="expanded" x-cloak class="chapter-list">
                     ${journey.chapters.map((chapter, index) => `
-                        <div class="p-2 pl-6 hover:bg-django-secondary/20 cursor-pointer chapter-item"
+                        <div class="p-2 pl-6 hover:bg-django-secondary/20 dark:hover:bg-green-800/50 cursor-pointer chapter-item"
                              data-journey-slug="${journey.slug}"
                              data-chapter-slug="${chapter.slug}"
                              data-chapter-index="${index}">
-                            <span class="text-sm text-django-text">${chapter.title}</span>
+                            <span class="text-sm text-django-text dark:text-green-200">${chapter.title}</span>
                         </div>
                     `).join('')}
                 </div>
