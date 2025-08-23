@@ -6,7 +6,7 @@ channels-redis==4.2.1
 psycopg2-binary==2.9.10
 mysqlclient==2.2.4
 
-Django==5.2.1
+Django==5.2.5
 django-extensions==4.1
 daphne==4.1.2
 sentry-sdk[django]>=2.25.1
