@@ -26,7 +26,7 @@ def generate_mermaid_erd():
 
     # First pass: collect all referenced models from executor app
     for model in apps.get_models():
-        if model._meta.app_label != "executor":
+        if model._meta.app_label != "app":
             continue
 
         for field in model._meta.get_fields():
@@ -43,7 +43,7 @@ def generate_mermaid_erd():
     # Second pass: generate diagram
     for model in apps.get_models():
         # Only include executor models and auth models if referenced
-        if model._meta.app_label != "executor" and (
+        if model._meta.app_label != "app" and (
             model not in auth_models or not include_auth_models
         ):
             continue
