@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function colorize(query, padding = 0){
         const keywords = new Set([
-            "BEGIN", "COMMIT", "SAVEPOINT", "ROLLBACK", "TRUNCATE", "ESCAPE", "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
+            "BEGIN", "COMMIT", "SAVEPOINT", "RELEASE", "ROLLBACK", "TRUNCATE", "ESCAPE", "ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "BACKUP", "BETWEEN", "BY", "CASE", "CHECK", "COLUMN", "CONSTRAINT", "CREATE", "CROSS", "DATABASE", "DEFAULT", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN", "FALSE", "FOREIGN", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO", "IS", "JOIN", "KEY", "LEFT", "LIKE", "LIMIT", "NOT", "NULL", "ON", "OR", "ORDER", "OUTER", "PRIMARY", "REFERENCES", "RIGHT", "SELECT", "SET", "TABLE", "THEN", "TO", "TRUE", "UNION", "UNIQUE", "UPDATE", "VALUES", "VIEW", "WHEN", "WHERE", "WITH"
         ]);
 
         const lines = query.split('\n');
@@ -392,37 +392,50 @@ document.addEventListener('DOMContentLoaded', function() {
         const queryIndices = lineToQueryMap.get(lineNumber);
         if (!queryIndices || queryIndices.length === 0) return;
         
-        // Clear any existing query highlights
+        // Clear highlights and collapse ALL queries first
         document.querySelectorAll('.query-item').forEach(item => {
             item.classList.remove('query-highlighted');
+            // Collapse all queries
+            const alpineData = Alpine.$data(item);
+            if (alpineData) {
+                alpineData.expanded = false;
+            }
         });
         
-        // Highlight and expand the first matching query
-        const firstQueryIndex = queryIndices[0];
-        const queryItem = document.querySelector(`.query-item[data-query-index="${firstQueryIndex}"]`);
-        if (queryItem) {
-            // Add highlight class
-            queryItem.classList.add('query-highlighted');
-            
-            // Expand the query using Alpine.js
-            const alpineData = Alpine.$data(queryItem);
-            if (alpineData) {
-                alpineData.expanded = true;
+        // Highlight and expand ONLY the matching queries
+        queryIndices.forEach((queryIndex, i) => {
+            const queryItem = document.querySelector(`.query-item[data-query-index="${queryIndex}"]`);
+            if (queryItem) {
+                // Add highlight class
+                queryItem.classList.add('query-highlighted');
+                
+                // Expand the query using Alpine.js
+                const alpineData = Alpine.$data(queryItem);
+                if (alpineData) {
+                    alpineData.expanded = true;
+                }
+                
+                // Scroll the first query into view
+                if (i === 0) {
+                    queryItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
-            
-            // Scroll the query into view
-            queryItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Remove highlight after 3 seconds
-            setTimeout(() => {
-                queryItem.classList.remove('query-highlighted');
-            }, 3000);
-        }
+        });
+        
+        // Remove highlights after 3 seconds
+        setTimeout(() => {
+            queryIndices.forEach(queryIndex => {
+                const queryItem = document.querySelector(`.query-item[data-query-index="${queryIndex}"]`);
+                if (queryItem) {
+                    queryItem.classList.remove('query-highlighted');
+                }
+            });
+        }, 3000);
     }
 
     function fillQueries(queries, rawQueries, filters) {
         const tokenMapper = {
-            TCL: ['BEGIN', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'SET'],
+            TCL: ['BEGIN', 'COMMIT', 'ROLLBACK', 'RELEASE', 'SAVEPOINT', 'SET'],
             DDL: ['CREATE', 'ALTER', 'DROP', 'TRUNCATE'],
             SELECT: ['SELECT'],
             INSERT: ['INSERT'],
