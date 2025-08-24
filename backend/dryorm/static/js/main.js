@@ -345,11 +345,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!models_editor || !lineNumber) return;
         
         // Clear any existing highlights
-        models_editor.getAllMarks().forEach(mark => {
-            if (mark.className && mark.className.includes('query-highlight')) {
-                mark.clear();
-            }
-        });
+        for (let i = 0; i < models_editor.lineCount(); i++) {
+            models_editor.removeLineClass(i, 'background', 'query-highlight');
+        }
         
         // Convert to 0-based line number for CodeMirror
         const line = lineNumber - 1;
@@ -357,14 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if line exists
         if (line < 0 || line >= models_editor.lineCount()) return;
         
-        // Highlight the line
-        const from = {line: line, ch: 0};
-        const to = {line: line, ch: models_editor.getLine(line)?.length || 0};
-        
-        const highlight = models_editor.markText(from, to, {
-            className: 'query-highlight',
-            css: 'background-color: rgba(255, 255, 0, 0.3); border-radius: 2px;'
-        });
+        // Highlight the full line width
+        const highlight = models_editor.addLineClass(line, 'background', 'query-highlight');
         
         // Scroll to the line
         models_editor.scrollIntoView({line: line, ch: 0}, 100);
@@ -375,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Remove highlight after 3 seconds
         setTimeout(() => {
-            highlight.clear();
+            models_editor.removeLineClass(line, 'background', 'query-highlight');
         }, 3000);
         
         // Switch to code view if we're on mobile
