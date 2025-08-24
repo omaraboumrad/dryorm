@@ -77,12 +77,12 @@ class LineAwareQueryLogger:
 
             def execute_with_line_tracking(sql, params=None):
                 line_info = self.get_user_code_line()
-                
+
                 # Get the initial query count to find our new query
                 initial_query_count = len(connection.queries)
-                
+
                 result = original_execute(sql, params)
-                
+
                 # Find the new query that was just added to connection.queries
                 if len(connection.queries) > initial_query_count:
                     django_query = connection.queries[-1]
@@ -94,17 +94,17 @@ class LineAwareQueryLogger:
                         "source_context": line_info.get("source_context"),
                     }
                     self.queries.append(query_info)
-                
+
                 return result
 
             def executemany_with_line_tracking(sql, param_list):
                 line_info = self.get_user_code_line()
-                
+
                 # Get the initial query count to find our new query
                 initial_query_count = len(connection.queries)
-                
+
                 result = original_executemany(sql, param_list)
-                
+
                 # Find the new query that was just added to connection.queries
                 if len(connection.queries) > initial_query_count:
                     django_query = connection.queries[-1]
@@ -116,7 +116,7 @@ class LineAwareQueryLogger:
                         "source_context": line_info.get("source_context"),
                     }
                     self.queries.append(query_info)
-                
+
                 return result
 
             # Patch the cursor methods
@@ -148,6 +148,8 @@ class LineAwareQueryLogger:
         except Exception:
             pass
         return {}
+
+
 # End of LineAwareQueryLogger class
 
 
