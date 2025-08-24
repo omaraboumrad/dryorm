@@ -341,6 +341,51 @@ document.addEventListener('DOMContentLoaded', function() {
         return highlightedLines.join('\n');
     }
 
+    function highlightLineInEditor(lineNumber) {
+        if (!models_editor || !lineNumber) return;
+        
+        // Clear any existing highlights
+        models_editor.getAllMarks().forEach(mark => {
+            if (mark.className && mark.className.includes('query-highlight')) {
+                mark.clear();
+            }
+        });
+        
+        // Convert to 0-based line number for CodeMirror
+        const line = lineNumber - 1;
+        
+        // Check if line exists
+        if (line < 0 || line >= models_editor.lineCount()) return;
+        
+        // Highlight the line
+        const from = {line: line, ch: 0};
+        const to = {line: line, ch: models_editor.getLine(line)?.length || 0};
+        
+        const highlight = models_editor.markText(from, to, {
+            className: 'query-highlight',
+            css: 'background-color: rgba(255, 255, 0, 0.3); border-radius: 2px;'
+        });
+        
+        // Scroll to the line
+        models_editor.scrollIntoView({line: line, ch: 0}, 100);
+        
+        // Focus the editor and position cursor at the line
+        models_editor.setCursor(line, 0);
+        models_editor.focus();
+        
+        // Remove highlight after 3 seconds
+        setTimeout(() => {
+            highlight.clear();
+        }, 3000);
+        
+        // Switch to code view if we're on mobile
+        const app_state = Alpine.$data(document.querySelector('body'));
+        if (app_state.isSmall) {
+            app_state.showCode = true;
+            app_state.showResult = false;
+        }
+    }
+
     function fillQueries(queries, rawQueries, filters) {
         const tokenMapper = {
             TCL: ['BEGIN', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'SET'],
@@ -394,6 +439,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const preview = previewLines.join(' ').substring(0, 60);
             const hasMoreContent = q.sql.split('\n').length > 2 || q.sql.length > 60;
 
+            // Add line number info if available
+            const lineNumberIndicator = q.line_number 
+                ? `<span class="text-xs text-django-primary/60 dark:text-green-300 font-mono ml-2 cursor-pointer hover:text-django-primary dark:hover:text-green-200 query-line-link" data-line="${q.line_number}" title="Click to highlight line ${q.line_number}">L${q.line_number}</span>` 
+                : '';
+
             // Create the query container
             const queryDiv = document.createElement('div');
             queryDiv.className = 'border-b border-django-primary/10 dark:border-green-700 last:border-b-0 mb-2';
@@ -405,6 +455,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         <span class="text-xs px-2 py-1 rounded bg-django-primary/20 text-django-primary dark:bg-green-700 dark:text-green-100 font-medium whitespace-nowrap">${typeLabel}</span>
                         <span class="text-xs font-semibold text-django-primary/80 dark:text-green-100 whitespace-nowrap">${q.time}s</span>
+                        ${lineNumberIndicator}
                         <span class="text-xs text-django-text dark:text-green-100 truncate">${preview}${hasMoreContent ? '...' : ''}</span>
                     </div>
                     <div class="flex items-center ml-2">
@@ -424,6 +475,17 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
 
             queries.appendChild(queryDiv);
+        });
+
+        // Add click handlers for line highlighting
+        document.querySelectorAll('.query-line-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent expanding/collapsing the query
+                const lineNumber = parseInt(this.getAttribute('data-line'));
+                if (lineNumber) {
+                    highlightLineInEditor(lineNumber);
+                }
+            });
         });
     }
 
