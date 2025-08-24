@@ -1,4 +1,4 @@
-# dryorm
+# DryORM
 
 Quickly test out model configurations and transactions
 
@@ -106,3 +106,7 @@ No plans beyond what you see in the issues.
 ### Does it support other ORMs?
 
 The implementation is framework/lib agnostic, as long as you provide the executor image, you can run your code against it. DryORM [historically supported multiple executors](<https://github.com/omaraboumrad/dryorm/tree/f153aabf68f8d500317d357ceaa558da61380b2a/executors>) (Django, SQLAlchemy, Peewee), however it's been modified to prioritize Django. Nothing's stopping you from building your own executor and using it. (See the specification above)
+
+## Attributions
+
+- DryORM's line aware query logger is attributed to [Tktech](<https://github.com/TkTech>)'s [WetORM's LineAwareQueryLogger](<https://github.com/TkTech/wetorm>)
