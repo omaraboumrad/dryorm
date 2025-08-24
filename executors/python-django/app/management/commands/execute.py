@@ -39,72 +39,11 @@ def collect_ddl():
         ]
 
 
-def interpolate_sql_params(sql, params):
-    """Safely interpolate SQL parameters with proper quoting"""
-    if not params:
-        return sql
-    
-    def quote_param(param):
-        if param is None:
-            return 'NULL'
-        elif isinstance(param, str):
-            # Escape single quotes and wrap in quotes
-            return "'" + param.replace("'", "''") + "'"
-        elif isinstance(param, (int, float)):
-            return str(param)
-        elif isinstance(param, bool):
-            return 'TRUE' if param else 'FALSE'
-        else:
-            # For other types, convert to string and quote
-            return "'" + str(param).replace("'", "''") + "'"
-    
-    try:
-        if isinstance(params, (list, tuple)):
-            if params and isinstance(params[0], (list, tuple)):
-                # Multiple parameter sets (bulk operations)
-                examples = params[:3]  # Show first 3 examples
-                result_sqls = []
-                
-                for i, param_set in enumerate(examples):
-                    if isinstance(param_set, (list, tuple)):
-                        quoted_params = [quote_param(p) for p in param_set]
-                        # Replace %s with actual quoted values
-                        interpolated = sql
-                        for param in quoted_params:
-                            interpolated = interpolated.replace('%s', param, 1)
-                        result_sqls.append(interpolated)
-                
-                result = result_sqls[0]
-                if len(result_sqls) > 1:
-                    for i, additional_sql in enumerate(result_sqls[1:], 2):
-                        result += f"\n-- Example {i}:\n{additional_sql}"
-                
-                if len(params) > 3:
-                    result += f"\n-- ... and {len(params) - 3} more rows"
-                
-                return result
-            else:
-                # Single parameter set as list/tuple
-                quoted_params = [quote_param(p) for p in params]
-                interpolated = sql
-                for param in quoted_params:
-                    interpolated = interpolated.replace('%s', param, 1)
-                return interpolated
-        else:
-            # Single parameter
-            return sql.replace('%s', quote_param(params), 1)
-    except Exception:
-        # If interpolation fails, return original SQL
-        return sql
-
 def format_sql_queries(queries):
     return [
         {
             "time": q["time"],
-            "sql": sqlparse.format(
-                interpolate_sql_params(q["sql"], q.get("params")), 
-                reindent=True
-            ),
+            "sql": sqlparse.format(q["sql"], reindent=True),
             "line_number": q.get("line_number"),
             "source_context": q.get("source_context"),
         }
@@ -138,60 +77,47 @@ class LineAwareQueryLogger:
 
             def execute_with_line_tracking(sql, params=None):
                 line_info = self.get_user_code_line()
-                start_time = time.time()
-                try:
-                    result = original_execute(sql, params)
-                    execution_time = time.time() - start_time
-
-                    # Store enhanced query info
+                
+                # Get the initial query count to find our new query
+                initial_query_count = len(connection.queries)
+                
+                result = original_execute(sql, params)
+                
+                # Find the new query that was just added to connection.queries
+                if len(connection.queries) > initial_query_count:
+                    django_query = connection.queries[-1]
+                    # Use Django's actual executed SQL and timing
                     query_info = {
-                        "sql": sql,
-                        "time": f"{execution_time:.6f}",
-                        "params": params,
+                        "sql": django_query["sql"],
+                        "time": django_query["time"],
                         "line_number": line_info.get("line_number"),
                         "source_context": line_info.get("source_context"),
                     }
                     self.queries.append(query_info)
-                    return result
-                except Exception as e:
-                    execution_time = time.time() - start_time
-                    query_info = {
-                        "sql": sql,
-                        "time": f"{execution_time:.6f}",
-                        "params": params,
-                        "line_number": line_info.get("line_number"),
-                        "source_context": line_info.get("source_context"),
-                    }
-                    self.queries.append(query_info)
-                    raise
+                
+                return result
 
             def executemany_with_line_tracking(sql, param_list):
                 line_info = self.get_user_code_line()
-                start_time = time.time()
-                try:
-                    result = original_executemany(sql, param_list)
-                    execution_time = time.time() - start_time
-
+                
+                # Get the initial query count to find our new query
+                initial_query_count = len(connection.queries)
+                
+                result = original_executemany(sql, param_list)
+                
+                # Find the new query that was just added to connection.queries
+                if len(connection.queries) > initial_query_count:
+                    django_query = connection.queries[-1]
+                    # Use Django's actual executed SQL and timing
                     query_info = {
-                        "sql": sql,
-                        "time": f"{execution_time:.6f}",
-                        "params": param_list,
+                        "sql": django_query["sql"],
+                        "time": django_query["time"],
                         "line_number": line_info.get("line_number"),
                         "source_context": line_info.get("source_context"),
                     }
                     self.queries.append(query_info)
-                    return result
-                except Exception as e:
-                    execution_time = time.time() - start_time
-                    query_info = {
-                        "sql": sql,
-                        "time": f"{execution_time:.6f}",
-                        "params": param_list,
-                        "line_number": line_info.get("line_number"),
-                        "source_context": line_info.get("source_context"),
-                    }
-                    self.queries.append(query_info)
-                    raise
+                
+                return result
 
             # Patch the cursor methods
             cursor.execute = execute_with_line_tracking
