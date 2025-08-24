@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Store raw data
     let rawOutput = '';
     let rawQueries = [];
+    let lineToQueryMap = new Map(); // Maps line numbers to query indices
 
     // Setup copy buttons for static sections
     setupCopyButton(document.querySelector('[data-section="output-section"] .copy-indicator'), () => rawOutput);
@@ -116,6 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     models_editor.setSize("100%", "100%");
+
+    // Add cursor position change listener for query highlighting
+    models_editor.on('cursorActivity', function(cm) {
+        const cursor = cm.getCursor();
+        const currentLine = cursor.line + 1; // Convert to 1-based line number
+        highlightQueryForLine(currentLine);
+    });
 
     // --- Websocket ---
     var socket = null;
@@ -378,6 +386,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function highlightQueryForLine(lineNumber) {
+        if (!lineNumber || !lineToQueryMap.has(lineNumber)) return;
+        
+        const queryIndices = lineToQueryMap.get(lineNumber);
+        if (!queryIndices || queryIndices.length === 0) return;
+        
+        // Clear any existing query highlights
+        document.querySelectorAll('.query-item').forEach(item => {
+            item.classList.remove('query-highlighted');
+        });
+        
+        // Highlight and expand the first matching query
+        const firstQueryIndex = queryIndices[0];
+        const queryItem = document.querySelector(`.query-item[data-query-index="${firstQueryIndex}"]`);
+        if (queryItem) {
+            // Add highlight class
+            queryItem.classList.add('query-highlighted');
+            
+            // Expand the query using Alpine.js
+            const alpineData = Alpine.$data(queryItem);
+            if (alpineData) {
+                alpineData.expanded = true;
+            }
+            
+            // Scroll the query into view
+            queryItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Remove highlight after 3 seconds
+            setTimeout(() => {
+                queryItem.classList.remove('query-highlighted');
+            }, 3000);
+        }
+    }
+
     function fillQueries(queries, rawQueries, filters) {
         const tokenMapper = {
             TCL: ['BEGIN', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'SET'],
@@ -421,8 +463,19 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Clear the container and create individual collapsible query elements
+        // Clear the container and build line-to-query mapping
         queries.innerHTML = '';
+        lineToQueryMap.clear();
+
+        // Build the line-to-query mapping
+        filtered.forEach((q, index) => {
+            if (q.line_number) {
+                if (!lineToQueryMap.has(q.line_number)) {
+                    lineToQueryMap.set(q.line_number, []);
+                }
+                lineToQueryMap.get(q.line_number).push(index);
+            }
+        });
 
         filtered.forEach((q, index) => {
             const types = getTypes(q.sql);
@@ -438,8 +491,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Create the query container
             const queryDiv = document.createElement('div');
-            queryDiv.className = 'border-b border-django-primary/10 dark:border-green-700 last:border-b-0 mb-2';
+            queryDiv.className = 'query-item border-b border-django-primary/10 dark:border-green-700 last:border-b-0 mb-2';
             queryDiv.setAttribute('x-data', '{ expanded: false }');
+            queryDiv.setAttribute('data-query-index', index);
 
             queryDiv.innerHTML = `
                 <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-django-secondary/10 dark:hover:bg-green-700 rounded-sm"
