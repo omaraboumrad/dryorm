@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check for saved theme preference or default to 'light' mode
     const theme = localStorage.getItem('theme') || 'light';
-    
+
     // Apply theme and update icons
     function applyTheme(theme) {
         if (theme === 'dark') {
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     themeToggle.addEventListener('click', function() {
         const currentTheme = localStorage.getItem('theme') || 'light';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+
         localStorage.setItem('theme', newTheme);
         applyTheme(newTheme);
     });
@@ -351,33 +351,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function highlightLineInEditor(lineNumber) {
         if (!models_editor || !lineNumber) return;
-        
+
         // Clear any existing highlights
         for (let i = 0; i < models_editor.lineCount(); i++) {
             models_editor.removeLineClass(i, 'background', 'query-highlight');
         }
-        
+
         // Convert to 0-based line number for CodeMirror
         const line = lineNumber - 1;
-        
+
         // Check if line exists
         if (line < 0 || line >= models_editor.lineCount()) return;
-        
+
         // Highlight the full line width
         const highlight = models_editor.addLineClass(line, 'background', 'query-highlight');
-        
+
         // Scroll to the line
         models_editor.scrollIntoView({line: line, ch: 0}, 100);
-        
+
         // Focus the editor and position cursor at the line
         models_editor.setCursor(line, 0);
         models_editor.focus();
-        
+
         // Remove highlight after 3 seconds
         setTimeout(() => {
             models_editor.removeLineClass(line, 'background', 'query-highlight');
         }, 3000);
-        
+
         // Switch to code view if we're on mobile
         const app_state = Alpine.$data(document.querySelector('body'));
         if (app_state.isSmall) {
@@ -388,10 +388,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function highlightQueryForLine(lineNumber) {
         if (!lineNumber || !lineToQueryMap.has(lineNumber)) return;
-        
+
         const queryIndices = lineToQueryMap.get(lineNumber);
         if (!queryIndices || queryIndices.length === 0) return;
-        
+
         // Clear highlights and collapse ALL queries first
         document.querySelectorAll('.query-item').forEach(item => {
             item.classList.remove('query-highlighted');
@@ -401,27 +401,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 alpineData.expanded = false;
             }
         });
-        
+
         // Highlight and expand ONLY the matching queries
         queryIndices.forEach((queryIndex, i) => {
             const queryItem = document.querySelector(`.query-item[data-query-index="${queryIndex}"]`);
             if (queryItem) {
                 // Add highlight class
                 queryItem.classList.add('query-highlighted');
-                
+
                 // Expand the query using Alpine.js
                 const alpineData = Alpine.$data(queryItem);
                 if (alpineData) {
                     alpineData.expanded = true;
                 }
-                
+
                 // Scroll the first query into view
                 if (i === 0) {
                     queryItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         });
-        
+
         // Remove highlights after 3 seconds
         setTimeout(() => {
             queryIndices.forEach(queryIndex => {
@@ -498,8 +498,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasMoreContent = q.sql.split('\n').length > 2 || q.sql.length > 60;
 
             // Add line number info if available
-            const lineNumberIndicator = q.line_number 
-                ? `<span class="text-xs text-django-primary/60 dark:text-green-300 font-mono ml-2 cursor-pointer hover:text-django-primary dark:hover:text-green-200 query-line-link" data-line="${q.line_number}" title="Click to highlight line ${q.line_number}">L${q.line_number}</span>` 
+            const lineNumberIndicator = q.line_number
+                ? `<span class="text-xs text-django-primary/60 dark:text-green-300 font-mono ml-2 cursor-pointer hover:text-django-primary dark:hover:text-green-200 query-line-link" data-line="${q.line_number}" title="Click to highlight line ${q.line_number}">L${q.line_number}</span>`
                 : '';
 
             // Create the query container

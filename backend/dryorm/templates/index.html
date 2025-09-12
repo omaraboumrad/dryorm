@@ -75,7 +75,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 </div>
 
 <!-- CODE/RESULT Panel Container -->
-<div class="flex items-center gap-0.5 flex-1 h-full overflow-hidden">
+<div class="flex items-center gap-0.5 flex-1 h-full overflow-auto">
     <!-- Code Panel -->
     <div class="bg-white dark:bg-green-900 flex flex-col h-full w-full overflow-hidden" 
          x-show="!isSmall ? showCode : (showCode && !showResult)" 
@@ -86,7 +86,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
     </div>
     
     <!-- Result Panel -->
-    <div class="bg-django-secondary/10 dark:bg-[#0f2e1e] flex flex-col h-full w-full overflow-auto" 
+    <div class="bg-django-secondary/10 dark:bg-[#0f2e1e] flex flex-col h-full w-full overflow-y-auto" 
          x-show="!isSmall ? showResult : (showResult && !showCode)" 
          x-cloak>
         <c-section title="Output" id="output-section" background="bg-django-secondary/20">
