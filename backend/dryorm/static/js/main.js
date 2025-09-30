@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
         lineNumbers: true,
+        gutters: ["CodeMirror-linenumbers", "query-markers"],
         indentUnit: 4,
         insertSoftTabs: true,
         indentWithTabs: false,
@@ -389,8 +390,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function highlightQueryForLine(lineNumber) {
         if (!lineNumber || !lineToQueryMap.has(lineNumber)) return;
 
-        const queryIndices = lineToQueryMap.get(lineNumber);
-        if (!queryIndices || queryIndices.length === 0) return;
+        const queries = lineToQueryMap.get(lineNumber);
+        if (!queries || queries.length === 0) return;
 
         // Clear highlights and collapse ALL queries first
         document.querySelectorAll('.query-item').forEach(item => {
@@ -402,35 +403,190 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Highlight and expand ONLY the matching queries
-        queryIndices.forEach((queryIndex, i) => {
-            const queryItem = document.querySelector(`.query-item[data-query-index="${queryIndex}"]`);
-            if (queryItem) {
-                // Add highlight class
-                queryItem.classList.add('query-highlighted');
+        // Highlight and expand ONLY the matching queries by finding items with matching SQL
+        queries.forEach((query, i) => {
+            // Find query items by matching SQL content (since we don't have a stable ID)
+            document.querySelectorAll('.query-item').forEach(item => {
+                const itemSql = item.querySelector('pre')?.textContent;
+                // Match by comparing the SQL - remove colorization markup for comparison
+                const cleanItemSql = itemSql?.replace(/<[^>]*>/g, '').trim();
+                const cleanQuerySql = query.sql.trim();
 
-                // Expand the query using Alpine.js
-                const alpineData = Alpine.$data(queryItem);
-                if (alpineData) {
-                    alpineData.expanded = true;
-                }
+                if (cleanItemSql === cleanQuerySql) {
+                    // Add highlight class
+                    item.classList.add('query-highlighted');
 
-                // Scroll the first query into view
-                if (i === 0) {
-                    queryItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Expand the query using Alpine.js
+                    const alpineData = Alpine.$data(item);
+                    if (alpineData) {
+                        alpineData.expanded = true;
+                    }
+
+                    // Scroll the first query into view
+                    if (i === 0) {
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
-            }
+            });
         });
 
         // Remove highlights after 3 seconds
         setTimeout(() => {
-            queryIndices.forEach(queryIndex => {
-                const queryItem = document.querySelector(`.query-item[data-query-index="${queryIndex}"]`);
-                if (queryItem) {
-                    queryItem.classList.remove('query-highlighted');
-                }
+            document.querySelectorAll('.query-item.query-highlighted').forEach(item => {
+                item.classList.remove('query-highlighted');
             });
         }, 3000);
+    }
+
+    function updateQueryMarkers() {
+        if (!models_editor || !lineToQueryMap) return;
+
+        // Clear all existing markers
+        models_editor.clearGutter("query-markers");
+
+        // Add markers for lines with queries
+        lineToQueryMap.forEach((queries, lineNumber) => {
+            const line = lineNumber - 1; // Convert to 0-based
+            if (line >= 0 && line < models_editor.lineCount()) {
+                const marker = document.createElement("div");
+                marker.className = "query-marker";
+                marker.innerHTML = "●";
+                marker.title = `${queries.length} ${queries.length === 1 ? 'query' : 'queries'}`;
+                models_editor.setGutterMarker(line, "query-markers", marker);
+            }
+        });
+
+        // Add hover listeners
+        addQueryHoverListeners();
+    }
+
+    // Create popup element for displaying queries on hover
+    let queryPopup = null;
+
+    function createQueryPopup() {
+        if (queryPopup) return queryPopup;
+
+        queryPopup = document.createElement('div');
+        queryPopup.id = 'query-popup';
+        queryPopup.style.cssText = `
+            position: absolute;
+            display: none;
+            background: white;
+            border: 2px solid #44B78B;
+            border-radius: 4px;
+            padding: 12px;
+            max-width: 500px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        `;
+        document.body.appendChild(queryPopup);
+        return queryPopup;
+    }
+
+    function showQueryPopup(lineNumber, x, y) {
+        const popup = createQueryPopup();
+        const queries = lineToQueryMap.get(lineNumber);
+
+        if (!queries || queries.length === 0) {
+            hideQueryPopup();
+            return;
+        }
+
+        // Build popup content
+        let content = '';
+        queries.forEach((query, index) => {
+            if (index > 0) content += '<hr style="margin: 8px 0; border: 1px solid #e5e7eb;">';
+            content += `<div style="margin-bottom: 4px;">`;
+            content += `<span style="color: #0C4B33; font-weight: bold;">${query.time}s</span>`;
+            content += `</div>`;
+            content += `<pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #333;">${escapeHtml(query.sql)}</pre>`;
+        });
+
+        popup.innerHTML = content;
+
+        // Check if dark mode is active
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        if (isDarkMode) {
+            popup.style.background = '#0f2e1e';
+            popup.style.border = '2px solid #34d399';
+            popup.style.color = '#d1fae5';
+        } else {
+            popup.style.background = 'white';
+            popup.style.border = '2px solid #44B78B';
+            popup.style.color = '#333';
+        }
+
+        // Position the popup
+        popup.style.left = x + 'px';
+        popup.style.top = (y + 5) + 'px';
+        popup.style.display = 'block';
+
+        // Adjust position if popup goes off screen
+        setTimeout(() => {
+            const rect = popup.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                popup.style.left = (window.innerWidth - rect.width - 10) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                popup.style.top = (y - rect.height - 5) + 'px';
+            }
+        }, 0);
+    }
+
+    function hideQueryPopup() {
+        if (queryPopup) {
+            queryPopup.style.display = 'none';
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Store mouse move handler reference for removal
+    let mouseMoveHandler = null;
+    let mouseOutHandler = null;
+
+    function addQueryHoverListeners() {
+        const codeMirrorElement = models_editor.getWrapperElement();
+
+        mouseMoveHandler = function(e) {
+            // Get the coordinates relative to the CodeMirror instance
+            const pos = models_editor.coordsChar({left: e.clientX, top: e.clientY});
+            const lineNumber = pos.line + 1; // Convert to 1-based
+
+            if (lineToQueryMap.has(lineNumber)) {
+                showQueryPopup(lineNumber, e.pageX, e.pageY);
+            } else {
+                hideQueryPopup();
+            }
+        };
+
+        mouseOutHandler = function(e) {
+            // Check if mouse left the CodeMirror area
+            if (!codeMirrorElement.contains(e.relatedTarget)) {
+                hideQueryPopup();
+            }
+        };
+
+        codeMirrorElement.addEventListener('mousemove', mouseMoveHandler);
+        codeMirrorElement.addEventListener('mouseout', mouseOutHandler);
+    }
+
+    function removeQueryHoverListeners() {
+        if (mouseMoveHandler) {
+            const codeMirrorElement = models_editor.getWrapperElement();
+            codeMirrorElement.removeEventListener('mousemove', mouseMoveHandler);
+            codeMirrorElement.removeEventListener('mouseout', mouseOutHandler);
+            mouseMoveHandler = null;
+            mouseOutHandler = null;
+        }
     }
 
     function fillQueries(queries, rawQueries, filters) {
@@ -480,13 +636,13 @@ document.addEventListener('DOMContentLoaded', function() {
         queries.innerHTML = '';
         lineToQueryMap.clear();
 
-        // Build the line-to-query mapping
+        // Build the line-to-query mapping (store actual query objects, not indices)
         filtered.forEach((q, index) => {
             if (q.line_number) {
                 if (!lineToQueryMap.has(q.line_number)) {
                     lineToQueryMap.set(q.line_number, []);
                 }
-                lineToQueryMap.get(q.line_number).push(index);
+                lineToQueryMap.get(q.line_number).push(q);
             }
         });
 
@@ -546,6 +702,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+
+        // Update query markers in the editor
+        updateQueryMarkers();
     }
 
 

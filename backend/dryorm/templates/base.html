@@ -54,11 +54,32 @@
             .cm-builtin { color: #0C4B33 !important;}
             .cm-comment { color: gray !important;}
 
+            /* Query marker gutter */
+            .CodeMirror-gutters .query-markers {
+                width: 15px !important;
+            }
+
+            .query-marker {
+                color: #44B78B;
+                font-size: 10px;
+                cursor: pointer;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+            }
+
             /* Query highlight styles */
             .query-highlight {
                 background-color: #44b78b1a !important;
             }
-            
+
+            /* Persistent query highlight (for highlight all button) */
+            .query-highlight-persistent {
+                background-color: #44b78b1a !important;
+            }
+
             /* Query item highlight styles */
             .query-highlighted {
                 background-color: #44b78b1a !important;
@@ -80,12 +101,22 @@
             .dark .cm-keyword { color: #34d399 !important; font-weight: bold; }
             .dark .cm-builtin { color: #34d399 !important;}
             .dark .cm-comment { color: #86efac !important;}
+
+            /* Dark mode query marker */
+            .dark .query-marker {
+                color: #34d399;
+            }
             
             /* Dark mode query highlight */
             .dark .query-highlight {
                 background-color: #1a5c34 !important;
             }
-            
+
+            /* Dark mode persistent query highlight */
+            .dark .query-highlight-persistent {
+                background-color: #1a5c34 !important;
+            }
+
             /* Dark mode query item highlight */
             .dark .query-highlighted {
                 background-color: #1a5c34 !important;
