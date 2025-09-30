@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var models_editor = CodeMirror.fromTextArea(document.getElementById('code_models'), {
         mode: "python",
         lineNumbers: true,
-        gutters: ["CodeMirror-linenumbers", "query-markers"],
         indentUnit: 4,
         insertSoftTabs: true,
         indentWithTabs: false,
@@ -441,18 +440,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateQueryMarkers() {
         if (!models_editor || !lineToQueryMap) return;
 
-        // Clear all existing markers
-        models_editor.clearGutter("query-markers");
+        // Clear all existing line number styling
+        for (let i = 0; i < models_editor.lineCount(); i++) {
+            models_editor.removeLineClass(i, 'gutter', 'has-query');
+            models_editor.removeLineClass(i, 'wrap', 'has-query');
+        }
 
-        // Add markers for lines with queries
+        // Add styling to line numbers with queries
         lineToQueryMap.forEach((queries, lineNumber) => {
             const line = lineNumber - 1; // Convert to 0-based
             if (line >= 0 && line < models_editor.lineCount()) {
-                const marker = document.createElement("div");
-                marker.className = "query-marker";
-                marker.innerHTML = "●";
-                marker.title = `${queries.length} ${queries.length === 1 ? 'query' : 'queries'}`;
-                models_editor.setGutterMarker(line, "query-markers", marker);
+                models_editor.addLineClass(line, 'gutter', 'has-query');
+                models_editor.addLineClass(line, 'wrap', 'has-query');
             }
         });
 

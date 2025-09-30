@@ -54,20 +54,17 @@
             .cm-builtin { color: #0C4B33 !important;}
             .cm-comment { color: gray !important;}
 
-            /* Query marker gutter */
-            .CodeMirror-gutters .query-markers {
-                width: 15px !important;
+            /* Line numbers with queries */
+            .has-query .CodeMirror-linenumber {
+                color: #0C4B33 !important;
+                font-weight: bold !important;
+                background-color: #44b78b1a !important;
+                border-radius: 2px;
             }
 
-            .query-marker {
-                color: #44B78B;
-                font-size: 10px;
-                cursor: pointer;
-                text-align: center;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
+            /* Highlight line on hover */
+            .has-query:hover {
+                background-color: #44b78b1a !important;
             }
 
             /* Query highlight styles */
@@ -102,9 +99,16 @@
             .dark .cm-builtin { color: #34d399 !important;}
             .dark .cm-comment { color: #86efac !important;}
 
-            /* Dark mode query marker */
-            .dark .query-marker {
-                color: #34d399;
+            /* Dark mode line numbers with queries */
+            .dark .has-query .CodeMirror-linenumber {
+                color: #10b981 !important;
+                font-weight: bold !important;
+                background-color: #1a5c34 !important;
+            }
+
+            /* Dark mode highlight line on hover */
+            .dark .has-query:hover {
+                background-color: #1a5c34 !important;
             }
             
             /* Dark mode query highlight */
