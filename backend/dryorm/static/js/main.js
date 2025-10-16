@@ -112,8 +112,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
                 cm.replaceSelection(spaces);
             },
-            'Ctrl-Enter': (cm) => execute(),
-            'Cmd-Enter': (cm) => execute(),
+        }
+    });
+
+    // Handle Ctrl/Cmd+Enter with optional Shift for no-cache
+    models_editor.on('keydown', function(cm, event) {
+        const isEnter = event.key === 'Enter' || event.keyCode === 13;
+        const isCtrlOrCmd = event.ctrlKey || event.metaKey;
+
+        if (isEnter && isCtrlOrCmd) {
+            event.preventDefault();
+            execute(event.shiftKey);
         }
     });
     models_editor.setSize("100%", "100%");
@@ -218,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 
 
-    function execute() {
+    function execute(forceNoCache = false) {
         app_state.loading = true;
         output.textContent = 'loading...';
         queries.innerHTML = 'loading...';
@@ -247,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var payload = JSON.stringify({
             code: models_editor.getValue(),
-            ignore_cache: ignore_cache.checked,
+            ignore_cache: forceNoCache || ignore_cache.checked,
             database: database_select.value,
         });
 
