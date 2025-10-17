@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent horizontal scrolling on body/html */
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
 /* HTMX indicator styles */
 .htmx-indicator {
     opacity: 0;
@@ -113,4 +119,23 @@
 .dark .query-highlighted {
     background-color: #1a5c34 !important;
     border-color: #34d399 !important;
+}
+
+/* Force CodeMirror to respect container width */
+.cm-editor {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.cm-scroller {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+}
+
+.cm-content {
+    max-width: 100% !important;
+}
+
+.cm-line {
+    max-width: none !important;
 }

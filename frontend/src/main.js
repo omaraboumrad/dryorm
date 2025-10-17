@@ -34,18 +34,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-window.addEventListener('resize', function() {
-    const app_state = Alpine.$data(document.querySelector('body'));
-    const wasSmall = app_state.isSmall;
-    app_state.isSmall = window.innerWidth < 1024;
-
-    if (!wasSmall && app_state.isSmall && app_state.showCode && app_state.showResult) {
-        app_state.showResult = false;
-    }
-    else if (wasSmall && !app_state.isSmall && app_state.showCode) {
-        app_state.showResult = true;
-    }
-});
+// Resize listener removed - now using pure CSS media queries
 
 document.addEventListener('DOMContentLoaded', function() {
     var app_state = Alpine.$data(document.querySelector('body'));
@@ -161,9 +150,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 cursorPositionListener,
                 lineHighlightCompartment.of([]),
                 EditorView.theme({
-                    '&': { height: '100%' },
-                    '.cm-scroller': { overflow: 'auto' },
-                    '.cm-content': { fontFamily: 'monospace' },
+                    '&': { height: '100%', width: '100%', maxWidth: '100%' },
+                    '.cm-scroller': { overflow: 'auto', maxWidth: '100%' },
+                    '.cm-content': { fontFamily: 'monospace', maxWidth: '100%' },
                 }),
                 EditorState.tabSize.of(4),
             ],
@@ -295,10 +284,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (app_state.isSmall) {
+        // On mobile (<1024px), switch to result view
+        if (window.innerWidth < 1024) {
             app_state.showCode = false;
+            app_state.showResult = true;
         }
-        app_state.showResult = true;
 
         var payload = JSON.stringify({
             code: code,
@@ -418,9 +408,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Focus the editor
         models_editor.focus();
 
-        // Switch to code view if we're on mobile
-        const app_state = Alpine.$data(document.querySelector('body'));
-        if (app_state.isSmall) {
+        // Switch to code view if we're on mobile (<1024px)
+        if (window.innerWidth < 1024) {
+            const app_state = Alpine.$data(document.querySelector('body'));
             app_state.showCode = true;
             app_state.showResult = false;
         }
