@@ -296,8 +296,6 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 
 {{ templates|json_script:'templates' }}
 {{ journeys|json_script:'journeys' }}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0/mode/python/python.min.js"></script>
 
-<script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+<script type="module" src="{% static 'dist/main.js' %}"></script>
 {% endblock %}

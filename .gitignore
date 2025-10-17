@@ -104,3 +104,11 @@ db.sqlite3
 
 backend/static
 backend/cache
+
+# Node.js
+frontend/node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+backend/dryorm/static/dist/.vite/
