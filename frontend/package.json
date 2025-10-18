@@ -21,5 +21,8 @@
     "@codemirror/lang-python": "^6.0.0",
     "@codemirror/language": "^6.0.0",
     "@lezer/highlight": "^1.0.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "*"
   }
 }
