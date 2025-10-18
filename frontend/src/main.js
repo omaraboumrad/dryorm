@@ -19,20 +19,27 @@ const customHighlightStyle = HighlightStyle.define([
 
 // Query line marker for gutter
 class QueryLineMarker extends GutterMarker {
+    constructor(count) {
+        super();
+        this.count = count;
+    }
+
     toDOM() {
-        return document.createTextNode("●");
+        return document.createTextNode(this.count > 1 ? String(this.count) : "●");
+    }
+
+    eq(other) {
+        return other instanceof QueryLineMarker && other.count === this.count;
     }
 }
-
-const queryLineMarker = new QueryLineMarker();
 
 // Effect to update query lines
 const setQueryLines = StateEffect.define();
 
-// State field to track lines with queries
+// State field to track lines with queries (now stores Map of position -> count)
 const queryLinesField = StateField.define({
     create() {
-        return new Set();
+        return new Map();
     },
     update(value, tr) {
         for (let effect of tr.effects) {
@@ -51,25 +58,25 @@ const queryLineGutter = gutter({
         const queryLines = view.state.field(queryLinesField);
         const builder = new RangeSetBuilder();
 
-        // Convert Set to Array and sort positions (RangeSetBuilder requires sorted order)
-        const positions = Array.from(queryLines).sort((a, b) => a - b);
-        for (let pos of positions) {
-            builder.add(pos, pos, queryLineMarker);
+        // Convert Map to Array and sort positions (RangeSetBuilder requires sorted order)
+        const positions = Array.from(queryLines.entries()).sort((a, b) => a[0] - b[0]);
+        for (let [pos, count] of positions) {
+            builder.add(pos, pos, new QueryLineMarker(count));
         }
 
         return builder.finish();
     },
-    initialSpacer: () => queryLineMarker,
+    initialSpacer: () => new QueryLineMarker(1),
 });
 
 // Theme for query line markers
 const queryLineTheme = EditorView.baseTheme({
     ".cm-query-gutter": {
         color: "#44B78B",
-        paddingLeft: "3px",
-        paddingRight: "3px",
+        paddingLeft: "4px",
+        paddingRight: "4px",
         fontWeight: "bold",
-        width: "1.5em",
+        minWidth: "1.8em",
         textAlign: "center",
     },
     ".dark .cm-query-gutter": {
@@ -530,13 +537,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateQueryMarkers() {
         // Update the query line markers in the gutter
-        const queryLinePositions = new Set();
+        const queryLinePositions = new Map();
 
-        // Convert line numbers to document positions
+        // Convert line numbers to document positions and count queries per line
         lineToQueryMap.forEach((queries, lineNumber) => {
             if (lineNumber > 0 && lineNumber <= models_editor.state.doc.lines) {
                 const line = models_editor.state.doc.line(lineNumber);
-                queryLinePositions.add(line.from);
+                queryLinePositions.set(line.from, queries.length);
             }
         });
 
@@ -581,13 +588,35 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Group queries by template
+        const templateGroups = new Map();
+        queries.forEach(query => {
+            const template = query.template || query.sql;
+            if (!templateGroups.has(template)) {
+                templateGroups.set(template, []);
+            }
+            templateGroups.get(template).push(query);
+        });
+
         let content = '';
-        queries.forEach((query, index) => {
-            if (index > 0) content += '<hr style="margin: 8px 0; border: 1px solid #e5e7eb;">';
-            content += `<div style="margin-bottom: 4px;">`;
-            content += `<span style="color: #0C4B33; font-weight: bold;">${query.time}s</span>`;
+        let groupIndex = 0;
+        templateGroups.forEach((groupQueries, template) => {
+            if (groupIndex > 0) content += '<hr style="margin: 8px 0; border: 1px solid #e5e7eb;">';
+
+            const totalTime = groupQueries.reduce((sum, q) => sum + parseFloat(q.time), 0).toFixed(3);
+            const count = groupQueries.length;
+
+            content += `<div style="margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">`;
+            content += `<span style="color: #0C4B33; font-weight: bold;">${totalTime}s</span>`;
+
+            if (count > 1) {
+                content += `<span style="color: #dc2626; font-weight: bold; margin-left: 8px;">${count} Similar</span>`;
+            }
+
             content += `</div>`;
-            content += `<pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #333;">${escapeHtml(query.sql)}</pre>`;
+            content += `<pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #333;">${escapeHtml(template)}</pre>`;
+
+            groupIndex++;
         });
 
         popup.innerHTML = content;

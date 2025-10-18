@@ -44,6 +44,7 @@ def format_sql_queries(queries):
         {
             "time": q["time"],
             "sql": sqlparse.format(q["sql"], reindent=True),
+            "template": sqlparse.format(q.get("template", q["sql"]), reindent=True),
             "line_number": q.get("line_number"),
             "source_context": q.get("source_context"),
         }
@@ -89,6 +90,7 @@ class LineAwareQueryLogger:
                     # Use Django's actual executed SQL and timing
                     query_info = {
                         "sql": django_query["sql"],
+                        "template": sql,  # Store the SQL template before interpolation
                         "time": django_query["time"],
                         "line_number": line_info.get("line_number"),
                         "source_context": line_info.get("source_context"),
@@ -111,6 +113,7 @@ class LineAwareQueryLogger:
                     # Use Django's actual executed SQL and timing
                     query_info = {
                         "sql": django_query["sql"],
+                        "template": sql,  # Store the SQL template before interpolation
                         "time": django_query["time"],
                         "line_number": line_info.get("line_number"),
                         "source_context": line_info.get("source_context"),
