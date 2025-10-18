@@ -1,9 +1,10 @@
 import './styles.css';
-import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLine } from '@codemirror/view';
-import { EditorState, Compartment } from '@codemirror/state';
+import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLine, gutter, GutterMarker } from '@codemirror/view';
+import { EditorState, Compartment, StateField, StateEffect, RangeSetBuilder } from '@codemirror/state';
 import { defaultKeymap, indentWithTab, history, historyKeymap } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
 import { syntaxHighlighting, defaultHighlightStyle, HighlightStyle, indentUnit } from '@codemirror/language';
+// import { autocompletion } from '@codemirror/autocomplete';
 import { tags } from '@lezer/highlight';
 
 // Custom theme for syntax highlighting
@@ -15,6 +16,66 @@ const customHighlightStyle = HighlightStyle.define([
     { tag: tags.definitionKeyword, color: '#0C4B33', fontWeight: 'bold' },
     { tag: tags.comment, color: 'gray' },
 ]);
+
+// Query line marker for gutter
+class QueryLineMarker extends GutterMarker {
+    toDOM() {
+        return document.createTextNode("●");
+    }
+}
+
+const queryLineMarker = new QueryLineMarker();
+
+// Effect to update query lines
+const setQueryLines = StateEffect.define();
+
+// State field to track lines with queries
+const queryLinesField = StateField.define({
+    create() {
+        return new Set();
+    },
+    update(value, tr) {
+        for (let effect of tr.effects) {
+            if (effect.is(setQueryLines)) {
+                return effect.value;
+            }
+        }
+        return value;
+    }
+});
+
+// Gutter for query line markers
+const queryLineGutter = gutter({
+    class: "cm-query-gutter",
+    markers: view => {
+        const queryLines = view.state.field(queryLinesField);
+        const builder = new RangeSetBuilder();
+
+        // Convert Set to Array and sort positions (RangeSetBuilder requires sorted order)
+        const positions = Array.from(queryLines).sort((a, b) => a - b);
+        for (let pos of positions) {
+            builder.add(pos, pos, queryLineMarker);
+        }
+
+        return builder.finish();
+    },
+    initialSpacer: () => queryLineMarker,
+});
+
+// Theme for query line markers
+const queryLineTheme = EditorView.baseTheme({
+    ".cm-query-gutter": {
+        color: "#44B78B",
+        paddingLeft: "3px",
+        paddingRight: "3px",
+        fontWeight: "bold",
+        width: "1.5em",
+        textAlign: "center",
+    },
+    ".dark .cm-query-gutter": {
+        color: "#34d399 !important",
+    }
+});
 
 // Line highlighting extension
 const lineHighlightCompartment = new Compartment();
@@ -145,6 +206,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 highlightActiveLine(),
                 python(),
                 syntaxHighlighting(customHighlightStyle),
+                // autocompletion(),
+                queryLinesField,
+                queryLineGutter,
+                queryLineTheme,
                 keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
                 executeKeymap,
                 cursorPositionListener,
@@ -278,6 +343,10 @@ document.addEventListener('DOMContentLoaded', function() {
         erd_link.onclick = null;
 
         document.getElementById('returned-data').innerHTML = '';
+
+        // Clear query markers
+        lineToQueryMap.clear();
+        updateQueryMarkers();
 
         const code = getEditorValue();
         if (code.trim() === '') {
@@ -460,8 +529,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateQueryMarkers() {
-        // This function would mark lines with queries in CodeMirror 6
-        // For now, we'll skip this as it requires custom decorations
+        // Update the query line markers in the gutter
+        const queryLinePositions = new Set();
+
+        // Convert line numbers to document positions
+        lineToQueryMap.forEach((queries, lineNumber) => {
+            if (lineNumber > 0 && lineNumber <= models_editor.state.doc.lines) {
+                const line = models_editor.state.doc.line(lineNumber);
+                queryLinePositions.add(line.from);
+            }
+        });
+
+        // Dispatch the effect to update query line markers
+        models_editor.dispatch({
+            effects: setQueryLines.of(queryLinePositions)
+        });
     }
 
     let queryPopup = null;
@@ -608,13 +690,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (filters.selectedREVERSE) filtered.reverse();
 
-        if (filtered.length === 0) {
-            queries.innerHTML = '<span class="p-2 text-sm">No queries</span>';
-            return;
-        }
-
         queries.innerHTML = '';
         lineToQueryMap.clear();
+
+        if (filtered.length === 0) {
+            queries.innerHTML = '<span class="p-2 text-sm">No queries</span>';
+            updateQueryMarkers();
+            return;
+        }
 
         filtered.forEach((q, index) => {
             if (q.line_number) {
