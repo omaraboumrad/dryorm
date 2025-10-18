@@ -3,7 +3,7 @@ import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightSp
 import { EditorState, Compartment } from '@codemirror/state';
 import { defaultKeymap, indentWithTab, history, historyKeymap } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
-import { syntaxHighlighting, defaultHighlightStyle, HighlightStyle } from '@codemirror/language';
+import { syntaxHighlighting, defaultHighlightStyle, HighlightStyle, indentUnit } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 
 // Custom theme for syntax highlighting
@@ -11,7 +11,7 @@ const customHighlightStyle = HighlightStyle.define([
     { tag: tags.string, color: '#164', fontWeight: '500' },
     { tag: tags.number, color: '#164' },
     { tag: tags.keyword, color: '#0C4B33', fontWeight: 'bold' },
-    { tag: tags.variableName, color: '#0C4B33', fontWeight: 'bold' },
+    //{ tag: tags.variableName, color: '#0C4B33', fontWeight: 'bold' },
     { tag: tags.definitionKeyword, color: '#0C4B33', fontWeight: 'bold' },
     { tag: tags.comment, color: 'gray' },
 ]);
@@ -155,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '.cm-content': { fontFamily: 'monospace', maxWidth: '100%' },
                 }),
                 EditorState.tabSize.of(4),
+                indentUnit.of("    "),
             ],
         }),
         parent: codeTextarea.parentElement,

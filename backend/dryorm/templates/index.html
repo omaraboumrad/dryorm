@@ -27,6 +27,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 {% endblock %}
 
 {% block content %}
+        <div class="flex flex-1 overflow-hidden w-full max-w-full">
 <!-- Journey Navigation Panel - Desktop Only -->
 <div class="bg-django-secondary/10 dark:bg-[#0f2e1e] border-r border-django-primary/20 dark:border-green-600 w-80 flex-shrink-0 overflow-y-auto hidden lg:block" x-show="showJourneyNav" x-cloak>
     <div id="journey-list" class="p-4">
@@ -294,6 +295,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
         </div>
 </dialog>
 
+    </div>
 {{ templates|json_script:'templates' }}
 {{ journeys|json_script:'journeys' }}
 
