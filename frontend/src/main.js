@@ -614,7 +614,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             content += `</div>`;
-            content += `<pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #333;">${escapeHtml(template)}</pre>`;
+            // Show actual query if no similarities, otherwise show template
+            const queryToShow = count > 1 ? template : groupQueries[0].sql;
+            content += `<pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #333;">${escapeHtml(queryToShow)}</pre>`;
 
             groupIndex++;
         });
