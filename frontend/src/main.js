@@ -217,8 +217,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 queryLinesField,
                 queryLineGutter,
                 queryLineTheme,
-                keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
                 executeKeymap,
+                keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
                 cursorPositionListener,
                 lineHighlightCompartment.of([]),
                 EditorView.theme({
