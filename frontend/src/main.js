@@ -554,6 +554,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let queryPopup = null;
+    let isAltPressed = false;
+    let currentPopupData = null; // Store current popup state for alt-key toggling
 
     function createQueryPopup() {
         if (queryPopup) return queryPopup;
@@ -579,6 +581,35 @@ document.addEventListener('DOMContentLoaded', function() {
         return queryPopup;
     }
 
+    function generatePopupContent(templateGroups, forceTemplated = false) {
+        let content = '';
+        let groupIndex = 0;
+
+        templateGroups.forEach((groupQueries, template) => {
+            if (groupIndex > 0) content += '<hr style="margin: 8px 0; border: 1px solid #e5e7eb;">';
+
+            const totalTime = groupQueries.reduce((sum, q) => sum + parseFloat(q.time), 0).toFixed(3);
+            const count = groupQueries.length;
+
+            content += `<div style="margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">`;
+            content += `<span style="color: #0C4B33; font-weight: bold;">${totalTime}s</span>`;
+
+            if (count > 1) {
+                content += `<span style="color: #dc2626; font-weight: bold; margin-left: 8px;">${count} Similar</span>`;
+            }
+
+            content += `</div>`;
+
+            // Show templated query if Alt is pressed or if there are similarities
+            const queryToShow = (forceTemplated || count > 1) ? template : groupQueries[0].sql;
+            content += `<pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #333;">${escapeHtml(queryToShow)}</pre>`;
+
+            groupIndex++;
+        });
+
+        return content;
+    }
+
     function showQueryPopup(lineNumber, x, y) {
         const popup = createQueryPopup();
         const queries = lineToQueryMap.get(lineNumber);
@@ -598,29 +629,11 @@ document.addEventListener('DOMContentLoaded', function() {
             templateGroups.get(template).push(query);
         });
 
-        let content = '';
-        let groupIndex = 0;
-        templateGroups.forEach((groupQueries, template) => {
-            if (groupIndex > 0) content += '<hr style="margin: 8px 0; border: 1px solid #e5e7eb;">';
+        // Store current popup data for alt-key toggling
+        currentPopupData = { lineNumber, x, y, templateGroups };
 
-            const totalTime = groupQueries.reduce((sum, q) => sum + parseFloat(q.time), 0).toFixed(3);
-            const count = groupQueries.length;
-
-            content += `<div style="margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">`;
-            content += `<span style="color: #0C4B33; font-weight: bold;">${totalTime}s</span>`;
-
-            if (count > 1) {
-                content += `<span style="color: #dc2626; font-weight: bold; margin-left: 8px;">${count} Similar</span>`;
-            }
-
-            content += `</div>`;
-            // Show actual query if no similarities, otherwise show template
-            const queryToShow = count > 1 ? template : groupQueries[0].sql;
-            content += `<pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #333;">${escapeHtml(queryToShow)}</pre>`;
-
-            groupIndex++;
-        });
-
+        // Generate content based on Alt key state
+        const content = generatePopupContent(templateGroups, isAltPressed);
         popup.innerHTML = content;
 
         const isDarkMode = document.documentElement.classList.contains('dark');
@@ -653,6 +666,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (queryPopup) {
             queryPopup.style.display = 'none';
         }
+        currentPopupData = null;
+    }
+
+    function updatePopupContent() {
+        if (!currentPopupData || !queryPopup || queryPopup.style.display === 'none') {
+            return;
+        }
+
+        const content = generatePopupContent(currentPopupData.templateGroups, isAltPressed);
+        queryPopup.innerHTML = content;
     }
 
     function escapeHtml(text) {
@@ -681,6 +704,21 @@ document.addEventListener('DOMContentLoaded', function() {
         editorElement.addEventListener('mouseout', function(e) {
             if (!editorElement.contains(e.relatedTarget)) {
                 hideQueryPopup();
+            }
+        });
+
+        // Add Alt key listeners to toggle between templated and actual queries
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Alt' && !isAltPressed) {
+                isAltPressed = true;
+                updatePopupContent();
+            }
+        });
+
+        document.addEventListener('keyup', function(e) {
+            if (e.key === 'Alt' && isAltPressed) {
+                isAltPressed = false;
+                updatePopupContent();
             }
         });
     }
