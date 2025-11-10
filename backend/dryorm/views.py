@@ -77,6 +77,7 @@ def save(request):
         code=request.POST.get("code"),
         database=request.POST.get("database"),
         private=request.POST.get("private") == "true",
+        django_version=request.POST.get("django_version", "5.2.8"),
     )
 
     return http.HttpResponse(f'"{instance.slug}"')

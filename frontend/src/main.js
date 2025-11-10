@@ -400,6 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('code', getEditorValue());
         formData.append('name', name.value);
         formData.append('database', database_select.value);
+        formData.append('django_version', django_version_select.value);
         formData.append('private', isPrivate.checked);
         formData.append('csrfmiddlewaretoken', csrftoken);
 

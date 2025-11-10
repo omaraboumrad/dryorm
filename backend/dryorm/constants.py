@@ -29,10 +29,10 @@ JOB_TIMEOUT_EVENT = "job-timeout"
 JOB_OVERLOADED = "job-overloaded"
 
 
-# Supported Django versions
+# Supported Django versions (ordered by preference, latest first)
 DJANGO_VERSIONS = {
-    "4.2.26": DjangoVersion(version="4.2.26", description="Django 4.2.26 LTS"),
     "5.2.8": DjangoVersion(version="5.2.8", description="Django 5.2.8"),
+    "4.2.26": DjangoVersion(version="4.2.26", description="Django 4.2.26 LTS"),
 }
 
 # Executors organized by database and django version

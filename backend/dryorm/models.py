@@ -16,14 +16,14 @@ def generate_random_string(length=8):
 
 class SnippetManager(models.Manager):
 
-    def create_snippet(self, name, code, database, private):
+    def create_snippet(self, name, code, database, private, django_version=None):
 
         if not name:
             name = generate_random_string()
         slug = slugify(name)
 
         return self.create(
-            name=name, slug=slug, code=code, database=database, private=private
+            name=name, slug=slug, code=code, database=database, private=private, django_version=django_version
         )
 
 
@@ -36,6 +36,7 @@ class Snippet(models.Model):
     created = models.DateTimeField(auto_now=True)
     private = models.BooleanField(default=False)
     database = models.CharField(max_length=50, default="sqlite")
+    django_version = models.CharField(max_length=20, default="5.2.8")
 
     objects = SnippetManager()
 
