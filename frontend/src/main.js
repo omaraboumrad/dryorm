@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var journeys = JSON.parse(document.getElementById('journeys').textContent);
     var template_select = document.getElementById('template-select');
     var database_select = document.getElementById('database-select');
+    var django_version_select = document.getElementById('django-version-select');
     var ignore_cache = document.getElementById('ignore-cache');
     var erd_link = document.getElementById('erd');
     var query_filters = document.getElementById('query-filters');
@@ -349,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
             code: code,
             ignore_cache: forceNoCache || ignore_cache.checked,
             database: database_select.value,
+            django_version: django_version_select.value,
         };
 
         run_button.disabled = true;

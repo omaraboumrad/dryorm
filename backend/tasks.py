@@ -26,15 +26,15 @@ class OverloadedError(Exception):
     pass
 
 
-def run_django_sync(code, database, ignore_cache=False):
+def run_django_sync(code, database, ignore_cache=False, django_version="5.2.8"):
     """Synchronous version for HTTP request/response cycle."""
     client = docker.from_env()
     redis_client = redis.Redis("redis")
     key = hashlib.md5(code.encode("utf-8")).hexdigest()
 
-    executor = constants.EXECUTOR
+    executor = constants.get_executor(database, django_version)
     selected_db = DATABASES.get(database, "sqlite")
-    cached_reply = cache.get(f"{database}-{key}")
+    cached_reply = cache.get(f"{database}-{django_version}-{key}")
     unique_name = None
     container = None
     container_slot_acquired = False
@@ -188,7 +188,7 @@ def run_django_sync(code, database, ignore_cache=False):
 
         # Cache the result
         reply_str = json.dumps(result_dict)
-        cache.set(f"{database}-{key}", reply_str, timeout=60 * 60 * 24 * 365)
+        cache.set(f"{database}-{django_version}-{key}", reply_str, timeout=60 * 60 * 24 * 365)
 
         return result_dict
     finally:

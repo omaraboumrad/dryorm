@@ -66,9 +66,36 @@ services:
             - default
             - snippets_net
 
-    # Executors
+    # Executors - Multi-stage builds
 
-    executor-python-django:
-        build: ./executors/python-django
-        image: dryorm-executor/python-django
+    executor-python-django-postgres-4.2.26:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: postgres-4.2.26
+        image: dryorm-executor/python-django-postgres-4.2.26
+        command: /bin/true
+
+    executor-python-django-postgres-5.2.8:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: postgres-5.2.8
+        image: dryorm-executor/python-django-postgres-5.2.8
+        command: /bin/true
+
+    executor-python-django-mariadb-4.2.26:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: mariadb-4.2.26
+        image: dryorm-executor/python-django-mariadb-4.2.26
+        command: /bin/true
+
+    executor-python-django-mariadb-5.2.8:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: mariadb-5.2.8
+        image: dryorm-executor/python-django-mariadb-5.2.8
         command: /bin/true

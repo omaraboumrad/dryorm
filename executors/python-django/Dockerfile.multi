@@ -1,0 +1,63 @@
+# Multi-stage Dockerfile for Django executors
+# Supports multiple Django versions and databases
+
+# ============= Base Images =============
+
+# PostgreSQL Base
+FROM python:3.12-slim-bullseye AS base-postgres
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir psycopg2-binary==2.9.10
+
+# MariaDB Base
+FROM python:3.12-slim-bullseye AS base-mariadb
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    pkg-config \
+    default-libmysqlclient-dev \
+    mariadb-client \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir mysqlclient==2.2.7
+
+# ============= Django Version Stages =============
+
+# PostgreSQL + Django 4.2.26
+FROM base-postgres AS postgres-4.2.26
+COPY requirements-4.2.26-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY . /app/
+WORKDIR /app/
+CMD ["./run.sh"]
+
+# PostgreSQL + Django 5.2.8
+FROM base-postgres AS postgres-5.2.8
+COPY requirements-5.2.8-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY . /app/
+WORKDIR /app/
+CMD ["./run.sh"]
+
+# MariaDB + Django 4.2.26
+FROM base-mariadb AS mariadb-4.2.26
+COPY requirements-4.2.26-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY . /app/
+WORKDIR /app/
+CMD ["./run.sh"]
+
+# MariaDB + Django 5.2.8
+FROM base-mariadb AS mariadb-5.2.8
+COPY requirements-5.2.8-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY . /app/
+WORKDIR /app/
+CMD ["./run.sh"]

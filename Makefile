@@ -40,7 +40,15 @@ clean: frontend-clean ## Clean all build artifacts
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	@echo "$(GREEN)✓ Cleanup complete$(NC)"
 
+# ==================== Docker ====================
+
+build-executors: ## Build all executor images using multi-stage Dockerfile
+	@echo "$(BLUE)Building all Django executor images from multi-stage Dockerfile...$(NC)"
+	docker-compose build executor-python-django-postgres-4.2.26 executor-python-django-postgres-5.2.8
+	docker-compose build executor-python-django-mariadb-4.2.26 executor-python-django-mariadb-5.2.8
+	@echo "$(GREEN)✓ All executor images built successfully$(NC)"
+
 .PHONY: frontend-install frontend-build frontend-watch frontend-clean
-.PHONY: up down restart logs logs-backend logs-worker ps build-docker
+.PHONY: up down restart logs logs-backend logs-worker ps build-docker build-executors
 .PHONY: shell dbshell makemigrations migrate createsuperuser collectstatic
 .PHONY: dev dev-watch setup clean clean-all test test-coverage check requirements

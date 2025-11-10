@@ -2,4 +2,6 @@ from . import constants
 
 
 def extras(request):
-    return {"executors": [constants.EXECUTOR]}
+    # Return all unique executors
+    executors = list(constants.EXECUTORS.values())
+    return {"executors": executors}
