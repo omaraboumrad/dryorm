@@ -1,0 +1,125 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DryORM API",
+    "description": "Execute Django ORM code snippets in isolated containers with SQLite, PostgreSQL, or MariaDB databases.",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://dryorm.xterm.info"
+    }
+  ],
+  "paths": {
+    "/execute": {
+      "post": {
+        "description": "Execute Django ORM code and return queries, output, ERD, and results",
+        "operationId": "ExecuteDjangoCode",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "Django models and code to execute. Must define models using django.db.models.Model and optionally a run() function that returns data."
+                  },
+                  "database": {
+                    "type": "string",
+                    "enum": ["sqlite", "postgres", "mariadb"],
+                    "default": "sqlite",
+                    "description": "Database backend to use"
+                  },
+                  "ignore_cache": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to bypass cache and force re-execution"
+                  }
+                },
+                "required": ["code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Execution result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "event": {
+                      "type": "string",
+                      "enum": [
+                        "job-done",
+                        "job-timeout",
+                        "job-oom-killed",
+                        "job-network-disabled",
+                        "job-internal-error",
+                        "job-code-error",
+                        "job-image-not-found-error",
+                        "job-overloaded"
+                      ],
+                      "description": "Execution status"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "output": {
+                          "type": "string",
+                          "description": "Standard output from the code execution"
+                        },
+                        "erd": {
+                          "type": "string",
+                          "description": "Base64-encoded Mermaid ERD diagram URL for Kroki"
+                        },
+                        "queries": {
+                          "type": "array",
+                          "description": "SQL queries executed with timing and source line tracking",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sql": {
+                                "type": "string"
+                              },
+                              "time": {
+                                "type": "string"
+                              },
+                              "template": {
+                                "type": "string"
+                              },
+                              "line_number": {
+                                "type": "integer"
+                              },
+                              "source_context": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "returned": {
+                          "description": "Data returned from the run() function"
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message if execution failed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {}
+  }
+}

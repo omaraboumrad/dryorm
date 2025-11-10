@@ -4,14 +4,13 @@ import traceback
 import json
 import os
 import uuid
+import redis
+import time
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "dryorm.settings"
 
 from django.core.cache import cache
-import channels
 import docker
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
 from docker.errors import (
     APIError,
@@ -27,36 +26,48 @@ class OverloadedError(Exception):
     pass
 
 
-def find_running_django_containers(client, prefix="django-"):
-    return [
-        container
-        for container in client.containers.list()
-        if container.name.startswith(prefix)
-    ]
-
-
-def run_django(channel, code, database, ignore_cache=False):
+def run_django_sync(code, database, ignore_cache=False):
+    """Synchronous version for HTTP request/response cycle."""
     client = docker.from_env()
+    redis_client = redis.Redis("redis")
     key = hashlib.md5(code.encode("utf-8")).hexdigest()
 
-    channel_layer = get_channel_layer()
     executor = constants.EXECUTOR
     selected_db = DATABASES.get(database, "sqlite")
     cached_reply = cache.get(f"{database}-{key}")
     unique_name = None
+    container = None
+    container_slot_acquired = False
 
     try:
         # Is the result already cached?
         if cached_reply and not ignore_cache:
-            async_to_sync(channel_layer.send)(
-                channel, {"type": "websocket.send", "text": cached_reply}
-            )
-            return
+            return json.loads(cached_reply)
         else:
-            running = find_running_django_containers(client, prefix="django-")
+            # Use Redis to atomically check and increment container count
+            container_count_key = "dryorm:running_containers"
 
-            if len(running) >= executor.max_containers:
-                raise OverloadedError
+            # Try to acquire a slot atomically
+            with redis_client.pipeline() as pipe:
+                while True:
+                    try:
+                        pipe.watch(container_count_key)
+                        current_count = int(pipe.get(container_count_key) or 0)
+
+                        if current_count >= executor.max_containers:
+                            pipe.unwatch()
+                            raise OverloadedError
+
+                        # Atomically increment
+                        pipe.multi()
+                        pipe.incr(container_count_key)
+                        pipe.expire(container_count_key, 60)  # Expire after 60s as safety
+                        pipe.execute()
+                        container_slot_acquired = True
+                        break
+                    except redis.WatchError:
+                        # Another request modified the count, retry
+                        continue
 
             if selected_db.needs_setup:
                 unique_name = selected_db.setup()
@@ -73,41 +84,56 @@ def run_django(channel, code, database, ignore_cache=False):
                 f"DB_PASSWORD={unique_name}",
             ]
 
-            result = client.containers.run(
+            # Create and start container
+            container_name = f"django-{uuid.uuid4().hex[:6]}"
+            container = client.containers.create(
                 executor.image,
-                name=f"django-{uuid.uuid4().hex[:6]}",
+                name=container_name,
                 mem_limit=executor.memory,
                 memswap_limit=executor.memory,
                 network="dryorm_snippets_net",
-                remove=True,
                 environment=environment,
+                detach=True,
             )
-    except ContainerError as error:  # Do some logging
+
+            # Start and wait for container
+            container.start()
+            exit_status = container.wait()
+            result = container.logs()
+
+            # Remove container
+            container.remove()
+
+            # Check if container exited with error
+            if exit_status['StatusCode'] != 0:
+                error = ContainerError(
+                    container=container,
+                    exit_status=exit_status['StatusCode'],
+                    command='',
+                    image=executor.image,
+                    stderr=result
+                )
+                raise error
+    except ContainerError as error:
         match error.exit_status:
             case 137:
                 # OOM killed
-                reply = json.dumps(
-                    dict(
-                        event=constants.JOB_OOM_KILLED_EVENT,
-                        error="OOM! Please use less memory. Sorry!",
-                    )
-                )
+                result_dict = {
+                    "event": constants.JOB_OOM_KILLED_EVENT,
+                    "error": "OOM! Please use less memory. Sorry!",
+                }
             case 101:
                 # Network Error
-                reply = json.dumps(
-                    dict(
-                        event=constants.JOB_NETWORK_DISABLED_EVENT,
-                        error="Network is disabled! Sorry!",
-                    )
-                )
+                result_dict = {
+                    "event": constants.JOB_NETWORK_DISABLED_EVENT,
+                    "error": "Network is disabled! Sorry!",
+                }
             case 124:
-                # Network Error
-                reply = json.dumps(
-                    dict(
-                        event=constants.JOB_TIMEOUT_EVENT,
-                        error="Timed out! Maximum allowed is 10 seconds. Sorry!",
-                    )
-                )
+                # Timeout
+                result_dict = {
+                    "event": constants.JOB_TIMEOUT_EVENT,
+                    "error": "Timed out! Maximum allowed is 10 seconds. Sorry!",
+                }
             case _:
                 if error.stderr:
                     error_message = error.stderr.decode("utf-8")
@@ -119,56 +145,68 @@ def run_django(channel, code, database, ignore_cache=False):
                     or "Temporary failure in name resolution" in error_message
                 ):
                     # Network Error
-                    reply = json.dumps(
-                        dict(
-                            event=constants.JOB_NETWORK_DISABLED_EVENT,
-                            error="Network is disabled! Sorry!",
-                        )
-                    )
+                    result_dict = {
+                        "event": constants.JOB_NETWORK_DISABLED_EVENT,
+                        "error": "Network is disabled! Sorry!",
+                    }
                 else:
-                    reply = json.dumps(
-                        dict(event=constants.JOB_CODE_ERROR_EVENT, error=error_message)
-                    )
+                    result_dict = {
+                        "event": constants.JOB_CODE_ERROR_EVENT,
+                        "error": error_message
+                    }
+        return result_dict
     except ImageNotFound as error:
-        reply = json.dumps(
-            dict(
-                event=constants.JOB_IMAGE_NOT_FOUND_ERROR_EVENT,
-                error=f"Executor for {executor.verbose} not found!",
-            )
-        )
-    except APIError as error:  # Do some logging
-        reply = json.dumps(
-            dict(event=constants.JOB_INTERNAL_ERROR_EVENT, error=error.explanation)
-        )
+        return {
+            "event": constants.JOB_IMAGE_NOT_FOUND_ERROR_EVENT,
+            "error": f"Executor for {executor.verbose} not found!",
+        }
+    except APIError as error:
+        return {
+            "event": constants.JOB_INTERNAL_ERROR_EVENT,
+            "error": error.explanation
+        }
     except OverloadedError as error:
-        reply = json.dumps(
-            dict(
-                event=constants.JOB_OVERLOADED,
-                error=f"System is currently overloaded (>= {executor.max_containers} instances), please try again in a few! Sorry!",
-            )
-        )
+        return {
+            "event": constants.JOB_OVERLOADED,
+            "error": f"System is currently overloaded (>= {executor.max_containers} instances), please try again in a few! Sorry!",
+        }
     except:
         # Catch-all for any other exceptions
         message = traceback.format_exc()
-        reply = json.dumps(
-            dict(
-                event=constants.JOB_INTERNAL_ERROR_EVENT,
-                error=f"Unknown error occurred. Please try again later.\n{message}",
-            )
-        )
+        return {
+            "event": constants.JOB_INTERNAL_ERROR_EVENT,
+            "error": f"Unknown error occurred. Please try again later.\n{message}",
+        }
     else:
         decoded = result.decode("utf-8")
 
         # TODO: too much encoding/decoding, should revisit
-        reply = json.dumps(
-            dict(event=constants.JOB_DONE_EVENT, result=json.loads(decoded))
-        )
-        cache.set(f"{database}-{key}", reply, timeout=60 * 60 * 24 * 365)
+        result_dict = {
+            "event": constants.JOB_DONE_EVENT,
+            "result": json.loads(decoded)
+        }
+
+        # Cache the result
+        reply_str = json.dumps(result_dict)
+        cache.set(f"{database}-{key}", reply_str, timeout=60 * 60 * 24 * 365)
+
+        return result_dict
     finally:
+        # Release container slot if it was acquired
+        if container_slot_acquired:
+            try:
+                redis_client.decr("dryorm:running_containers")
+            except:
+                pass
+
+        # Clean up container if it exists and wasn't removed
+        if container:
+            try:
+                container.remove(force=True)
+            except:
+                pass  # Container may already be removed
+
+        # Clean up database
         if not cached_reply or ignore_cache:
             if unique_name and selected_db.needs_setup:
                 selected_db.teardown(unique_name)
-
-            async_to_sync(channel_layer.send)(
-                channel, {"type": "websocket.send", "text": reply}
-            )

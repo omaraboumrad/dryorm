@@ -20,7 +20,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 INSTALLED_APPS = [
-    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -29,7 +28,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_cotton",
     "django_extensions",
-    "channels",
     "dryorm",
 ]
 
@@ -112,17 +110,6 @@ CACHES = {
         "LOCATION": "/app/cache",
     }
 }
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("redis", 6379)],
-        },
-    },
-}
-
-ASGI_APPLICATION = f"{PROJECT}.asgi.application"
 
 COTTON_DIR = "components"
 COTTON_SNAKE_CASED_NAMES = False

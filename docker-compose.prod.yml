@@ -22,7 +22,7 @@ services:
             POSTGRES_PASSWORD: dryorm
             POSTGRES_DB: dryorm
         volumes:
-            - postgres_data:/var/lib/postgresql/data
+            - ./pg_data:/var/lib/postgresql/data
 
     database_postgres:
         image: postgres:alpine
@@ -70,30 +70,18 @@ services:
         volumes:
             - static:/app/static
             - django_cache:/app/cache
+            - /var/run/docker.sock:/var/run/docker.sock
         depends_on:
             - database
+            - database_postgres
+            - database_mariadb
             - redis
         ports:
             - 8000
         env_file: .env
-
-    rq_worker:
-        image: dryorm/backend
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - django_cache:/app/cache
-        depends_on:
-            - database_postgres
-            - database_mariadb
-            - redis
-            - backend
         networks:
             - default
             - snippets_net
-        deploy:
-            replicas: 10 
-        command: rq worker --url redis://redis:6379
-        env_file: .env
 
     # Executors
 

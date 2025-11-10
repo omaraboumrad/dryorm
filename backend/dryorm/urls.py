@@ -9,6 +9,7 @@ urlpatterns = [
     path("about", views.about, name="about"),
     path("browse", views.list_snippets, name="list"),
     path("save", views.save, name="save"),
+    path("execute", views.execute, name="execute"),
     path("api/journeys", views.journeys_api, name="journeys_api"),
     path("j/", views.home, name="journeys"),
     path("j/<slug:journey_slug>", views.home, name="journey"),

@@ -255,81 +255,58 @@ document.addEventListener('DOMContentLoaded', function() {
     // Focus the editor
     models_editor.focus();
 
-    // --- Websocket ---
-    var socket = null;
+    // --- HTTP Request Handler ---
+    function handleResponse(data) {
+        switch(data.event){
+            case 'job-done':
+                rawOutput = data.result.output;
+                output.textContent = rawOutput === '' ? 'No output' : rawOutput;
 
-    var connect = function(){
-        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        socket = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/');
+                let erd = data.result.erd;
+                if (erd && erd.length > 0) {
+                    erd_link.classList.remove('hidden');
+                    erd_link.href = `https://kroki.io/mermaid/svg/${erd}`;
+                    erd_link.target = '_blank';
+                }
 
-        socket.onmessage = function(e) {
-            var data = JSON.parse(e.data);
+                const state = Alpine.$data(query_filters);
+                rawQueries = data.result.queries;
+                query_count_number.textContent = rawQueries.length;
+                fillQueries(queries, rawQueries, state);
 
-            switch(data.event){
-                case 'job-fired':
-                    break;
+                if (typeof data.result.returned === 'string' ){
+                    iframe.srcdoc = data.result.returned;
+                    dialog.showModal();
+                    show_template.classList.remove('hidden');
+                } else {
+                    handleReturnedData(data.result.returned);
+                }
 
-                case 'job-done':
-                    rawOutput = data.result.output;
-                    output.textContent = rawOutput === '' ? 'No output' : rawOutput;
+                app_state.loading = false
+                run_button.disabled = false;
 
-                    let erd = data.result.erd;
-                    if (erd && erd.length > 0) {
-                        erd_link.classList.remove('hidden');
-                        erd_link.href = `https://kroki.io/mermaid/svg/${erd}`;
-                        erd_link.target = '_blank';
-                    }
-
-                    const state = Alpine.$data(query_filters);
-                    rawQueries = data.result.queries;
-                    query_count_number.textContent = rawQueries.length;
-                    fillQueries(queries, rawQueries, state);
-
-                    if (typeof data.result.returned === 'string' ){
-                        iframe.srcdoc = data.result.returned;
-                        dialog.showModal();
-                        show_template.classList.remove('hidden');
-                    } else {
-                        handleReturnedData(data.result.returned);
-                    }
-
-                    app_state.loading = false
-                    run(true);
-
-                    break;
-                case 'job-timeout':
-                case 'job-oom-killed':
-                case 'job-network-disabled':
-                case 'job-internal-error':
-                case 'job-code-error':
-                case 'job-image-not-found-error':
-                case 'job-overloaded':
-                    output.textContent = data.error;
-                    run(true)
-                    app_state.loading = false
-                    break;
-                default:
-                    console.warn('Unhandled event:', data);
-                    break;
-            }
-        }
-
-        socket.onopen = function(e) {
-            run(true)
-            if (window.location.search.includes('?run') || window.location.pathname.endsWith("/run")) {
-                execute();
-            }
-        }
-
-        socket.onclose = function(e) {
-            run(false)
-            setTimeout(function(){
-                connect();
-            }, 2000);
+                break;
+            case 'job-timeout':
+            case 'job-oom-killed':
+            case 'job-network-disabled':
+            case 'job-internal-error':
+            case 'job-code-error':
+            case 'job-image-not-found-error':
+            case 'job-overloaded':
+                output.textContent = data.error;
+                run_button.disabled = false;
+                app_state.loading = false
+                break;
+            default:
+                console.warn('Unhandled event:', data);
+                break;
         }
     }
 
-    connect();
+    // Check if auto-run is requested
+    if (window.location.search.includes('?run') || window.location.pathname.endsWith("/run")) {
+        execute();
+    }
 
     initializeJourneys();
 
@@ -358,6 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const code = getEditorValue();
         if (code.trim() === '') {
             alert('Please enter some code to run or select a template');
+            app_state.loading = false;
             return;
         }
 
@@ -367,14 +345,32 @@ document.addEventListener('DOMContentLoaded', function() {
             app_state.showResult = true;
         }
 
-        var payload = JSON.stringify({
+        var payload = {
             code: code,
             ignore_cache: forceNoCache || ignore_cache.checked,
             database: database_select.value,
-        });
+        };
 
-        socket.send(payload);
-        run.disabled = true;
+        run_button.disabled = true;
+
+        // Use fetch API instead of WebSocket
+        fetch('/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            handleResponse(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            output.textContent = 'Connection error: ' + error.message;
+            run_button.disabled = false;
+            app_state.loading = false;
+        });
     }
 
     template_select.addEventListener('change', function() {

@@ -52,30 +52,19 @@ services:
         volumes:
             - ./backend:/app
             - django_cache:/app/cache
+            - /var/run/docker.sock:/var/run/docker.sock
         depends_on:
             - database
+            - database_postgres
+            - database_mariadb
             - redis
         ports:
             - 8090:8000
         command: python manage.py runserver 0.0.0.0:8000
         env_file: .env
-
-    rq_worker:
-        image: dryorm/backend
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - ./backend:/app
-            - django_cache:/app/cache
-        depends_on:
-            - database_postgres
-            - database_mariadb
-            - redis
-            - backend
         networks:
             - default
             - snippets_net
-        command: rq worker --url redis://redis:6379
-        env_file: .env
 
     # Executors
 

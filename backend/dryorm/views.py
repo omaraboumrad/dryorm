@@ -7,11 +7,14 @@ from django.conf import settings
 
 from django.db.models import Q
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 from . import models
 from . import templates
 from . import constants
 from . import databases
+import tasks
 
 
 class SnippetListView(generic.ListView):
@@ -125,9 +128,43 @@ def load_journeys():
 def journeys_api(request):
     if request.method != "GET":
         return http.HttpResponseNotAllowed(["GET"])
-    
+
     journeys = load_journeys()
     return JsonResponse(journeys)
+
+
+@csrf_exempt
+def execute(request):
+    """HTTP endpoint for executing Django snippets synchronously."""
+    if request.method != "POST":
+        return http.HttpResponseNotAllowed(["POST"])
+
+    try:
+        payload = json.loads(request.body)
+        code = payload.get("code")
+        database = payload.get("database", "sqlite")
+        ignore_cache = payload.get("ignore_cache", False)
+
+        if not code:
+            return JsonResponse(
+                {"event": constants.JOB_CODE_ERROR_EVENT, "error": "No code provided"},
+                status=400
+            )
+
+        # Execute the task synchronously (no RQ, no channels)
+        result = tasks.run_django_sync(code, database, ignore_cache)
+        return JsonResponse(result)
+
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"event": constants.JOB_CODE_ERROR_EVENT, "error": "Invalid JSON"},
+            status=400
+        )
+    except Exception as e:
+        return JsonResponse(
+            {"event": constants.JOB_INTERNAL_ERROR_EVENT, "error": str(e)},
+            status=500
+        )
 
 
 # Define templates as a dictionary
