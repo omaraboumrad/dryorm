@@ -149,36 +149,6 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                  >
                  <div class="flex gap-2">
                      <button
-                             @click.prevent="selectedTCL = !selectedTCL"
-                             :class="selectedTCL ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
-                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
-                             >
-                             <span class="hidden xl:inline">TCL</span>
-                             <span class="xl:hidden">T</span>
-                             <span class="count ml-1 text-xs opacity-70" data-type="TCL"></span>
-                     </button>
-
-                     <button
-                             @click.prevent="selectedDDL = !selectedDDL"
-                             :class="selectedDDL ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
-                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
-                             >
-                             <span class="hidden xl:inline">DDL</span>
-                             <span class="xl:hidden">D</span>
-                             <span class="count ml-1 text-xs opacity-70" data-type="DDL"></span>
-                     </button>
-
-                     <button
-                             @click.prevent="selectedSELECT = !selectedSELECT"
-                             :class="selectedSELECT ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
-                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
-                             >
-                             <span class="hidden xl:inline">SELECT</span>
-                             <span class="xl:hidden">S</span>
-                             <span class="count ml-1 text-xs opacity-70" data-type="SELECT"></span>
-                     </button>
-
-                     <button
                              @click.prevent="selectedINSERT = !selectedINSERT"
                              :class="selectedINSERT ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
                              class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
@@ -199,6 +169,16 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                      </button>
 
                      <button
+                             @click.prevent="selectedSELECT = !selectedSELECT"
+                             :class="selectedSELECT ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">SELECT</span>
+                             <span class="xl:hidden">S</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="SELECT"></span>
+                     </button>
+
+                     <button
                              @click.prevent="selectedDELETE = !selectedDELETE"
                              :class="selectedDELETE ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
                              class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
@@ -206,6 +186,26 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                              <span class="hidden xl:inline">DELETE</span>
                              <span class="xl:hidden">D</span>
                              <span class="count ml-1 text-xs opacity-70" data-type="DELETE"></span>
+                     </button>
+
+                     <button
+                             @click.prevent="selectedDDL = !selectedDDL"
+                             :class="selectedDDL ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">DDL</span>
+                             <span class="xl:hidden">D</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="DDL"></span>
+                     </button>
+
+                     <button
+                             @click.prevent="selectedTCL = !selectedTCL"
+                             :class="selectedTCL ? 'bg-django-primary text-white' : 'text-django-text dark:text-green-100 hover:bg-django-secondary/20 dark:hover:bg-green-700'"
+                             class="inline-flex items-center px-2 py-1 text-sm font-medium uppercase rounded-sm transition-colors duration-200"
+                             >
+                             <span class="hidden xl:inline">TCL</span>
+                             <span class="xl:hidden">T</span>
+                             <span class="count ml-1 text-xs opacity-70" data-type="TCL"></span>
                      </button>
 
                      <button
