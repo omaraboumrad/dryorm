@@ -47,7 +47,7 @@ class SnippetDetailView(generic.DetailView):
         context["django_versions"] = constants.DJANGO_VERSIONS
         context["templates"] = templates.TEMPLATES
         context["first"] = templates.TEMPLATES["basic"]
-        context["journeys"] = load_journeys()
+        context["journeys"] = {}
         return context
 
 
@@ -60,7 +60,11 @@ class SnippetHomeView(generic.TemplateView):
         context["django_versions"] = constants.DJANGO_VERSIONS
         context["templates"] = templates.TEMPLATES
         context["first"] = templates.TEMPLATES["basic"]
-        context["journeys"] = load_journeys()
+        # Only load journeys if this is a journey URL
+        if self.request.path.startswith('/j/'):
+            context["journeys"] = load_journeys()
+        else:
+            context["journeys"] = {}
         return context
 
 

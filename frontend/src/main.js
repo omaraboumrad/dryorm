@@ -144,7 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var name = document.getElementById('name');
     var isPrivate = document.getElementById('isPrivate');
     var templates = JSON.parse(document.getElementById('templates').textContent);
-    var journeys = JSON.parse(document.getElementById('journeys').textContent);
+    var journeys = null; // Lazy-loaded
+    var journeysInitialized = false;
     var template_select = document.getElementById('template-select');
     var database_select = document.getElementById('database-select');
     var django_version_select = document.getElementById('django-version-select');
@@ -309,11 +310,47 @@ document.addEventListener('DOMContentLoaded', function() {
         execute();
     }
 
-    initializeJourneys();
+    // Lazy load journeys function
+    async function ensureJourneysLoaded() {
+        if (journeysInitialized) return;
 
-    setTimeout(() => {
-        handleJourneyNavigation();
-    }, 100);
+        const journeysElement = document.getElementById('journeys');
+        const journeysData = JSON.parse(journeysElement.textContent);
+
+        // Check if journeys are already loaded from backend (journey URL)
+        if (Object.keys(journeysData).length > 0) {
+            journeys = journeysData;
+        } else {
+            // Fetch from API endpoint for regular pages
+            try {
+                const response = await fetch('/api/journeys');
+                journeys = await response.json();
+            } catch (error) {
+                console.error('Error loading journeys:', error);
+                journeys = {};
+            }
+        }
+
+        initializeJourneys();
+        journeysInitialized = true;
+    }
+
+    // Check if we need to load journeys immediately (journey URL)
+    const isJourneyUrl = window.location.pathname.startsWith('/j/');
+    if (isJourneyUrl) {
+        ensureJourneysLoaded();
+        setTimeout(() => {
+            handleJourneyNavigation();
+        }, 100);
+    }
+
+    // Watch for journey nav toggle and load journeys on first open
+    const journeyNavButton = document.querySelector('[\\@click="showJourneyNav = !showJourneyNav"]');
+    if (journeyNavButton) {
+        journeyNavButton.addEventListener('click', async function() {
+            await ensureJourneysLoaded();
+        });
+    }
 
     function execute(forceNoCache = false) {
         app_state.loading = true;
