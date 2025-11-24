@@ -29,75 +29,151 @@ JOB_TIMEOUT_EVENT = "job-timeout"
 JOB_OVERLOADED = "job-overloaded"
 
 
-# Supported Django versions (ordered by preference, latest first)
+# Supported ORM versions (ordered by preference, latest first)
+ORM_VERSIONS = {
+    "django-5.2.8": DjangoVersion(version="django-5.2.8", description="Django 5.2.8"),
+    "django-4.2.26": DjangoVersion(version="django-4.2.26", description="Django 4.2.26 LTS"),
+    "sqlalchemy-2.0": DjangoVersion(version="sqlalchemy-2.0", description="SQLAlchemy 2.0"),
+    "sqlalchemy-1.4": DjangoVersion(version="sqlalchemy-1.4", description="SQLAlchemy 1.4"),
+}
+
+# Legacy aliases for backward compatibility
 DJANGO_VERSIONS = {
     "5.2.8": DjangoVersion(version="5.2.8", description="Django 5.2.8"),
     "4.2.26": DjangoVersion(version="4.2.26", description="Django 4.2.26 LTS"),
 }
+SQLALCHEMY_VERSIONS = {
+    "2.0": DjangoVersion(version="2.0", description="SQLAlchemy 2.0"),
+    "1.4": DjangoVersion(version="1.4", description="SQLAlchemy 1.4"),
+}
 
-# Executors organized by database and django version
+# Executors organized by database and ORM version
 EXECUTORS = {
-    ("postgres", "4.2.26"): Executor(
+    # Django executors
+    ("postgres", "django-4.2.26"): Executor(
         image="dryorm-executor/python-django-postgres-4.2.26",
         key="python/django/postgres/4.2.26",
         verbose="Python - Django 4.2.26 - PostgreSQL",
         memory="75m",
         max_containers=10,
-        django_version="4.2.26",
+        django_version="django-4.2.26",
         database="postgres",
     ),
-    ("postgres", "5.2.8"): Executor(
+    ("postgres", "django-5.2.8"): Executor(
         image="dryorm-executor/python-django-postgres-5.2.8",
         key="python/django/postgres/5.2.8",
         verbose="Python - Django 5.2.8 - PostgreSQL",
         memory="75m",
         max_containers=10,
-        django_version="5.2.8",
+        django_version="django-5.2.8",
         database="postgres",
     ),
-    ("mariadb", "4.2.26"): Executor(
+    ("mariadb", "django-4.2.26"): Executor(
         image="dryorm-executor/python-django-mariadb-4.2.26",
         key="python/django/mariadb/4.2.26",
         verbose="Python - Django 4.2.26 - MariaDB",
         memory="75m",
         max_containers=10,
-        django_version="4.2.26",
+        django_version="django-4.2.26",
         database="mariadb",
     ),
-    ("mariadb", "5.2.8"): Executor(
+    ("mariadb", "django-5.2.8"): Executor(
         image="dryorm-executor/python-django-mariadb-5.2.8",
         key="python/django/mariadb/5.2.8",
         verbose="Python - Django 5.2.8 - MariaDB",
         memory="75m",
         max_containers=10,
-        django_version="5.2.8",
+        django_version="django-5.2.8",
         database="mariadb",
     ),
-    ("sqlite", "4.2.26"): Executor(
+    ("sqlite", "django-4.2.26"): Executor(
         image="dryorm-executor/python-django-postgres-4.2.26",  # Use postgres base for sqlite
         key="python/django/sqlite/4.2.26",
         verbose="Python - Django 4.2.26 - SQLite",
         memory="75m",
         max_containers=10,
-        django_version="4.2.26",
+        django_version="django-4.2.26",
         database="sqlite",
     ),
-    ("sqlite", "5.2.8"): Executor(
+    ("sqlite", "django-5.2.8"): Executor(
         image="dryorm-executor/python-django-postgres-5.2.8",  # Use postgres base for sqlite
         key="python/django/sqlite/5.2.8",
         verbose="Python - Django 5.2.8 - SQLite",
         memory="75m",
         max_containers=10,
-        django_version="5.2.8",
+        django_version="django-5.2.8",
+        database="sqlite",
+    ),
+    # SQLAlchemy executors
+    ("postgres", "sqlalchemy-2.0"): Executor(
+        image="dryorm-executor/python-sqlalchemy-postgres-2.0",
+        key="python/sqlalchemy/postgres/2.0",
+        verbose="Python - SQLAlchemy 2.0 - PostgreSQL",
+        memory="75m",
+        max_containers=10,
+        django_version="sqlalchemy-2.0",
+        database="postgres",
+    ),
+    ("postgres", "sqlalchemy-1.4"): Executor(
+        image="dryorm-executor/python-sqlalchemy-postgres-1.4",
+        key="python/sqlalchemy/postgres/1.4",
+        verbose="Python - SQLAlchemy 1.4 - PostgreSQL",
+        memory="75m",
+        max_containers=10,
+        django_version="sqlalchemy-1.4",
+        database="postgres",
+    ),
+    ("mariadb", "sqlalchemy-2.0"): Executor(
+        image="dryorm-executor/python-sqlalchemy-mariadb-2.0",
+        key="python/sqlalchemy/mariadb/2.0",
+        verbose="Python - SQLAlchemy 2.0 - MariaDB",
+        memory="75m",
+        max_containers=10,
+        django_version="sqlalchemy-2.0",
+        database="mariadb",
+    ),
+    ("mariadb", "sqlalchemy-1.4"): Executor(
+        image="dryorm-executor/python-sqlalchemy-mariadb-1.4",
+        key="python/sqlalchemy/mariadb/1.4",
+        verbose="Python - SQLAlchemy 1.4 - MariaDB",
+        memory="75m",
+        max_containers=10,
+        django_version="sqlalchemy-1.4",
+        database="mariadb",
+    ),
+    ("sqlite", "sqlalchemy-2.0"): Executor(
+        image="dryorm-executor/python-sqlalchemy-postgres-2.0",  # Use postgres base for sqlite
+        key="python/sqlalchemy/sqlite/2.0",
+        verbose="Python - SQLAlchemy 2.0 - SQLite",
+        memory="75m",
+        max_containers=10,
+        django_version="sqlalchemy-2.0",
+        database="sqlite",
+    ),
+    ("sqlite", "sqlalchemy-1.4"): Executor(
+        image="dryorm-executor/python-sqlalchemy-postgres-1.4",  # Use postgres base for sqlite
+        key="python/sqlalchemy/sqlite/1.4",
+        verbose="Python - SQLAlchemy 1.4 - SQLite",
+        memory="75m",
+        max_containers=10,
+        django_version="sqlalchemy-1.4",
         database="sqlite",
     ),
 }
 
 
-def get_executor(database: str, django_version: str) -> Executor:
-    """Get the appropriate executor for the given database and Django version."""
-    key = (database, django_version)
+def get_executor(database: str, orm_version: str) -> Executor:
+    """Get the appropriate executor for the given database and ORM version."""
+    key = (database, orm_version)
+
+    # Support legacy format (without 'django-' or 'sqlalchemy-' prefix)
     if key not in EXECUTORS:
-        # Default to latest version if specific combination not found
-        key = (database, "5.2.8")
-    return EXECUTORS.get(key, EXECUTORS[("sqlite", "5.2.8")])
+        # Try adding django- prefix for backward compatibility
+        if not orm_version.startswith(('django-', 'sqlalchemy-')):
+            key = (database, f"django-{orm_version}")
+
+    if key not in EXECUTORS:
+        # Default to latest Django version if specific combination not found
+        key = (database, "django-5.2.8")
+
+    return EXECUTORS.get(key, EXECUTORS[("sqlite", "django-5.2.8")])

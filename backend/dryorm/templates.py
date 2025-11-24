@@ -204,6 +204,124 @@ def run():
 """
 
 
+# SQLAlchemy Templates
+SQLALCHEMY_BASIC = """from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String
+
+class Base(DeclarativeBase):
+    pass
+
+class Person(Base):
+    __tablename__ = 'person'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+
+    def __repr__(self):
+        return f"<Person(name={self.name})>"
+
+def run():
+    session = Session()
+
+    person = Person(name='John Doe')
+    session.add(person)
+    session.commit()
+
+    print(f'Created: {person}')
+
+    session.close()
+"""
+
+SQLALCHEMY_BASIC_FK = """from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import String, ForeignKey
+
+class Base(DeclarativeBase):
+    pass
+
+class Category(Base):
+    __tablename__ = 'category'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+
+    products: Mapped[list["Product"]] = relationship(back_populates="category")
+
+class Product(Base):
+    __tablename__ = 'product'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
+
+    category: Mapped["Category"] = relationship(back_populates="products")
+
+def run():
+    session = Session()
+
+    electronics = Category(name='Electronics')
+    clothing = Category(name='Clothing')
+    session.add_all([electronics, clothing])
+    session.commit()
+
+    products = [
+        Product(name='Laptop', category_id=electronics.id),
+        Product(name='T-Shirt', category_id=clothing.id),
+        Product(name='Smartphone', category_id=electronics.id),
+    ]
+    session.add_all(products)
+    session.commit()
+
+    print('Products per category:')
+    categories = session.query(Category).all()
+    for category in categories:
+        print(f'{category.name}: {len(category.products)} products')
+
+    session.close()
+"""
+
+SQLALCHEMY_QUERY = """from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String, select
+
+class Base(DeclarativeBase):
+    pass
+
+class Person(Base):
+    __tablename__ = 'person'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    country: Mapped[str] = mapped_column(String(100))
+
+def run():
+    session = Session()
+
+    # Add people
+    people = [
+        Person(name='John Doe', country='USA'),
+        Person(name='Jane Doe', country='Canada'),
+        Person(name='Jim Doe', country='UK'),
+        Person(name='Alice Smith', country='USA'),
+    ]
+    session.add_all(people)
+    session.commit()
+
+    # Query examples
+    print('All people from USA:')
+    stmt = select(Person).where(Person.country == 'USA')
+    usa_people = session.execute(stmt).scalars().all()
+    for person in usa_people:
+        print(f'  {person.name}')
+
+    print(f'\\nTotal people: {session.query(Person).count()}')
+
+    session.close()
+
+    # Return data for table display
+    return {
+        'All People': [{'id': p.id, 'name': p.name, 'country': p.country} for p in people]
+    }
+"""
+
 TEMPLATES = {
     "dryorm features": DRYORM_FEATURES,
     "basic": BASIC,
@@ -214,4 +332,7 @@ TEMPLATES = {
     "self fk": SELF_FK,
     "user profile": USER_PROFILE,
     "dryorm tabular output": TABULAR_OUTPUT,
+    "sqlalchemy basic": SQLALCHEMY_BASIC,
+    "sqlalchemy basic fk": SQLALCHEMY_BASIC_FK,
+    "sqlalchemy query": SQLALCHEMY_QUERY,
 }

@@ -44,7 +44,7 @@ class SnippetDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["databases"] = databases.DATABASES
-        context["django_versions"] = constants.DJANGO_VERSIONS
+        context["orm_versions"] = constants.ORM_VERSIONS
         context["templates"] = templates.TEMPLATES
         context["first"] = templates.TEMPLATES["basic"]
         context["journeys"] = {}
@@ -57,7 +57,7 @@ class SnippetHomeView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["databases"] = databases.DATABASES
-        context["django_versions"] = constants.DJANGO_VERSIONS
+        context["orm_versions"] = constants.ORM_VERSIONS
         context["templates"] = templates.TEMPLATES
         context["first"] = templates.TEMPLATES["basic"]
         # Only load journeys if this is a journey URL
@@ -142,7 +142,7 @@ def journeys_api(request):
 
 @csrf_exempt
 def execute(request):
-    """HTTP endpoint for executing Django snippets synchronously."""
+    """HTTP endpoint for executing ORM snippets synchronously."""
     if request.method != "POST":
         return http.HttpResponseNotAllowed(["POST"])
 
@@ -150,7 +150,7 @@ def execute(request):
         payload = json.loads(request.body)
         code = payload.get("code")
         database = payload.get("database", "sqlite")
-        django_version = payload.get("django_version", "5.2.8")
+        orm_version = payload.get("orm_version", "django-5.2.8")
         ignore_cache = payload.get("ignore_cache", False)
 
         if not code:
@@ -159,8 +159,8 @@ def execute(request):
                 status=400
             )
 
-        # Execute the task synchronously (no RQ, no channels)
-        result = tasks.run_django_sync(code, database, ignore_cache, django_version)
+        # Execute the task synchronously
+        result = tasks.run_django_sync(code, database, ignore_cache, orm_version)
         return JsonResponse(result)
 
     except json.JSONDecodeError:

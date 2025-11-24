@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var journeysInitialized = false;
     var template_select = document.getElementById('template-select');
     var database_select = document.getElementById('database-select');
-    var django_version_select = document.getElementById('django-version-select');
+    var orm_version_select = document.getElementById('orm-version-select');
     var ignore_cache = document.getElementById('ignore-cache');
     var erd_link = document.getElementById('erd');
     var query_filters = document.getElementById('query-filters');
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
             code: code,
             ignore_cache: forceNoCache || ignore_cache.checked,
             database: database_select.value,
-            django_version: django_version_select.value,
+            orm_version: orm_version_select.value,
         };
 
         run_button.disabled = true;
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('code', getEditorValue());
         formData.append('name', name.value);
         formData.append('database', database_select.value);
-        formData.append('django_version', django_version_select.value);
+        formData.append('orm_version', orm_version_select.value);
         formData.append('private', isPrivate.checked);
         formData.append('csrfmiddlewaretoken', csrftoken);
 

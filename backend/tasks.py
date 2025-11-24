@@ -26,15 +26,15 @@ class OverloadedError(Exception):
     pass
 
 
-def run_django_sync(code, database, ignore_cache=False, django_version="5.2.8"):
+def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.8"):
     """Synchronous version for HTTP request/response cycle."""
     client = docker.from_env()
     redis_client = redis.Redis("redis")
     key = hashlib.md5(code.encode("utf-8")).hexdigest()
 
-    executor = constants.get_executor(database, django_version)
+    executor = constants.get_executor(database, orm_version)
     selected_db = DATABASES.get(database, "sqlite")
-    cached_reply = cache.get(f"{database}-{django_version}-{key}")
+    cached_reply = cache.get(f"{database}-{orm_version}-{key}")
     unique_name = None
     container = None
     container_slot_acquired = False
@@ -85,7 +85,7 @@ def run_django_sync(code, database, ignore_cache=False, django_version="5.2.8"):
             ]
 
             # Create and start container
-            container_name = f"django-{uuid.uuid4().hex[:6]}"
+            container_name = f"executor-{uuid.uuid4().hex[:6]}"
             container = client.containers.create(
                 executor.image,
                 name=container_name,
@@ -188,7 +188,7 @@ def run_django_sync(code, database, ignore_cache=False, django_version="5.2.8"):
 
         # Cache the result
         reply_str = json.dumps(result_dict)
-        cache.set(f"{database}-{django_version}-{key}", reply_str, timeout=60 * 60 * 24 * 365)
+        cache.set(f"{database}-{orm_version}-{key}", reply_str, timeout=60 * 60 * 24 * 365)
 
         return result_dict
     finally:
