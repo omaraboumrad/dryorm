@@ -1,0 +1,82 @@
+# Multi-stage Dockerfile for Prisma executors
+# Supports multiple Prisma versions and databases
+
+# ============= Base Image =============
+FROM node:20-slim AS base
+
+WORKDIR /app
+
+# Install OpenSSL and other dependencies required by Prisma
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    openssl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============= PostgreSQL Stages =============
+
+# PostgreSQL + Prisma 5.22
+FROM base AS postgres-5.22
+# Copy package.json and install dependencies first (for better caching)
+COPY package-5.22.json /app/package.json
+RUN npm install --omit=dev && npm cache clean --force
+# Copy application files last (so changes don't invalidate npm install)
+COPY app/ /app/app/
+COPY run.sh /app/
+RUN chmod +x /app/run.sh
+ENV DB_TYPE=postgres
+CMD ["/app/run.sh"]
+
+# PostgreSQL + Prisma 6.3
+FROM base AS postgres-6.3
+COPY package-6.3.json /app/package.json
+RUN npm install --omit=dev && npm cache clean --force
+COPY app/ /app/app/
+COPY run.sh /app/
+RUN chmod +x /app/run.sh
+ENV DB_TYPE=postgres
+CMD ["/app/run.sh"]
+
+# ============= MariaDB Stages =============
+
+# MariaDB + Prisma 5.22
+FROM base AS mariadb-5.22
+COPY package-5.22.json /app/package.json
+RUN npm install --omit=dev && npm cache clean --force
+COPY app/ /app/app/
+COPY run.sh /app/
+RUN chmod +x /app/run.sh
+ENV DB_TYPE=mariadb
+CMD ["/app/run.sh"]
+
+# MariaDB + Prisma 6.3
+FROM base AS mariadb-6.3
+COPY package-6.3.json /app/package.json
+RUN npm install --omit=dev && npm cache clean --force
+COPY app/ /app/app/
+COPY run.sh /app/
+RUN chmod +x /app/run.sh
+ENV DB_TYPE=mariadb
+CMD ["/app/run.sh"]
+
+# ============= SQLite Stages =============
+
+# SQLite + Prisma 5.22
+FROM base AS sqlite-5.22
+COPY package-5.22.json /app/package.json
+RUN npm install --omit=dev && npm cache clean --force
+COPY app/ /app/app/
+COPY run.sh /app/
+RUN chmod +x /app/run.sh
+ENV DB_TYPE=sqlite
+CMD ["/app/run.sh"]
+
+# SQLite + Prisma 6.3
+FROM base AS sqlite-6.3
+COPY package-6.3.json /app/package.json
+RUN npm install --omit=dev && npm cache clean --force
+COPY app/ /app/app/
+COPY run.sh /app/
+RUN chmod +x /app/run.sh
+ENV DB_TYPE=sqlite
+CMD ["/app/run.sh"]

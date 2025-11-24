@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  posts     Post[]
+  profile   Profile?
+}
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  bio    String
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int
+  categories Category[]
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts Post[]
+}
+
+// Code:
+export async function run(prisma) {
+  // Create a user with profile
+  const user = await prisma.user.create({
+    data: {
+      name: 'John Doe',
+      email: 'john@example.com',
+      profile: {
+        create: {
+          bio: 'Software developer and tech enthusiast',
+        },
+      },
+    },
+    include: {
+      profile: true,
+    },
+  });
+
+  console.log('Created user:', JSON.stringify(user, null, 2));
+
+  // Create categories
+  const techCategory = await prisma.category.create({
+    data: { name: 'Technology' },
+  });
+
+  const codingCategory = await prisma.category.create({
+    data: { name: 'Coding' },
+  });
+
+  console.log('Created categories');
+
+  // Create posts with categories
+  const post1 = await prisma.post.create({
+    data: {
+      title: 'Getting Started with Prisma',
+      content: 'Prisma is an amazing ORM for Node.js and TypeScript',
+      published: true,
+      authorId: user.id,
+      categories: {
+        connect: [{ id: techCategory.id }, { id: codingCategory.id }],
+      },
+    },
+    include: {
+      categories: true,
+    },
+  });
+
+  const post2 = await prisma.post.create({
+    data: {
+      title: 'Understanding Database Relations',
+      content: 'Relations in Prisma are intuitive and powerful',
+      published: false,
+      authorId: user.id,
+      categories: {
+        connect: [{ id: codingCategory.id }],
+      },
+    },
+    include: {
+      categories: true,
+    },
+  });
+
+  console.log('Created posts:', JSON.stringify([post1, post2], null, 2));
+
+  // Query all users with their posts and profiles
+  const usersWithData = await prisma.user.findMany({
+    include: {
+      posts: {
+        include: {
+          categories: true,
+        },
+      },
+      profile: true,
+    },
+  });
+
+  console.log('All users with data:', JSON.stringify(usersWithData, null, 2));
+
+  // Count published posts
+  const publishedCount = await prisma.post.count({
+    where: { published: true },
+  });
+
+  console.log(`Published posts: ${publishedCount}`);
+
+  // Find posts by category
+  const techPosts = await prisma.post.findMany({
+    where: {
+      categories: {
+        some: {
+          name: 'Technology',
+        },
+      },
+    },
+    include: {
+      author: true,
+      categories: true,
+    },
+  });
+
+  console.log('Technology posts:', JSON.stringify(techPosts, null, 2));
+
+  return {
+    totalUsers: usersWithData.length,
+    publishedPosts: publishedCount,
+    techPosts: techPosts.length,
+  };
+}

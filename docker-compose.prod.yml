@@ -150,3 +150,53 @@ services:
             target: mariadb-1.4
         image: dryorm-executor/python-sqlalchemy-mariadb-1.4
         command: /bin/true
+
+    # Prisma Executors
+
+    executor-nodejs-prisma-postgres-5.22:
+        build:
+            context: ./executors/nodejs-prisma
+            dockerfile: Dockerfile.multi
+            target: postgres-5.22
+        image: dryorm-executor/nodejs-prisma-postgres-5.22
+        command: /bin/true
+
+    executor-nodejs-prisma-postgres-6.3:
+        build:
+            context: ./executors/nodejs-prisma
+            dockerfile: Dockerfile.multi
+            target: postgres-6.3
+        image: dryorm-executor/nodejs-prisma-postgres-6.3
+        command: /bin/true
+
+    executor-nodejs-prisma-mariadb-5.22:
+        build:
+            context: ./executors/nodejs-prisma
+            dockerfile: Dockerfile.multi
+            target: mariadb-5.22
+        image: dryorm-executor/nodejs-prisma-mariadb-5.22
+        command: /bin/true
+
+    executor-nodejs-prisma-mariadb-6.3:
+        build:
+            context: ./executors/nodejs-prisma
+            dockerfile: Dockerfile.multi
+            target: mariadb-6.3
+        image: dryorm-executor/nodejs-prisma-mariadb-6.3
+        command: /bin/true
+
+    executor-nodejs-prisma-sqlite-5.22:
+        build:
+            context: ./executors/nodejs-prisma
+            dockerfile: Dockerfile.multi
+            target: sqlite-5.22
+        image: dryorm-executor/nodejs-prisma-sqlite-5.22
+        command: /bin/true
+
+    executor-nodejs-prisma-sqlite-6.3:
+        build:
+            context: ./executors/nodejs-prisma
+            dockerfile: Dockerfile.multi
+            target: sqlite-6.3
+        image: dryorm-executor/nodejs-prisma-sqlite-6.3
+        command: /bin/true

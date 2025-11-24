@@ -1,0 +1,11 @@
+{
+  "name": "dryorm-prisma-executor",
+  "version": "1.0.0",
+  "description": "Prisma 6.3 executor for DryORM",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "6.3.0",
+    "prisma": "6.3.0"
+  }
+}

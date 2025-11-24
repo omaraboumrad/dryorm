@@ -99,7 +99,8 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
             # Start and wait for container
             container.start()
             exit_status = container.wait()
-            result = container.logs()
+            # Get only stdout (stderr is for debug messages)
+            result = container.logs(stdout=True, stderr=False)
 
             # Remove container
             container.remove()
@@ -180,11 +181,28 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
     else:
         decoded = result.decode("utf-8")
 
+        # Debug: Log the raw output
+        print("=" * 80)
+        print("RAW CONTAINER OUTPUT:")
+        print(decoded)
+        print("=" * 80)
+        print(f"Length: {len(decoded)} bytes")
+        print(f"First 100 chars: {repr(decoded[:100])}")
+        print(f"Last 100 chars: {repr(decoded[-100:])}")
+        print("=" * 80)
+
         # TODO: too much encoding/decoding, should revisit
-        result_dict = {
-            "event": constants.JOB_DONE_EVENT,
-            "result": json.loads(decoded)
-        }
+        try:
+            result_dict = {
+                "event": constants.JOB_DONE_EVENT,
+                "result": json.loads(decoded)
+            }
+        except json.JSONDecodeError as e:
+            print(f"JSON DECODE ERROR: {e}")
+            print(f"Error at position {e.pos}")
+            if e.pos < len(decoded):
+                print(f"Context around error: {repr(decoded[max(0, e.pos-50):e.pos+50])}")
+            raise
 
         # Cache the result
         reply_str = json.dumps(result_dict)

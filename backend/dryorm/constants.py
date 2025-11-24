@@ -35,6 +35,8 @@ ORM_VERSIONS = {
     "django-4.2.26": DjangoVersion(version="django-4.2.26", description="Django 4.2.26 LTS"),
     "sqlalchemy-2.0": DjangoVersion(version="sqlalchemy-2.0", description="SQLAlchemy 2.0"),
     "sqlalchemy-1.4": DjangoVersion(version="sqlalchemy-1.4", description="SQLAlchemy 1.4"),
+    "prisma-5.22": DjangoVersion(version="prisma-5.22", description="Prisma 5.22"),
+    "prisma-6.3": DjangoVersion(version="prisma-6.3", description="Prisma 6.3"),
 }
 
 # Legacy aliases for backward compatibility
@@ -45,6 +47,10 @@ DJANGO_VERSIONS = {
 SQLALCHEMY_VERSIONS = {
     "2.0": DjangoVersion(version="2.0", description="SQLAlchemy 2.0"),
     "1.4": DjangoVersion(version="1.4", description="SQLAlchemy 1.4"),
+}
+PRISMA_VERSIONS = {
+    "5.22": DjangoVersion(version="5.22", description="Prisma 5.22"),
+    "6.3": DjangoVersion(version="6.3", description="Prisma 6.3"),
 }
 
 # Executors organized by database and ORM version
@@ -159,6 +165,61 @@ EXECUTORS = {
         django_version="sqlalchemy-1.4",
         database="sqlite",
     ),
+    # Prisma executors
+    ("postgres", "prisma-5.22"): Executor(
+        image="dryorm-executor/nodejs-prisma-postgres-5.22",
+        key="nodejs/prisma/postgres/5.22",
+        verbose="Node.js - Prisma 5.22 - PostgreSQL",
+        memory="250m",
+        max_containers=10,
+        django_version="prisma-5.22",
+        database="postgres",
+    ),
+    ("postgres", "prisma-6.3"): Executor(
+        image="dryorm-executor/nodejs-prisma-postgres-6.3",
+        key="nodejs/prisma/postgres/6.3",
+        verbose="Node.js - Prisma 6.3 - PostgreSQL",
+        memory="250m",
+        max_containers=10,
+        django_version="prisma-6.3",
+        database="postgres",
+    ),
+    ("mariadb", "prisma-5.22"): Executor(
+        image="dryorm-executor/nodejs-prisma-mariadb-5.22",
+        key="nodejs/prisma/mariadb/5.22",
+        verbose="Node.js - Prisma 5.22 - MariaDB",
+        memory="250m",
+        max_containers=10,
+        django_version="prisma-5.22",
+        database="mariadb",
+    ),
+    ("mariadb", "prisma-6.3"): Executor(
+        image="dryorm-executor/nodejs-prisma-mariadb-6.3",
+        key="nodejs/prisma/mariadb/6.3",
+        verbose="Node.js - Prisma 6.3 - MariaDB",
+        memory="250m",
+        max_containers=10,
+        django_version="prisma-6.3",
+        database="mariadb",
+    ),
+    ("sqlite", "prisma-5.22"): Executor(
+        image="dryorm-executor/nodejs-prisma-postgres-5.22",  # Use postgres base for sqlite
+        key="nodejs/prisma/sqlite/5.22",
+        verbose="Node.js - Prisma 5.22 - SQLite",
+        memory="250m",
+        max_containers=10,
+        django_version="prisma-5.22",
+        database="sqlite",
+    ),
+    ("sqlite", "prisma-6.3"): Executor(
+        image="dryorm-executor/nodejs-prisma-postgres-6.3",  # Use postgres base for sqlite
+        key="nodejs/prisma/sqlite/6.3",
+        verbose="Node.js - Prisma 6.3 - SQLite",
+        memory="250m",
+        max_containers=10,
+        django_version="prisma-6.3",
+        database="sqlite",
+    ),
 }
 
 
@@ -166,10 +227,10 @@ def get_executor(database: str, orm_version: str) -> Executor:
     """Get the appropriate executor for the given database and ORM version."""
     key = (database, orm_version)
 
-    # Support legacy format (without 'django-' or 'sqlalchemy-' prefix)
+    # Support legacy format (without 'django-', 'sqlalchemy-', or 'prisma-' prefix)
     if key not in EXECUTORS:
         # Try adding django- prefix for backward compatibility
-        if not orm_version.startswith(('django-', 'sqlalchemy-')):
+        if not orm_version.startswith(('django-', 'sqlalchemy-', 'prisma-')):
             key = (database, f"django-{orm_version}")
 
     if key not in EXECUTORS:

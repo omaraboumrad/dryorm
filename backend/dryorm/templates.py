@@ -322,6 +322,202 @@ def run():
     }
 """
 
+# Prisma Templates
+PRISMA_BASIC = """generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Person {
+  id   Int    @id @default(autoincrement())
+  name String
+}
+
+// Code:
+export async function run(prisma) {
+  const person = await prisma.person.create({
+    data: {
+      name: 'John Doe',
+    },
+  });
+
+  console.log('Created:', person);
+}
+"""
+
+PRISMA_BASIC_FK = """generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Product {
+  id         Int      @id @default(autoincrement())
+  name       String
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+}
+
+// Code:
+export async function run(prisma) {
+  // Create categories
+  const electronics = await prisma.category.create({
+    data: { name: 'Electronics' },
+  });
+
+  const clothing = await prisma.category.create({
+    data: { name: 'Clothing' },
+  });
+
+  // Create products
+  await prisma.product.createMany({
+    data: [
+      { name: 'Laptop', categoryId: electronics.id },
+      { name: 'T-Shirt', categoryId: clothing.id },
+      { name: 'Smartphone', categoryId: electronics.id },
+      { name: 'Jeans', categoryId: clothing.id },
+    ],
+  });
+
+  // Query with relations
+  console.log('Products per category:');
+  const categories = await prisma.category.findMany({
+    include: {
+      products: true,
+    },
+  });
+
+  for (const category of categories) {
+    console.log(`${category.name}: ${category.products.length} products`);
+  }
+}
+"""
+
+PRISMA_QUERY = """generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Person {
+  id      Int    @id @default(autoincrement())
+  name    String
+  country String
+}
+
+// Code:
+export async function run(prisma) {
+  // Add people
+  await prisma.person.createMany({
+    data: [
+      { name: 'John Doe', country: 'USA' },
+      { name: 'Jane Doe', country: 'Canada' },
+      { name: 'Jim Doe', country: 'UK' },
+      { name: 'Alice Smith', country: 'USA' },
+    ],
+  });
+
+  // Query examples
+  console.log('All people from USA:');
+  const usaPeople = await prisma.person.findMany({
+    where: { country: 'USA' },
+  });
+
+  for (const person of usaPeople) {
+    console.log(`  ${person.name}`);
+  }
+
+  const totalPeople = await prisma.person.count();
+  console.log(`\\nTotal people: ${totalPeople}`);
+
+  // Return data for table display
+  const allPeople = await prisma.person.findMany();
+  return allPeople;
+}
+"""
+
+PRISMA_MANY_TO_MANY = """generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  title      String
+  categories Category[]
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String
+  posts Post[]
+}
+
+// Code:
+export async function run(prisma) {
+  // Create categories
+  const tech = await prisma.category.create({
+    data: { name: 'Technology' },
+  });
+
+  const coding = await prisma.category.create({
+    data: { name: 'Coding' },
+  });
+
+  // Create posts with categories
+  await prisma.post.create({
+    data: {
+      title: 'Getting Started with Prisma',
+      categories: {
+        connect: [{ id: tech.id }, { id: coding.id }],
+      },
+    },
+  });
+
+  await prisma.post.create({
+    data: {
+      title: 'Database Design Patterns',
+      categories: {
+        connect: [{ id: tech.id }],
+      },
+    },
+  });
+
+  // Query posts with categories
+  console.log('Posts with their categories:');
+  const posts = await prisma.post.findMany({
+    include: {
+      categories: true,
+    },
+  });
+
+  for (const post of posts) {
+    const categoryNames = post.categories.map(c => c.name).join(', ');
+    console.log(`${post.title}: [${categoryNames}]`);
+  }
+}
+"""
+
 TEMPLATES = {
     "dryorm features": DRYORM_FEATURES,
     "basic": BASIC,
@@ -335,4 +531,8 @@ TEMPLATES = {
     "sqlalchemy basic": SQLALCHEMY_BASIC,
     "sqlalchemy basic fk": SQLALCHEMY_BASIC_FK,
     "sqlalchemy query": SQLALCHEMY_QUERY,
+    "prisma basic": PRISMA_BASIC,
+    "prisma basic fk": PRISMA_BASIC_FK,
+    "prisma query": PRISMA_QUERY,
+    "prisma many-to-many": PRISMA_MANY_TO_MANY,
 }

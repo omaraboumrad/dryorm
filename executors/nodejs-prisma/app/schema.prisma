@@ -1,0 +1,9 @@
+// This file will be replaced with user code
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
