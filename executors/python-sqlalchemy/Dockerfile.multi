@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for SQLAlchemy executor
-# Supports PostgreSQL and MariaDB with multiple SQLAlchemy versions
+# Supports PostgreSQL, MariaDB, and SQLite with SQLAlchemy 2.0
 
-# Stage 1: Base image with Python
+# Base image with Python
 FROM python:3.12-slim-bullseye AS base
 
 WORKDIR /app
@@ -19,17 +19,10 @@ COPY run.sh /app/
 # Make run.sh executable
 RUN chmod +x /app/run.sh
 
-# Stage 6: SQLite + SQLAlchemy 2.0 (default)
+# Stage 1: SQLite + SQLAlchemy 2.0 (default)
 FROM base AS sqlite-2.0
 COPY requirements-2.0-base.txt /app/
 RUN pip install --no-cache-dir -r requirements-2.0-base.txt
-ENV DB_TYPE=sqlite
-CMD ["/app/run.sh"]
-
-# Stage 7: SQLite + SQLAlchemy 1.4
-FROM base AS sqlite-1.4
-COPY requirements-1.4-base.txt /app/
-RUN pip install --no-cache-dir -r requirements-1.4-base.txt
 ENV DB_TYPE=sqlite
 CMD ["/app/run.sh"]
 
@@ -40,24 +33,10 @@ RUN pip install --no-cache-dir -r requirements-2.0-base.txt
 ENV DB_TYPE=postgres
 CMD ["/app/run.sh"]
 
-# Stage 3: PostgreSQL + SQLAlchemy 1.4
-FROM base AS postgres-1.4
-COPY requirements-1.4-base.txt /app/
-RUN pip install --no-cache-dir -r requirements-1.4-base.txt
-ENV DB_TYPE=postgres
-CMD ["/app/run.sh"]
-
-# Stage 4: MariaDB + SQLAlchemy 2.0
+# Stage 3: MariaDB + SQLAlchemy 2.0
 FROM base AS mariadb-2.0
 COPY requirements-2.0-base.txt /app/
 RUN pip install --no-cache-dir -r requirements-2.0-base.txt
-ENV DB_TYPE=mariadb
-CMD ["/app/run.sh"]
-
-# Stage 5: MariaDB + SQLAlchemy 1.4
-FROM base AS mariadb-1.4
-COPY requirements-1.4-base.txt /app/
-RUN pip install --no-cache-dir -r requirements-1.4-base.txt
 ENV DB_TYPE=mariadb
 CMD ["/app/run.sh"]
 

@@ -72,6 +72,9 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
             if selected_db.needs_setup:
                 unique_name = selected_db.setup()
 
+            # Create and start container
+            container_name = f"executor-{uuid.uuid4().hex[:6]}"
+
             environment = [
                 f"CODE={code}",
                 f"SERVICE_DB_HOST={selected_db.host}",
@@ -84,8 +87,6 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
                 f"DB_PASSWORD={unique_name}",
             ]
 
-            # Create and start container
-            container_name = f"executor-{uuid.uuid4().hex[:6]}"
             container = client.containers.create(
                 executor.image,
                 name=container_name,
@@ -99,8 +100,24 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
             # Start and wait for container
             container.start()
             exit_status = container.wait()
-            # Get only stdout (stderr is for debug messages)
-            result = container.logs(stdout=True, stderr=False)
+
+            # Read result from file instead of logs
+            try:
+                # Try to read from file first
+                exec_result = container.exec_run('cat /tmp/result.json')
+
+                if exec_result.exit_code == 0:
+                    result = exec_result.output
+                    print("Successfully read from /tmp/result.json")
+                else:
+                    # File doesn't exist or cat failed, fall back to logs
+                    print(f"File read failed (exit code {exec_result.exit_code}), falling back to logs")
+                    print(f"Exec output: {exec_result.output.decode('utf-8')}")
+                    result = container.logs(stdout=True, stderr=False)
+            except Exception as e:
+                # If exec fails completely, fall back to logs
+                print(f"Exec failed with exception: {e}, falling back to logs")
+                result = container.logs(stdout=True, stderr=False)
 
             # Remove container
             container.remove()

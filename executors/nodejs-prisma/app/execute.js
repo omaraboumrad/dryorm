@@ -5,7 +5,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { createRequire } from 'module';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -287,16 +287,14 @@ async function main() {
   // Restore console.log before final output
   console.log = originalLog;
 
-  // Output result as JSON
+  // Write result to file instead of stdout to avoid pollution
   try {
     const jsonOutput = safeStringify(result);
+    const resultFile = '/tmp/result.json';
 
-    // Debug: Write to stderr to see what we're outputting
-    console.error('=== DEBUG: JSON OUTPUT START ===');
-    console.error(jsonOutput);
-    console.error('=== DEBUG: JSON OUTPUT END ===');
-    console.error(`Length: ${jsonOutput.length} bytes`);
+    writeFileSync(resultFile, jsonOutput);
 
+    // Also write to stdout for backward compatibility (can be removed later)
     process.stdout.write(jsonOutput + '\n');
   } catch (stringifyError) {
     // If even safe stringify fails, output a basic error
@@ -308,8 +306,8 @@ async function main() {
       error: `JSON Serialization Error: ${stringifyError.message}`,
       traceback: stringifyError.stack
     };
-    console.error('=== DEBUG: FALLBACK JSON ===');
-    console.error(JSON.stringify(fallbackResult));
+    const resultFile = '/tmp/result.json';
+    writeFileSync(resultFile, JSON.stringify(fallbackResult));
     process.stdout.write(JSON.stringify(fallbackResult) + '\n');
   }
 }
@@ -325,16 +323,22 @@ main().catch((error) => {
     traceback: error.stack
   };
   try {
-    process.stdout.write(safeStringify(errorResult) + '\n');
+    const jsonOutput = safeStringify(errorResult);
+    const resultFile = '/tmp/result.json';
+    writeFileSync(resultFile, jsonOutput);
+    process.stdout.write(jsonOutput + '\n');
   } catch (e) {
-    process.stdout.write(JSON.stringify({
+    const fallbackOutput = JSON.stringify({
       output: '',
       queries: [],
       erd: '',
       returned: null,
       error: 'Critical serialization error',
       traceback: ''
-    }) + '\n');
+    });
+    const resultFile = '/tmp/result.json';
+    writeFileSync(resultFile, fallbackOutput);
+    process.stdout.write(fallbackOutput + '\n');
   }
   process.exit(1);
 });

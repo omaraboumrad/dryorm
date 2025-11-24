@@ -4,7 +4,7 @@ This executor allows users to test and share SQLAlchemy code snippets with multi
 
 ## Features
 
-- **Multiple SQLAlchemy Versions**: Supports SQLAlchemy 1.4 and 2.0
+- **SQLAlchemy 2.0**: Uses the latest SQLAlchemy version
 - **Multiple Databases**: PostgreSQL, MariaDB, and SQLite
 - **Query Tracking**: Tracks SQL queries with source line numbers
 - **ERD Generation**: Automatically generates Entity-Relationship Diagrams
@@ -21,7 +21,6 @@ python-sqlalchemy/
 ├── Dockerfile.multi            # Multi-stage Docker build
 ├── run.sh                      # Container entry point
 ├── requirements-2.0-base.txt   # SQLAlchemy 2.0 dependencies
-├── requirements-1.4-base.txt   # SQLAlchemy 1.4 dependencies
 └── README.md                   # This file
 ```
 
@@ -122,29 +121,22 @@ The executor returns JSON with the following structure:
 Build all variants using Docker multi-stage builds:
 
 ```bash
+# Build all images at once
+./build.sh
+
+# Or build individual images:
+
 # PostgreSQL + SQLAlchemy 2.0
 docker build -f Dockerfile.multi --target postgres-2.0 \
   -t dryorm-executor/python-sqlalchemy-postgres-2.0 .
-
-# PostgreSQL + SQLAlchemy 1.4
-docker build -f Dockerfile.multi --target postgres-1.4 \
-  -t dryorm-executor/python-sqlalchemy-postgres-1.4 .
 
 # MariaDB + SQLAlchemy 2.0
 docker build -f Dockerfile.multi --target mariadb-2.0 \
   -t dryorm-executor/python-sqlalchemy-mariadb-2.0 .
 
-# MariaDB + SQLAlchemy 1.4
-docker build -f Dockerfile.multi --target mariadb-1.4 \
-  -t dryorm-executor/python-sqlalchemy-mariadb-1.4 .
-
 # SQLite + SQLAlchemy 2.0
 docker build -f Dockerfile.multi --target sqlite-2.0 \
   -t dryorm-executor/python-sqlalchemy-sqlite-2.0 .
-
-# SQLite + SQLAlchemy 1.4
-docker build -f Dockerfile.multi --target sqlite-1.4 \
-  -t dryorm-executor/python-sqlalchemy-sqlite-1.4 .
 ```
 
 ## Environment Variables

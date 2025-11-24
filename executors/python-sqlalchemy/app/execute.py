@@ -224,7 +224,12 @@ def main():
     finally:
         engine.dispose()
 
-    # Output result as JSON
+    # Write to file instead of stdout to avoid pollution
+    result_file = '/tmp/result.json'
+    with open(result_file, 'w') as f:
+        f.write(json.dumps(result))
+
+    # Also write to stdout for backward compatibility (can be removed later)
     print(json.dumps(result))
 
 

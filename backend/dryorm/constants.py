@@ -34,8 +34,6 @@ ORM_VERSIONS = {
     "django-5.2.8": DjangoVersion(version="django-5.2.8", description="Django 5.2.8"),
     "django-4.2.26": DjangoVersion(version="django-4.2.26", description="Django 4.2.26 LTS"),
     "sqlalchemy-2.0": DjangoVersion(version="sqlalchemy-2.0", description="SQLAlchemy 2.0"),
-    "sqlalchemy-1.4": DjangoVersion(version="sqlalchemy-1.4", description="SQLAlchemy 1.4"),
-    "prisma-5.22": DjangoVersion(version="prisma-5.22", description="Prisma 5.22"),
     "prisma-6.3": DjangoVersion(version="prisma-6.3", description="Prisma 6.3"),
 }
 
@@ -46,10 +44,8 @@ DJANGO_VERSIONS = {
 }
 SQLALCHEMY_VERSIONS = {
     "2.0": DjangoVersion(version="2.0", description="SQLAlchemy 2.0"),
-    "1.4": DjangoVersion(version="1.4", description="SQLAlchemy 1.4"),
 }
 PRISMA_VERSIONS = {
-    "5.22": DjangoVersion(version="5.22", description="Prisma 5.22"),
     "6.3": DjangoVersion(version="6.3", description="Prisma 6.3"),
 }
 
@@ -120,15 +116,6 @@ EXECUTORS = {
         django_version="sqlalchemy-2.0",
         database="postgres",
     ),
-    ("postgres", "sqlalchemy-1.4"): Executor(
-        image="dryorm-executor/python-sqlalchemy-postgres-1.4",
-        key="python/sqlalchemy/postgres/1.4",
-        verbose="Python - SQLAlchemy 1.4 - PostgreSQL",
-        memory="75m",
-        max_containers=10,
-        django_version="sqlalchemy-1.4",
-        database="postgres",
-    ),
     ("mariadb", "sqlalchemy-2.0"): Executor(
         image="dryorm-executor/python-sqlalchemy-mariadb-2.0",
         key="python/sqlalchemy/mariadb/2.0",
@@ -136,15 +123,6 @@ EXECUTORS = {
         memory="75m",
         max_containers=10,
         django_version="sqlalchemy-2.0",
-        database="mariadb",
-    ),
-    ("mariadb", "sqlalchemy-1.4"): Executor(
-        image="dryorm-executor/python-sqlalchemy-mariadb-1.4",
-        key="python/sqlalchemy/mariadb/1.4",
-        verbose="Python - SQLAlchemy 1.4 - MariaDB",
-        memory="75m",
-        max_containers=10,
-        django_version="sqlalchemy-1.4",
         database="mariadb",
     ),
     ("sqlite", "sqlalchemy-2.0"): Executor(
@@ -156,25 +134,7 @@ EXECUTORS = {
         django_version="sqlalchemy-2.0",
         database="sqlite",
     ),
-    ("sqlite", "sqlalchemy-1.4"): Executor(
-        image="dryorm-executor/python-sqlalchemy-postgres-1.4",  # Use postgres base for sqlite
-        key="python/sqlalchemy/sqlite/1.4",
-        verbose="Python - SQLAlchemy 1.4 - SQLite",
-        memory="75m",
-        max_containers=10,
-        django_version="sqlalchemy-1.4",
-        database="sqlite",
-    ),
     # Prisma executors
-    ("postgres", "prisma-5.22"): Executor(
-        image="dryorm-executor/nodejs-prisma-postgres-5.22",
-        key="nodejs/prisma/postgres/5.22",
-        verbose="Node.js - Prisma 5.22 - PostgreSQL",
-        memory="250m",
-        max_containers=10,
-        django_version="prisma-5.22",
-        database="postgres",
-    ),
     ("postgres", "prisma-6.3"): Executor(
         image="dryorm-executor/nodejs-prisma-postgres-6.3",
         key="nodejs/prisma/postgres/6.3",
@@ -184,15 +144,6 @@ EXECUTORS = {
         django_version="prisma-6.3",
         database="postgres",
     ),
-    ("mariadb", "prisma-5.22"): Executor(
-        image="dryorm-executor/nodejs-prisma-mariadb-5.22",
-        key="nodejs/prisma/mariadb/5.22",
-        verbose="Node.js - Prisma 5.22 - MariaDB",
-        memory="250m",
-        max_containers=10,
-        django_version="prisma-5.22",
-        database="mariadb",
-    ),
     ("mariadb", "prisma-6.3"): Executor(
         image="dryorm-executor/nodejs-prisma-mariadb-6.3",
         key="nodejs/prisma/mariadb/6.3",
@@ -201,15 +152,6 @@ EXECUTORS = {
         max_containers=10,
         django_version="prisma-6.3",
         database="mariadb",
-    ),
-    ("sqlite", "prisma-5.22"): Executor(
-        image="dryorm-executor/nodejs-prisma-postgres-5.22",  # Use postgres base for sqlite
-        key="nodejs/prisma/sqlite/5.22",
-        verbose="Node.js - Prisma 5.22 - SQLite",
-        memory="250m",
-        max_containers=10,
-        django_version="prisma-5.22",
-        database="sqlite",
     ),
     ("sqlite", "prisma-6.3"): Executor(
         image="dryorm-executor/nodejs-prisma-postgres-6.3",  # Use postgres base for sqlite

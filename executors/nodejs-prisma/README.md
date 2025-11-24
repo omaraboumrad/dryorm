@@ -4,7 +4,7 @@ This executor allows users to test and share Prisma ORM code snippets with multi
 
 ## Features
 
-- **Multiple Prisma Versions**: Supports Prisma 5.22 and 6.3
+- **Prisma 6.3**: Uses the latest Prisma version
 - **Multiple Databases**: PostgreSQL, MariaDB, and SQLite
 - **Query Tracking**: Tracks SQL queries with source line numbers
 - **ERD Generation**: Automatically generates Entity-Relationship Diagrams from Prisma schema
@@ -19,7 +19,6 @@ nodejs-prisma/
 │   └── schema.prisma           # User schema placeholder
 ├── Dockerfile.multi            # Multi-stage Docker build
 ├── run.sh                      # Container entry point
-├── package-5.22.json           # Prisma 5.22 dependencies
 ├── package-6.3.json            # Prisma 6.3 dependencies
 ├── build.sh                    # Build all Docker images
 └── README.md                   # This file
@@ -129,25 +128,13 @@ Build all variants using Docker multi-stage builds:
 
 # Or build individual images:
 
-# PostgreSQL + Prisma 5.22
-docker build -f Dockerfile.multi --target postgres-5.22 \
-  -t dryorm-executor/nodejs-prisma-postgres-5.22 .
-
 # PostgreSQL + Prisma 6.3
 docker build -f Dockerfile.multi --target postgres-6.3 \
   -t dryorm-executor/nodejs-prisma-postgres-6.3 .
 
-# MariaDB + Prisma 5.22
-docker build -f Dockerfile.multi --target mariadb-5.22 \
-  -t dryorm-executor/nodejs-prisma-mariadb-5.22 .
-
 # MariaDB + Prisma 6.3
 docker build -f Dockerfile.multi --target mariadb-6.3 \
   -t dryorm-executor/nodejs-prisma-mariadb-6.3 .
-
-# SQLite + Prisma 5.22
-docker build -f Dockerfile.multi --target sqlite-5.22 \
-  -t dryorm-executor/nodejs-prisma-sqlite-5.22 .
 
 # SQLite + Prisma 6.3
 docker build -f Dockerfile.multi --target sqlite-6.3 \
