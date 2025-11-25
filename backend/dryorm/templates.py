@@ -518,21 +518,48 @@ export async function run(prisma) {
 }
 """
 
-TEMPLATES = {
-    "dryorm features": DRYORM_FEATURES,
-    "basic": BASIC,
-    "bulk create": BULK,
-    "bulk fake": BULK_FAKE,
-    "csv import": CSV_IMPORT,
-    "basic fk": BASIC_FK,
-    "self fk": SELF_FK,
-    "user profile": USER_PROFILE,
-    "dryorm tabular output": TABULAR_OUTPUT,
-    "sqlalchemy basic": SQLALCHEMY_BASIC,
-    "sqlalchemy basic fk": SQLALCHEMY_BASIC_FK,
-    "sqlalchemy query": SQLALCHEMY_QUERY,
-    "prisma basic": PRISMA_BASIC,
-    "prisma basic fk": PRISMA_BASIC_FK,
-    "prisma query": PRISMA_QUERY,
-    "prisma many-to-many": PRISMA_MANY_TO_MANY,
+# Grouped templates by ORM type
+EXECUTOR_TEMPLATES = {
+    "django": {
+        "basic": BASIC,
+        "bulk create": BULK,
+        "bulk fake": BULK_FAKE,
+        "csv import": CSV_IMPORT,
+        "basic fk": BASIC_FK,
+        "self fk": SELF_FK,
+        "user profile": USER_PROFILE,
+        "dryorm tabular output": TABULAR_OUTPUT,
+        "dryorm features": DRYORM_FEATURES,
+    },
+    "sqlalchemy": {
+        "basic": SQLALCHEMY_BASIC,
+        "basic fk": SQLALCHEMY_BASIC_FK,
+        "query": SQLALCHEMY_QUERY,
+    },
+    "prisma": {
+        "basic": PRISMA_BASIC,
+        "basic fk": PRISMA_BASIC_FK,
+        "query": PRISMA_QUERY,
+        "many-to-many": PRISMA_MANY_TO_MANY,
+    }
 }
+
+
+def get_orm_type(orm_version: str) -> str:
+    """
+    Extract ORM type from ORM version string.
+
+    Args:
+        orm_version: Version string like "django-5.2.8", "sqlalchemy-2.0", "prisma-6.3"
+
+    Returns:
+        ORM type: "django", "sqlalchemy", or "prisma"
+    """
+    if orm_version.startswith("django-"):
+        return "django"
+    elif orm_version.startswith("sqlalchemy-"):
+        return "sqlalchemy"
+    elif orm_version.startswith("prisma-"):
+        return "prisma"
+    # Fallback to django for backward compatibility
+    return "django"

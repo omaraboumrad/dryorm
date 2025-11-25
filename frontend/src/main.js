@@ -143,7 +143,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var queries = document.getElementById('queries');
     var name = document.getElementById('name');
     var isPrivate = document.getElementById('isPrivate');
-    var templates = JSON.parse(document.getElementById('templates').textContent);
+    var allTemplates = JSON.parse(document.getElementById('templates').textContent);
+    var currentOrmType = 'django'; // Track current ORM type
     var journeys = null; // Lazy-loaded
     var journeysInitialized = false;
     var template_select = document.getElementById('template-select');
@@ -166,6 +167,34 @@ document.addEventListener('DOMContentLoaded', function() {
     setupCopyButton(document.querySelector('[data-section="queries-section"] .copy-indicator'), () => {
         return rawQueries.map(q => `-- ${q.time}s\n${q.sql}`).join('\n\n');
     });
+
+    // Helper function to get ORM type from version string
+    function getOrmType(ormVersion) {
+        if (ormVersion.startsWith('django-')) return 'django';
+        if (ormVersion.startsWith('sqlalchemy-')) return 'sqlalchemy';
+        if (ormVersion.startsWith('prisma-')) return 'prisma';
+        return 'django';
+    }
+
+    // Function to update template dropdown based on ORM type
+    function updateTemplateDropdown(ormType) {
+        var templates = allTemplates[ormType] || {};
+        template_select.innerHTML = '';
+
+        Object.keys(templates).forEach(function(key) {
+            var option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            template_select.appendChild(option);
+        });
+
+        // Auto-select first template and load it into editor
+        if (template_select.options.length > 0) {
+            template_select.selectedIndex = 0;
+            var firstTemplate = templates[template_select.value] || '';
+            setEditorValue(firstTemplate);
+        }
+    }
 
     // --- Code Editor with CodeMirror 6 ---
     const codeTextarea = document.getElementById('code_models');
@@ -412,13 +441,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Event listener for ORM version changes
+    orm_version_select.addEventListener('change', function() {
+        var newOrmType = getOrmType(this.value);
+        if (newOrmType !== currentOrmType) {
+            currentOrmType = newOrmType;
+            updateTemplateDropdown(newOrmType);
+        }
+    });
+
+    // Event listener for template selection changes
     template_select.addEventListener('change', function() {
         template_select.value = this.value;
+        var templates = allTemplates[currentOrmType] || {};
         var template_text = templates[this.value] || '';
         setEditorValue(template_text);
         models_editor.focus();
         window.history.pushState('Dry ORM', 'Dry ORM', '/');
     });
+
+    // Initialize template dropdown for current ORM version
+    currentOrmType = getOrmType(orm_version_select.value);
+    updateTemplateDropdown(currentOrmType);
 
     show_template.addEventListener('click', function() {
         dialog.showModal();

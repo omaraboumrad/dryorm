@@ -45,8 +45,8 @@ class SnippetDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context["databases"] = databases.DATABASES
         context["orm_versions"] = constants.ORM_VERSIONS
-        context["templates"] = templates.TEMPLATES
-        context["first"] = templates.TEMPLATES["basic"]
+        context["templates"] = templates.EXECUTOR_TEMPLATES
+        context["first"] = templates.EXECUTOR_TEMPLATES["django"]["basic"]
         context["journeys"] = {}
         return context
 
@@ -58,8 +58,8 @@ class SnippetHomeView(generic.TemplateView):
         context = super().get_context_data(**kwargs)
         context["databases"] = databases.DATABASES
         context["orm_versions"] = constants.ORM_VERSIONS
-        context["templates"] = templates.TEMPLATES
-        context["first"] = templates.TEMPLATES["basic"]
+        context["templates"] = templates.EXECUTOR_TEMPLATES
+        context["first"] = templates.EXECUTOR_TEMPLATES["django"]["basic"]
         # Only load journeys if this is a journey URL
         if self.request.path.startswith('/j/'):
             context["journeys"] = load_journeys()
