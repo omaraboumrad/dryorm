@@ -64,7 +64,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
     </div>
     <select id="orm-version-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">
         {% for key, version in orm_versions.items %}
-        <option value="{{key}}" {% if key == "django-5.2.8" %}selected{% endif %}>{{version.description}}</option>
+        <option value="{{key}}" {% if object.django_version == key or not object and key == "django-5.2.8" %}selected{% endif %}>{{version.description}}</option>
         {% endfor %}
     </select>
     <select id="database-select" class="w-full px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">

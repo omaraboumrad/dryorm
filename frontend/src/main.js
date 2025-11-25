@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to update template dropdown based on ORM type
-    function updateTemplateDropdown(ormType) {
+    function updateTemplateDropdown(ormType, autoLoadTemplate = false) {
         var templates = allTemplates[ormType] || {};
         template_select.innerHTML = '';
 
@@ -188,11 +188,15 @@ document.addEventListener('DOMContentLoaded', function() {
             template_select.appendChild(option);
         });
 
-        // Auto-select first template and load it into editor
+        // Auto-select first template
         if (template_select.options.length > 0) {
             template_select.selectedIndex = 0;
-            var firstTemplate = templates[template_select.value] || '';
-            setEditorValue(firstTemplate);
+
+            // Only auto-load template if explicitly requested (e.g., when switching ORM types)
+            if (autoLoadTemplate) {
+                var firstTemplate = templates[template_select.value] || '';
+                setEditorValue(firstTemplate);
+            }
         }
     }
 
@@ -446,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var newOrmType = getOrmType(this.value);
         if (newOrmType !== currentOrmType) {
             currentOrmType = newOrmType;
-            updateTemplateDropdown(newOrmType);
+            updateTemplateDropdown(newOrmType, true); // Auto-load template when switching ORMs
         }
     });
 
@@ -460,9 +464,9 @@ document.addEventListener('DOMContentLoaded', function() {
         window.history.pushState('Dry ORM', 'Dry ORM', '/');
     });
 
-    // Initialize template dropdown for current ORM version
+    // Initialize template dropdown for current ORM version (don't auto-load to preserve saved snippets)
     currentOrmType = getOrmType(orm_version_select.value);
-    updateTemplateDropdown(currentOrmType);
+    updateTemplateDropdown(currentOrmType, false);
 
     show_template.addEventListener('click', function() {
         dialog.showModal();
@@ -481,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('code', getEditorValue());
         formData.append('name', name.value);
         formData.append('database', database_select.value);
-        formData.append('orm_version', orm_version_select.value);
+        formData.append('django_version', orm_version_select.value);
         formData.append('private', isPrivate.checked);
         formData.append('csrfmiddlewaretoken', csrftoken);
 
