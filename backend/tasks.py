@@ -113,11 +113,11 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
                     # File doesn't exist or cat failed, fall back to logs
                     print(f"File read failed (exit code {exec_result.exit_code}), falling back to logs")
                     print(f"Exec output: {exec_result.output.decode('utf-8')}")
-                    result = container.logs(stdout=True, stderr=False)
+                    result = container.logs(stdout=True, stderr=True)
             except Exception as e:
                 # If exec fails completely, fall back to logs
                 print(f"Exec failed with exception: {e}, falling back to logs")
-                result = container.logs(stdout=True, stderr=False)
+                result = container.logs(stdout=True, stderr=True)
 
             # Remove container
             container.remove()
