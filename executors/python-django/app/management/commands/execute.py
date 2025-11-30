@@ -180,7 +180,8 @@ class Command(BaseCommand):
             query_logger.queries.clear()  # Clear our custom queries too
 
             out = io.StringIO()
-            with contextlib.redirect_stdout(out):
+            err = io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                 if hasattr(models, "run"):
                     returned = models.run()
                 else:
@@ -193,6 +194,7 @@ class Command(BaseCommand):
 
             combined = dict(
                 output=out.getvalue(),
+                warnings=err.getvalue(),
                 erd=erd,
                 queries=all_queries,
                 returned=returned,
