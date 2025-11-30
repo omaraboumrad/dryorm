@@ -11,11 +11,13 @@
                 </p>
             </div>
             <h2 class="py-4 text-xl font-semibold border-b"># Intro</h2>
-            <p>DryORM allows you to run Django ORM code against suported Databases. The technologies used to power this webapp are:</p>
+            <p>DryORM allows you to run Django ORM code against supported Databases (with experimental support for SQLAlchemy and Prisma). The technologies used to power this webapp are:</p>
             <ul class="list-disc list-inside">
                 <li>
-                    <strong>Frameworks & Libraries:</strong> <a class="text-django-secondary" href="https://wwww.djangoproject.com">Django</a> / <a class="text-django-secondary"
-    href="https://channels.readthedocs.io/en/latest/index.html">Channels</a> / <a class="text-django-secondary" href="https://python-rq.org/">Python RQ</a>
+                    <strong>ORMs & Query Builders:</strong> <a class="text-django-secondary" href="https://wwww.djangoproject.com">Django ORM</a> / <a class="text-django-secondary" href="https://www.sqlalchemy.org/">SQLAlchemy</a> (experimental) / <a class="text-django-secondary" href="https://www.prisma.io/">Prisma</a> (experimental)
+                </li>
+                <li>
+                    <strong>Frameworks & Libraries:</strong> <a class="text-django-secondary" href="https://wwww.djangoproject.com">Django</a>
                 </li>
                 <li>
                     <strong>DB / Broker:</strong> SQLite / Postgres / MariaDB / Redis
@@ -24,13 +26,13 @@
                     <strong>Infra:</strong> Docker / Compose
                 </li>
                 <li>
-                    <strong>Frontend:</strong> Django Templates / Tailwindcss (<strong>play.*</strong> for now) / AlpineJS / Vanilla JS
+                    <strong>Frontend:</strong> Django Templates / Tailwind / AlpineJS / Vanilla JS
                 </li>
             </ul>
             <p>
                 The project is built primarily to provide <a class="text-django-secondary"
     href="https://discord.com/invite/xcRH6mN4fa">Django's Discord Community</a> Staff with a medium to assist users with their ORM questions rather quickly.
-                The implementation is in fact framework-agnostic, however Django will remain the primary purpose for the foreseeable future.
+                The implementation is in fact framework-agnostic (as can be see by the experimental support), however Django will remain the primary purpose for the foreseeable future.
             </p>
             <p>
                 Since I'm not forcing anyone to login, there are several safeguards in place. Nevertheless, I urge you not to cause harm. The limitations are as follows:
@@ -39,7 +41,7 @@
                 <li>Rate limits</li>
                 <li>10 concurrent executions</li>
                 <li>10s timeout</li>
-                <li>75MB limit</li>
+                <li>75MB limit for Django/SQLAlchemy and 150MB for Prisma</li>
                 <li>No network</li>
             </ul>
             <p>Thank you to everyone that has helped test and provide feedback on the project, notably the awesome Django Discord Staff!</p>
@@ -50,7 +52,48 @@
         <div class="space-y-4 mt-4 whitespace-nowrap [&_*]:whitespace-inherit">
             <h2 class="py-4 border-b border-t text-xl font-semibold"># Changelog</h2>
             <div class="grid grid-cols-2 grid-cols-[max-content_min-content] w-fit gap-4">
-                <div class="font-semibold">August 23th, 2025</div>
+                <div class="font-semibold">November 25th, 2025</div>
+                <ul>
+                    <li>Engine - templates available for different executors</li>
+                </ul>
+                <div class="font-semibold">November 24th, 2025</div>
+                <ul>
+                    <li>Engine - adds support for Prisma 🎉 <a class="text-django-secondary underline" href="/prisma-example/run">(Example)</a></li>
+                    <li>Engine - adds support for SQLAlchemy 🎉 <a class="text-django-secondary underline" href="/sqlalchemy-example/run">(Example)</a></li>
+                </ul>
+                <div class="font-semibold">November 11th, 2025</div>
+                <ul>
+                    <li>Engine - massive slimming of docker images</li>
+                    <li>Engine - adds support for multiple django versions 🎉</li>
+                </ul>
+                <div class="font-semibold">November 10th, 2025</div>
+                <ul>
+                    <li>Engine - converts websockets flow to standard flow</li>
+                </ul>
+                <div class="font-semibold">October 19th, 2025</div>
+                <ul>
+                    <li>UI - toggle hover query to template on alt key</li>
+                </ul>
+                <div class="font-semibold">October 18th, 2025</div>
+                <ul>
+                    <li>UI - adds similarity check on hover</li>
+                </ul>
+                <div class="font-semibold">October 17th, 2025</div>
+                <ul>
+                    <li>UI - fixes the excessive horizontal scrolling</li>
+                    <li>UI - adds ctrl+cmd+enter to run without cache</li>
+                </ul>
+                <div class="font-semibold">September 30th, 2025</div>
+                <ul>
+                    <li>UI - shows sql query popup on hover</li>
+                </ul>
+                <div class="font-semibold">August 24th, 2025</div>
+                <ul>
+                    <li>Engine - interpolates the actual values in queries 🎉</li>
+                    <li>UI - highlights query when line is selected</li>
+                    <li>UI - adds support for line tracking</li>
+                </ul>
+                <div class="font-semibold">August 23rd, 2025</div>
                 <ul>
                     <li>Engine - upgrades django version to 5.2.5</li>
                 </ul>
