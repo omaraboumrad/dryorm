@@ -179,9 +179,9 @@ class Command(BaseCommand):
             connection.queries_log.clear()
             query_logger.queries.clear()  # Clear our custom queries too
 
+            # Use same StringIO for both stdout and stderr to maintain order
             out = io.StringIO()
-            err = io.StringIO()
-            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
                 if hasattr(models, "run"):
                     returned = models.run()
                 else:
@@ -194,7 +194,6 @@ class Command(BaseCommand):
 
             combined = dict(
                 output=out.getvalue(),
-                warnings=err.getvalue(),
                 erd=erd,
                 queries=all_queries,
                 returned=returned,

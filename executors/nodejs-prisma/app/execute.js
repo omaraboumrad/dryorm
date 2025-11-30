@@ -187,6 +187,7 @@ async function main() {
 
   // Declare these at function level so they're accessible in catch blocks
   const originalLog = console.log;
+  const originalError = console.error;
   const logs = [];
   const logger = new LineAwareQueryLogger();
   let prisma = null;
@@ -228,10 +229,13 @@ async function main() {
     // Load and execute user code
     const userCodePath = '/app/user-code.js';
 
-    // Capture stdout (but don't write to actual stdout to avoid polluting JSON)
+    // Capture stdout and stderr into logs
     console.log = (...args) => {
       logs.push(args.map(a => String(a)).join(' '));
-      // Don't call originalLog - we only want to capture, not output
+    };
+
+    console.error = (...args) => {
+      logs.push(args.map(a => String(a)).join(' '));
     };
 
     try {
@@ -252,6 +256,7 @@ async function main() {
       }
     } finally {
       console.log = originalLog;
+      console.error = originalError;
     }
 
     result.output = logs.join('\n');
@@ -266,8 +271,9 @@ async function main() {
     }
 
   } catch (error) {
-    // Restore console.log in case of error
+    // Restore console in case of error
     console.log = originalLog;
+    console.error = originalError;
 
     result.output = logs.join('\n');
     result.queries = logger.queries;
@@ -284,8 +290,9 @@ async function main() {
     }
   }
 
-  // Restore console.log before final output
+  // Restore console before final output
   console.log = originalLog;
+  console.error = originalError;
 
   // Write result to file instead of stdout to avoid pollution
   try {

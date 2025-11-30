@@ -6,6 +6,8 @@ import os
 import uuid
 import redis
 import time
+import io
+import tarfile
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "dryorm.settings"
 
@@ -101,22 +103,25 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
             container.start()
             exit_status = container.wait()
 
-            # Read result from file instead of logs
+            # Read result from file using get_archive (works on stopped containers)
             try:
-                # Try to read from file first
-                exec_result = container.exec_run('cat /tmp/result.json')
+                stream, stat = container.get_archive('/tmp/result.json')
 
-                if exec_result.exit_code == 0:
-                    result = exec_result.output
-                    print("Successfully read from /tmp/result.json")
-                else:
-                    # File doesn't exist or cat failed, fall back to logs
-                    print(f"File read failed (exit code {exec_result.exit_code}), falling back to logs")
-                    print(f"Exec output: {exec_result.output.decode('utf-8')}")
-                    result = container.logs(stdout=True, stderr=True)
+                # Read the tar stream
+                file_obj = io.BytesIO()
+                for chunk in stream:
+                    file_obj.write(chunk)
+                file_obj.seek(0)
+
+                # Extract the JSON file from tar
+                with tarfile.open(fileobj=file_obj) as tar:
+                    member = tar.getmember('result.json')
+                    f = tar.extractfile(member)
+                    result = f.read()
+                    print("Successfully read from /tmp/result.json using get_archive")
             except Exception as e:
-                # If exec fails completely, fall back to logs
-                print(f"Exec failed with exception: {e}, falling back to logs")
+                # If file extraction fails, fall back to logs
+                print(f"File extraction failed with exception: {e}, falling back to logs")
                 result = container.logs(stdout=True, stderr=True)
 
             # Remove container
@@ -203,12 +208,8 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
         print("RAW CONTAINER OUTPUT:")
         print(decoded)
         print("=" * 80)
-        print(f"Length: {len(decoded)} bytes")
-        print(f"First 100 chars: {repr(decoded[:100])}")
-        print(f"Last 100 chars: {repr(decoded[-100:])}")
-        print("=" * 80)
 
-        # TODO: too much encoding/decoding, should revisit
+        # Parse JSON from result file
         try:
             result_dict = {
                 "event": constants.JOB_DONE_EVENT,
