@@ -100,6 +100,22 @@ services:
         image: dryorm-executor/python-django-mariadb-5.2.8
         command: /bin/true
 
+    executor-python-django-postgres-6.0:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: postgres-6.0
+        image: dryorm-executor/python-django-postgres-6.0
+        command: /bin/true
+
+    executor-python-django-mariadb-6.0:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: mariadb-6.0
+        image: dryorm-executor/python-django-mariadb-6.0
+        command: /bin/true
+
     # SQLAlchemy Executors
 
     executor-python-sqlalchemy-postgres-2.0:

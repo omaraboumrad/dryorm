@@ -79,3 +79,23 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && pip cache purge
 COPY . /app/
 CMD ["./run.sh"]
+
+# PostgreSQL + Django 6.0
+FROM base-postgres AS postgres-6.0
+WORKDIR /app/
+COPY requirements-6.0-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run.sh"]
+
+# MariaDB + Django 6.0
+FROM base-mariadb AS mariadb-6.0
+WORKDIR /app/
+COPY requirements-6.0-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run.sh"]
