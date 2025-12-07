@@ -15,6 +15,10 @@ INSTALLED_APPS = [
     "app.apps.BaseAppConfig",
 ]
 
+# Conditionally add GeoDjango support
+if env("DB_TYPE") == "postgis":
+    INSTALLED_APPS.insert(0, "django.contrib.gis")
+
 MIDDLEWARE = []
 
 
@@ -44,6 +48,17 @@ match env("DB_TYPE", "sqlite"):
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.postgresql_psycopg2",
+                "NAME": env("DB_NAME"),
+                "USER": env("DB_USER"),
+                "PASSWORD": env("DB_PASSWORD"),
+                "HOST": env("SERVICE_DB_HOST"),
+                "PORT": env("SERVICE_DB_PORT"),
+            },
+        }
+    case "postgis":
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.contrib.gis.db.backends.postgis",
                 "NAME": env("DB_NAME"),
                 "USER": env("DB_USER"),
                 "PASSWORD": env("DB_PASSWORD"),

@@ -2,6 +2,7 @@ volumes:
     static: {}
     postgres_data: {}
     postgres_snippets_data: {}
+    postgis_snippets_data: {}
     mariadb_snippets_data: {}
     django_cache: {}
 
@@ -32,6 +33,17 @@ services:
             POSTGRES_DB: dryorm
         volumes:
             - postgres_snippets_data:/var/lib/postgresql/data
+        networks:
+            - snippets_net
+
+    database_postgis:
+        image: postgis/postgis:16-3.5-alpine
+        environment:
+            POSTGRES_USER: dryorm
+            POSTGRES_PASSWORD: dryorm
+            POSTGRES_DB: dryorm
+        volumes:
+            - postgis_snippets_data:/var/lib/postgresql/data
         networks:
             - snippets_net
 
@@ -74,6 +86,7 @@ services:
         depends_on:
             - database
             - database_postgres
+            - database_postgis
             - database_mariadb
             - redis
         ports:
@@ -131,6 +144,30 @@ services:
             dockerfile: Dockerfile.multi
             target: mariadb-6.0
         image: dryorm-executor/python-django-mariadb-6.0
+        command: /bin/true
+
+    executor-python-django-postgis-4.2.26:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: postgis-4.2.26
+        image: dryorm-executor/python-django-postgis-4.2.26
+        command: /bin/true
+
+    executor-python-django-postgis-5.2.8:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: postgis-5.2.8
+        image: dryorm-executor/python-django-postgis-5.2.8
+        command: /bin/true
+
+    executor-python-django-postgis-6.0:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: postgis-6.0
+        image: dryorm-executor/python-django-postgis-6.0
         command: /bin/true
 
     # SQLAlchemy Executors

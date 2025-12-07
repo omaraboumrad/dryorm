@@ -135,6 +135,33 @@ EXECUTORS = {
         django_version="django-6.0",
         database="sqlite",
     ),
+    ("postgis", "django-4.2.26"): Executor(
+        image="dryorm-executor/python-django-postgis-4.2.26",
+        key="python/django/postgis/4.2.26",
+        verbose="Python - Django 4.2.26 - PostGIS",
+        memory="75m",
+        max_containers=10,
+        django_version="django-4.2.26",
+        database="postgis",
+    ),
+    ("postgis", "django-5.2.8"): Executor(
+        image="dryorm-executor/python-django-postgis-5.2.8",
+        key="python/django/postgis/5.2.8",
+        verbose="Python - Django 5.2.8 - PostGIS",
+        memory="75m",
+        max_containers=10,
+        django_version="django-5.2.8",
+        database="postgis",
+    ),
+    ("postgis", "django-6.0"): Executor(
+        image="dryorm-executor/python-django-postgis-6.0",
+        key="python/django/postgis/6.0",
+        verbose="Python - Django 6.0 - PostGIS",
+        memory="75m",
+        max_containers=10,
+        django_version="django-6.0",
+        database="postgis",
+    ),
     # SQLAlchemy executors
     ("postgres", "sqlalchemy-2.0"): Executor(
         image="dryorm-executor/python-sqlalchemy-postgres-2.0",

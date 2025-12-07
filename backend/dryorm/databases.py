@@ -127,8 +127,56 @@ class MariaDB(Database):
         )
 
 
+class PostGIS(Database):
+    def __init__(self):
+        super().__init__(
+            key="postgis",
+            description="PostGIS 3.5 (PostgreSQL 16)",
+            needs_setup=True,
+            host="database_postgis",
+            port=5432,
+            user="dryorm",
+            password="dryorm",
+            script="scripts/postgis_create.sh",
+        )
+
+    def setup(self):
+        random_hash = uuid.uuid4().hex[:6]
+        unique_name = f"{self.key}-{random_hash}"
+        subprocess.run(
+            [
+                self.script,
+                self.host,
+                str(self.port),
+                self.user,
+                self.password,
+                unique_name,
+                unique_name,
+                unique_name,
+            ]
+        )
+        return unique_name
+
+    def teardown(self, unique_name):
+        subprocess.run(
+            [
+                "psql",
+                "-h",
+                self.host,
+                "-p",
+                str(self.port),
+                "-U",
+                self.user,
+                "-c",
+                f'DROP DATABASE "{unique_name}";',
+            ],
+            env={**os.environ, "PGPASSWORD": self.password},
+        )
+
+
 DATABASES = {
     "sqlite": SQLite(),
     "postgres": PostgreSQL(),
+    "postgis": PostGIS(),
     "mariadb": MariaDB(),
 }

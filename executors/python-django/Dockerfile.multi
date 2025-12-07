@@ -38,6 +38,27 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder-mariadb /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
+# PostGIS Base - Builder
+FROM python:3.12-slim-bullseye AS builder-postgis
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    gdal-bin \
+    libgdal-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir psycopg2-binary==2.9.10
+
+# PostGIS Base - Runtime
+FROM python:3.12-slim-bullseye AS base-postgis
+ENV PYTHONUNBUFFERED 1
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    libpq5 \
+    gdal-bin \
+    libgdal28 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder-postgis /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+
 # ============= Django Version Stages =============
 
 # PostgreSQL + Django 4.2.26
@@ -92,6 +113,36 @@ CMD ["./run.sh"]
 
 # MariaDB + Django 6.0
 FROM base-mariadb AS mariadb-6.0
+WORKDIR /app/
+COPY requirements-6.0-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run.sh"]
+
+# PostGIS + Django 4.2.26
+FROM base-postgis AS postgis-4.2.26
+WORKDIR /app/
+COPY requirements-4.2.26-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run.sh"]
+
+# PostGIS + Django 5.2.8
+FROM base-postgis AS postgis-5.2.8
+WORKDIR /app/
+COPY requirements-5.2.8-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run.sh"]
+
+# PostGIS + Django 6.0
+FROM base-postgis AS postgis-6.0
 WORKDIR /app/
 COPY requirements-6.0-base.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
