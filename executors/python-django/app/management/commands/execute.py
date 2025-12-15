@@ -60,6 +60,7 @@ class LineAwareQueryLogger:
     def __init__(self):
         self.queries = []
         self.user_code_lines = []
+        self.logging_enabled = True
 
     def set_user_code(self, code):
         """Store user code lines for line number tracking"""
@@ -85,7 +86,7 @@ class LineAwareQueryLogger:
                 result = original_execute(sql, params)
 
                 # Find the new query that was just added to connection.queries
-                if len(connection.queries) > initial_query_count:
+                if self.logging_enabled and len(connection.queries) > initial_query_count:
                     django_query = connection.queries[-1]
                     # Use Django's actual executed SQL and timing
                     query_info = {
@@ -108,7 +109,7 @@ class LineAwareQueryLogger:
                 result = original_executemany(sql, param_list)
 
                 # Find the new query that was just added to connection.queries
-                if len(connection.queries) > initial_query_count:
+                if self.logging_enabled and len(connection.queries) > initial_query_count:
                     django_query = connection.queries[-1]
                     # Use Django's actual executed SQL and timing
                     query_info = {
@@ -152,16 +153,49 @@ class LineAwareQueryLogger:
             pass
         return {}
 
+    @contextlib.contextmanager
+    def do_not_log(self):
+        """Context manager to temporarily disable query logging"""
+        previous_state = self.logging_enabled
+        self.logging_enabled = False
+        try:
+            yield
+        finally:
+            self.logging_enabled = previous_state
+
 
 # End of LineAwareQueryLogger class
+
+# Global query logger instance (set during command execution)
+_global_query_logger = None
+
+
+@contextlib.contextmanager
+def _do_not_log():
+    """Global context manager to disable query logging
+
+    Usage:
+        with _do_not_log():
+            # queries executed here will not be logged
+            Person.objects.create(name='Hidden')
+    """
+    if _global_query_logger is not None:
+        with _global_query_logger.do_not_log():
+            yield
+    else:
+        # If logger not initialized, just pass through
+        yield
 
 
 class Command(BaseCommand):
     help = "executes the transaction"
 
     def handle(self, *args, **options):
+        global _global_query_logger
+
         # Initialize line-aware query logger
         query_logger = LineAwareQueryLogger()
+        _global_query_logger = query_logger
 
         # Read the user code to enable line tracking
         try:
@@ -173,6 +207,9 @@ class Command(BaseCommand):
 
         # Patch cursor for line tracking
         query_logger.patch_cursor()
+
+        # Make _do_not_log available in models namespace
+        models._do_not_log = _do_not_log
 
         try:
             sqlmigrate_queries = collect_ddl()
