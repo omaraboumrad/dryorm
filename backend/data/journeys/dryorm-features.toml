@@ -61,6 +61,50 @@ def run():
     ))"""
 
 [[chapters]]
+title = "Factory Boy - Test Data"
+content = """from django.db import models
+from tabulate import tabulate
+import factory
+from factory.django import DjangoModelFactory
+
+class Person(models.Model):
+    class Role(models.TextChoices):
+        ADMIN = 'admin'
+        USER = 'user'
+        GUEST = 'guest'
+
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    role = models.CharField(max_length=100, choices=Role.choices)
+    age = models.IntegerField()
+
+class PersonFactory(DjangoModelFactory):
+    class Meta:
+        model = Person
+
+    name = factory.Faker('name')
+    email = factory.Faker('email')
+    role = factory.Iterator([choice[0] for choice in Person.Role.choices])
+    age = factory.Faker('pyint', min_value=18, max_value=80)
+
+def run():
+    # Create single instances
+    admin = PersonFactory(role=Person.Role.ADMIN)
+
+    # Batch create multiple instances
+    PersonFactory.create_batch(50)
+
+    print(tabulate(
+        Person.objects.all().values('role').annotate(models.Count('id')),
+        headers='keys',
+        tablefmt='psql'
+    ))
+
+    return {
+        'Sample People': list(Person.objects.all()[:10].values()),
+    }"""
+
+[[chapters]]
 title = "CSV Import"
 content = """import csv
 from io import StringIO
