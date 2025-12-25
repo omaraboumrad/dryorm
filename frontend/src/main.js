@@ -155,7 +155,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var pr_id_input = document.getElementById('pr-id-input');
     var fetch_pr_button = document.getElementById('fetch-pr-button');
     var pr_status = document.getElementById('pr-status');
-    var currentPrInfo = null;  // Store current PR info when fetched
+    var pr_dialog = document.getElementById('pr-dialog');
+    var select_pr_button = document.getElementById('select-pr-button');
+    var close_pr_dialog = document.getElementById('close-pr-dialog');
+    var cancel_pr_button = document.getElementById('cancel-pr-button');
+    var use_pr_button = document.getElementById('use-pr-button');
+    var pr_select_actions = document.getElementById('pr-select-actions');
+    var selected_pr_indicator = document.getElementById('selected-pr-indicator');
+    var selected_pr_label = document.getElementById('selected-pr-label');
+    var clear_pr_button = document.getElementById('clear-pr-button');
+    window.currentPrInfo = null;  // Store current PR info when fetched
+    var pendingPrInfo = null;  // PR info waiting to be confirmed in dialog
     var query_filters = document.getElementById('query-filters');
     var query_count_number = document.getElementById('query-count-number');
     const show_template = document.getElementById('show-template');
@@ -426,14 +436,9 @@ document.addEventListener('DOMContentLoaded', function() {
             database: database_select.value,
         };
 
-        // Check if we're in PR mode
-        if (isPrMode()) {
-            if (!currentPrInfo) {
-                output.textContent = 'Please fetch a PR first before running';
-                app_state.loading = false;
-                return;
-            }
-            payload.pr_id = currentPrInfo.id;
+        // Check if a PR is selected, otherwise use version
+        if (window.currentPrInfo) {
+            payload.pr_id = window.currentPrInfo.id;
         } else {
             payload.orm_version = orm_version_select.value;
         }
@@ -469,16 +474,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // PR Mode: Fetch PR button handler
+    // PR Dialog: Open dialog
+    select_pr_button.addEventListener('click', function() {
+        pr_id_input.value = '';
+        pr_status.innerHTML = '';
+        pr_select_actions.classList.add('hidden');
+        pendingPrInfo = null;
+        pr_dialog.showModal();
+        pr_id_input.focus();
+    });
+
+    // PR Dialog: Close handlers
+    close_pr_dialog.addEventListener('click', function() {
+        pr_dialog.close();
+    });
+
+    cancel_pr_button.addEventListener('click', function() {
+        pr_dialog.close();
+    });
+
+    pr_dialog.addEventListener('click', function(e) {
+        if (e.target === pr_dialog) {
+            pr_dialog.close();
+        }
+    });
+
+    // PR Dialog: Fetch PR button handler
     fetch_pr_button.addEventListener('click', async function() {
         const prId = pr_id_input.value.trim();
 
         if (!prId || isNaN(parseInt(prId))) {
             pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Please enter a valid PR number</span>';
+            pr_select_actions.classList.add('hidden');
             return;
         }
 
         pr_status.innerHTML = '<span class="text-django-text dark:text-green-100">Fetching PR #' + prId + '...</span>';
+        pr_select_actions.classList.add('hidden');
         fetch_pr_button.disabled = true;
 
         try {
@@ -493,14 +525,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
-                currentPrInfo = data.pr;
+                pendingPrInfo = data.pr;
                 const stateColor = data.pr.state === 'open'
                     ? 'text-green-600 dark:text-green-400'
                     : 'text-yellow-600 dark:text-yellow-400';
+                const cachedBadge = data.pr.cached
+                    ? '<span class="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-200 rounded">cached</span>'
+                    : '<span class="px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-200 rounded">fetched</span>';
 
                 pr_status.innerHTML = `
                     <div class="p-2 bg-django-secondary/10 dark:bg-green-800 rounded border border-django-primary/20 dark:border-green-600">
-                        <div class="font-medium text-django-text dark:text-green-100">${escapeHtml(data.pr.title)}</div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-django-text dark:text-green-100">${escapeHtml(data.pr.title)}</span>
+                            ${cachedBadge}
+                        </div>
                         <div class="text-xs mt-1 flex gap-3 flex-wrap">
                             <span class="${stateColor} font-medium">${data.pr.state}</span>
                             <span class="text-django-text/70 dark:text-green-200">by ${data.pr.author}</span>
@@ -509,28 +547,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 `;
+                pr_select_actions.classList.remove('hidden');
             } else {
-                currentPrInfo = null;
+                pendingPrInfo = null;
                 pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">' + escapeHtml(data.error) + '</span>';
+                pr_select_actions.classList.add('hidden');
             }
         } catch (error) {
-            currentPrInfo = null;
+            pendingPrInfo = null;
             pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Error fetching PR: ' + escapeHtml(error.message) + '</span>';
+            pr_select_actions.classList.add('hidden');
         } finally {
             fetch_pr_button.disabled = false;
         }
     });
 
-    // Helper function to check if we're in PR mode
-    function isPrMode() {
-        // Check if the PR mode tab is active by looking at Alpine state
-        const settingsPanel = document.querySelector('[x-data*="prMode"]');
-        if (settingsPanel) {
-            const alpineData = Alpine.$data(settingsPanel);
-            return alpineData && alpineData.prMode;
+    // PR Dialog: Use this PR button
+    use_pr_button.addEventListener('click', function() {
+        if (pendingPrInfo) {
+            window.currentPrInfo = pendingPrInfo;
+            selected_pr_label.textContent = `PR #${pendingPrInfo.id}`;
+            selected_pr_indicator.classList.remove('hidden');
+            selected_pr_indicator.classList.add('flex');
+            orm_version_select.classList.add('hidden');
+            pr_dialog.close();
         }
-        return false;
-    }
+    });
+
+    // Clear selected PR
+    clear_pr_button.addEventListener('click', function() {
+        window.currentPrInfo = null;
+        selected_pr_indicator.classList.add('hidden');
+        selected_pr_indicator.classList.remove('flex');
+        orm_version_select.classList.remove('hidden');
+    });
 
     // Event listener for template selection changes
     template_select.addEventListener('change', function() {

@@ -165,7 +165,11 @@ def fetch_pr(request):
                 status=400
             )
 
-        # Fetch and cache the PR
+        # Check if PR is already cached
+        cached_pr = pr_service.get_cached_pr(pr_id)
+        was_cached = cached_pr is not None
+
+        # Fetch (and cache if needed) the PR
         pr_info = pr_service.fetch_pr(pr_id)
 
         return JsonResponse({
@@ -177,6 +181,7 @@ def fetch_pr(request):
                 "state": pr_info.state,
                 "author": pr_info.author,
                 "branch": pr_info.branch,
+                "cached": was_cached,
             }
         })
 
