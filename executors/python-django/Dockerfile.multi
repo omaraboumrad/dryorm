@@ -154,9 +154,24 @@ CMD ["./run.sh"]
 # ============= PR Base Images (No Django pre-installed) =============
 # These images have all dependencies except Django.
 # Django is installed at runtime from a mounted PR source directory.
+# Uses Bookworm for newer SQLite (3.40+) required by newer Django.
+
+# PostgreSQL PR Base - Builder (Bookworm)
+FROM python:3.12-slim-bookworm AS pr-builder-postgres
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir psycopg2-binary==2.9.10
 
 # PostgreSQL + PR Base
-FROM base-postgres AS pr-base-postgres
+FROM python:3.12-slim-bookworm AS pr-base-postgres
+ENV PYTHONUNBUFFERED 1
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=pr-builder-postgres /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 WORKDIR /app/
 COPY requirements-pr-base.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
@@ -164,9 +179,24 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && pip cache purge
 COPY . /app/
 CMD ["./run-pr.sh"]
+
+# MariaDB PR Base - Builder (Bookworm)
+FROM python:3.12-slim-bookworm AS pr-builder-mariadb
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    pkg-config \
+    default-libmysqlclient-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir mysqlclient==2.2.7
 
 # MariaDB + PR Base
-FROM base-mariadb AS pr-base-mariadb
+FROM python:3.12-slim-bookworm AS pr-base-mariadb
+ENV PYTHONUNBUFFERED 1
+RUN apt-get update && apt-get install -y \
+    default-mysql-client \
+    default-libmysqlclient-dev \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=pr-builder-mariadb /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 WORKDIR /app/
 COPY requirements-pr-base.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
@@ -175,8 +205,25 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
 COPY . /app/
 CMD ["./run-pr.sh"]
 
+# PostGIS PR Base - Builder (Bookworm)
+FROM python:3.12-slim-bookworm AS pr-builder-postgis
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir psycopg2-binary==2.9.10
+
 # PostGIS + PR Base
-FROM base-postgis AS pr-base-postgis
+FROM python:3.12-slim-bookworm AS pr-base-postgis
+ENV PYTHONUNBUFFERED 1
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    libpq5 \
+    libgdal32 \
+    libgeos-c1v5 \
+    libproj25 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=pr-builder-postgis /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 WORKDIR /app/
 COPY requirements-pr-base.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
