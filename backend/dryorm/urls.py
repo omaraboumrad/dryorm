@@ -10,6 +10,7 @@ urlpatterns = [
     path("browse", views.list_snippets, name="list"),
     path("save", views.save, name="save"),
     path("execute", views.execute, name="execute"),
+    path("fetch-pr", views.fetch_pr, name="fetch_pr"),
     path("api/journeys", views.journeys_api, name="journeys_api"),
     path("j/", views.home, name="journeys"),
     path("j/<slug:journey_slug>", views.home, name="journey"),

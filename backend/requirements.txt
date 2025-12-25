@@ -10,3 +10,4 @@ daphne==4.2.1
 sentry-sdk[django]>=2.25.1
 django-cotton==2.1.1
 redis
+httpx==0.28.1

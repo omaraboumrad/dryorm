@@ -221,6 +221,47 @@ EXECUTORS = {
 }
 
 
+# PR mode executors - Django is installed at runtime from mounted PR source
+PR_EXECUTORS = {
+    "postgres": Executor(
+        image="dryorm-executor/python-django-pr-postgres",
+        key="python/django/pr/postgres",
+        verbose="Python - Django PR - PostgreSQL",
+        memory="150m",  # Higher memory for pip install at runtime
+        max_containers=5,
+        django_version="pr",
+        database="postgres",
+    ),
+    "mariadb": Executor(
+        image="dryorm-executor/python-django-pr-mariadb",
+        key="python/django/pr/mariadb",
+        verbose="Python - Django PR - MariaDB",
+        memory="150m",
+        max_containers=5,
+        django_version="pr",
+        database="mariadb",
+    ),
+    "sqlite": Executor(
+        image="dryorm-executor/python-django-pr-postgres",  # Use postgres base for sqlite
+        key="python/django/pr/sqlite",
+        verbose="Python - Django PR - SQLite",
+        memory="150m",
+        max_containers=5,
+        django_version="pr",
+        database="sqlite",
+    ),
+    "postgis": Executor(
+        image="dryorm-executor/python-django-pr-postgis",
+        key="python/django/pr/postgis",
+        verbose="Python - Django PR - PostGIS",
+        memory="150m",
+        max_containers=5,
+        django_version="pr",
+        database="postgis",
+    ),
+}
+
+
 def get_executor(database: str, orm_version: str) -> Executor:
     """Get the appropriate executor for the given database and ORM version."""
     key = (database, orm_version)
@@ -236,3 +277,8 @@ def get_executor(database: str, orm_version: str) -> Executor:
         key = (database, "django-6.0")
 
     return EXECUTORS.get(key, EXECUTORS[("sqlite", "django-6.0")])
+
+
+def get_pr_executor(database: str) -> Executor:
+    """Get the PR mode executor for the given database."""
+    return PR_EXECUTORS.get(database, PR_EXECUTORS["postgres"])

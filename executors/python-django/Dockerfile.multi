@@ -150,3 +150,37 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && pip cache purge
 COPY . /app/
 CMD ["./run.sh"]
+
+# ============= PR Base Images (No Django pre-installed) =============
+# These images have all dependencies except Django.
+# Django is installed at runtime from a mounted PR source directory.
+
+# PostgreSQL + PR Base
+FROM base-postgres AS pr-base-postgres
+WORKDIR /app/
+COPY requirements-pr-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run-pr.sh"]
+
+# MariaDB + PR Base
+FROM base-mariadb AS pr-base-mariadb
+WORKDIR /app/
+COPY requirements-pr-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run-pr.sh"]
+
+# PostGIS + PR Base
+FROM base-postgis AS pr-base-postgis
+WORKDIR /app/
+COPY requirements-pr-base.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt \
+    && pip cache purge
+COPY . /app/
+CMD ["./run-pr.sh"]

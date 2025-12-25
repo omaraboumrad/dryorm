@@ -152,6 +152,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var orm_version_select = document.getElementById('orm-version-select');
     var ignore_cache = document.getElementById('ignore-cache');
     var erd_link = document.getElementById('erd');
+    var pr_id_input = document.getElementById('pr-id-input');
+    var fetch_pr_button = document.getElementById('fetch-pr-button');
+    var pr_status = document.getElementById('pr-status');
+    var currentPrInfo = null;  // Store current PR info when fetched
     var query_filters = document.getElementById('query-filters');
     var query_count_number = document.getElementById('query-count-number');
     const show_template = document.getElementById('show-template');
@@ -420,8 +424,19 @@ document.addEventListener('DOMContentLoaded', function() {
             code: code,
             ignore_cache: forceNoCache || ignore_cache.checked,
             database: database_select.value,
-            orm_version: orm_version_select.value,
         };
+
+        // Check if we're in PR mode
+        if (isPrMode()) {
+            if (!currentPrInfo) {
+                output.textContent = 'Please fetch a PR first before running';
+                app_state.loading = false;
+                return;
+            }
+            payload.pr_id = currentPrInfo.id;
+        } else {
+            payload.orm_version = orm_version_select.value;
+        }
 
         run_button.disabled = true;
 
@@ -453,6 +468,69 @@ document.addEventListener('DOMContentLoaded', function() {
             updateTemplateDropdown(newOrmType, true); // Auto-load template when switching ORMs
         }
     });
+
+    // PR Mode: Fetch PR button handler
+    fetch_pr_button.addEventListener('click', async function() {
+        const prId = pr_id_input.value.trim();
+
+        if (!prId || isNaN(parseInt(prId))) {
+            pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Please enter a valid PR number</span>';
+            return;
+        }
+
+        pr_status.innerHTML = '<span class="text-django-text dark:text-green-100">Fetching PR #' + prId + '...</span>';
+        fetch_pr_button.disabled = true;
+
+        try {
+            const response = await fetch('/fetch-pr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pr_id: parseInt(prId) })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentPrInfo = data.pr;
+                const stateColor = data.pr.state === 'open'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-yellow-600 dark:text-yellow-400';
+
+                pr_status.innerHTML = `
+                    <div class="p-2 bg-django-secondary/10 dark:bg-green-800 rounded border border-django-primary/20 dark:border-green-600">
+                        <div class="font-medium text-django-text dark:text-green-100">${escapeHtml(data.pr.title)}</div>
+                        <div class="text-xs mt-1 flex gap-3 flex-wrap">
+                            <span class="${stateColor} font-medium">${data.pr.state}</span>
+                            <span class="text-django-text/70 dark:text-green-200">by ${data.pr.author}</span>
+                            <span class="text-django-text/70 dark:text-green-200">branch: ${data.pr.branch}</span>
+                            <span class="text-django-text/50 dark:text-green-300 font-mono">${data.pr.sha.substring(0, 7)}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                currentPrInfo = null;
+                pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">' + escapeHtml(data.error) + '</span>';
+            }
+        } catch (error) {
+            currentPrInfo = null;
+            pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Error fetching PR: ' + escapeHtml(error.message) + '</span>';
+        } finally {
+            fetch_pr_button.disabled = false;
+        }
+    });
+
+    // Helper function to check if we're in PR mode
+    function isPrMode() {
+        // Check if the PR mode tab is active by looking at Alpine state
+        const settingsPanel = document.querySelector('[x-data*="prMode"]');
+        if (settingsPanel) {
+            const alpineData = Alpine.$data(settingsPanel);
+            return alpineData && alpineData.prMode;
+        }
+        return false;
+    }
 
     // Event listener for template selection changes
     template_select.addEventListener('change', function() {

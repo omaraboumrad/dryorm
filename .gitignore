@@ -112,3 +112,4 @@ yarn-error.log
 
 # Build artifacts
 backend/dryorm/static/dist/.vite/
+pr_cache

@@ -14,6 +14,7 @@ from . import models
 from . import templates
 from . import constants
 from . import databases
+from .pr_service import pr_service, PRNotFoundError, PRFetchError
 import tasks
 
 
@@ -141,6 +142,62 @@ def journeys_api(request):
 
 
 @csrf_exempt
+def fetch_pr(request):
+    """HTTP endpoint for fetching and caching a Django PR from GitHub."""
+    if request.method != "POST":
+        return http.HttpResponseNotAllowed(["POST"])
+
+    try:
+        payload = json.loads(request.body)
+        pr_id = payload.get("pr_id")
+
+        if not pr_id:
+            return JsonResponse(
+                {"success": False, "error": "No PR ID provided"},
+                status=400
+            )
+
+        try:
+            pr_id = int(pr_id)
+        except (ValueError, TypeError):
+            return JsonResponse(
+                {"success": False, "error": "PR ID must be a number"},
+                status=400
+            )
+
+        # Fetch and cache the PR
+        pr_info = pr_service.fetch_pr(pr_id)
+
+        return JsonResponse({
+            "success": True,
+            "pr": {
+                "id": pr_info.pr_id,
+                "title": pr_info.title,
+                "sha": pr_info.sha,
+                "state": pr_info.state,
+                "author": pr_info.author,
+                "branch": pr_info.branch,
+            }
+        })
+
+    except PRNotFoundError:
+        return JsonResponse(
+            {"success": False, "error": f"PR #{pr_id} not found"},
+            status=404
+        )
+    except PRFetchError as e:
+        return JsonResponse(
+            {"success": False, "error": str(e)},
+            status=500
+        )
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"success": False, "error": "Invalid JSON"},
+            status=400
+        )
+
+
+@csrf_exempt
 def execute(request):
     """HTTP endpoint for executing ORM snippets synchronously."""
     if request.method != "POST":
@@ -152,6 +209,7 @@ def execute(request):
         database = payload.get("database", "sqlite")
         orm_version = payload.get("orm_version", "django-5.2.8")
         ignore_cache = payload.get("ignore_cache", False)
+        pr_id = payload.get("pr_id")  # Optional PR mode
 
         if not code:
             return JsonResponse(
@@ -160,7 +218,25 @@ def execute(request):
             )
 
         # Execute the task synchronously
-        result = tasks.run_django_sync(code, database, ignore_cache, orm_version)
+        if pr_id:
+            # PR mode - get cached PR info and pass to executor
+            try:
+                pr_id = int(pr_id)
+                pr_info = pr_service.get_cached_pr(pr_id)
+                if not pr_info:
+                    # Try to fetch if not cached
+                    pr_info = pr_service.fetch_pr(pr_id)
+                result = tasks.run_django_pr_sync(
+                    code, database, ignore_cache, pr_id, pr_info.sha, pr_info.host_path
+                )
+            except (PRNotFoundError, PRFetchError) as e:
+                return JsonResponse(
+                    {"event": constants.JOB_CODE_ERROR_EVENT, "error": str(e)},
+                    status=400
+                )
+        else:
+            result = tasks.run_django_sync(code, database, ignore_cache, orm_version)
+
         return JsonResponse(result)
 
     except json.JSONDecodeError:
