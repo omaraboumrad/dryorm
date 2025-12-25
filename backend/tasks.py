@@ -248,15 +248,15 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
                 selected_db.teardown(unique_name)
 
 
-def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=None, pr_host_path=None):
-    """Synchronous execution for Django PR mode - installs Django from PR source at runtime."""
+def run_django_ref_sync(code, database, ignore_cache=False, ref_type=None, ref_id=None, ref_sha=None, ref_host_path=None):
+    """Synchronous execution for Django ref mode (PR/branch/tag) - loads Django from source at runtime."""
     client = docker.from_env()
     redis_client = redis.Redis("redis")
     key = hashlib.md5(code.encode("utf-8")).hexdigest()
 
     executor = constants.get_pr_executor(database)
     selected_db = DATABASES.get(database, "sqlite")
-    cache_key = f"pr-{pr_id}-{pr_sha}-{database}-{key}"
+    cache_key = f"{ref_type}-{ref_id}-{ref_sha}-{database}-{key}"
     cached_reply = cache.get(cache_key)
     unique_name = None
     container = None
@@ -295,8 +295,8 @@ def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=No
             if selected_db.needs_setup:
                 unique_name = selected_db.setup()
 
-            # Create and start container with mounted PR source
-            container_name = f"executor-pr-{uuid.uuid4().hex[:6]}"
+            # Create and start container with mounted ref source
+            container_name = f"executor-ref-{uuid.uuid4().hex[:6]}"
 
             environment = [
                 f"CODE={code}",
@@ -310,9 +310,9 @@ def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=No
                 f"DB_PASSWORD={unique_name}",
             ]
 
-            # Mount the PR source directory into the container (use host path for Docker)
+            # Mount the ref source directory into the container (use host path for Docker)
             volumes = {
-                pr_host_path: {"bind": "/django-pr", "mode": "ro"}
+                ref_host_path: {"bind": "/django-pr", "mode": "ro"}
             }
 
             container = client.containers.create(
@@ -345,7 +345,7 @@ def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=No
                     member = tar.getmember('result.json')
                     f = tar.extractfile(member)
                     result = f.read()
-                    print("Successfully read from /tmp/result.json using get_archive (PR mode)")
+                    print("Successfully read from /tmp/result.json using get_archive (ref mode)")
             except Exception as e:
                 # If file extraction fails, fall back to logs
                 print(f"File extraction failed with exception: {e}, falling back to logs")
@@ -370,7 +370,7 @@ def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=No
                 # OOM killed
                 result_dict = {
                     "event": constants.JOB_OOM_KILLED_EVENT,
-                    "error": "OOM! Please use less memory. PR mode requires more memory for pip install.",
+                    "error": "OOM! Please use less memory.",
                 }
             case 101:
                 # Network Error
@@ -408,7 +408,7 @@ def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=No
     except ImageNotFound as error:
         return {
             "event": constants.JOB_IMAGE_NOT_FOUND_ERROR_EVENT,
-            "error": f"Executor for {executor.verbose} not found! Make sure PR base images are built.",
+            "error": f"Executor for {executor.verbose} not found! Make sure ref base images are built.",
         }
     except APIError as error:
         return {
@@ -432,7 +432,7 @@ def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=No
 
         # Debug: Log the raw output
         print("=" * 80)
-        print("RAW CONTAINER OUTPUT (PR MODE):")
+        print("RAW CONTAINER OUTPUT (REF MODE):")
         print(decoded)
         print("=" * 80)
 
@@ -473,3 +473,8 @@ def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=No
         if not cached_reply or ignore_cache:
             if unique_name and selected_db.needs_setup:
                 selected_db.teardown(unique_name)
+
+
+# Backwards compatibility alias
+def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=None, pr_host_path=None):
+    return run_django_ref_sync(code, database, ignore_cache, "pr", str(pr_id), pr_sha, pr_host_path)

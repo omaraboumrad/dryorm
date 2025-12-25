@@ -14,7 +14,7 @@ from . import models
 from . import templates
 from . import constants
 from . import databases
-from .pr_service import pr_service, PRNotFoundError, PRFetchError
+from .pr_service import ref_service, RefNotFoundError, RefFetchError, pr_service, PRNotFoundError, PRFetchError
 import tasks
 
 
@@ -142,55 +142,62 @@ def journeys_api(request):
 
 
 @csrf_exempt
-def fetch_pr(request):
-    """HTTP endpoint for fetching and caching a Django PR from GitHub."""
+def fetch_ref(request):
+    """HTTP endpoint for fetching and caching a Django ref (PR, branch, or tag) from GitHub."""
     if request.method != "POST":
         return http.HttpResponseNotAllowed(["POST"])
 
     try:
         payload = json.loads(request.body)
-        pr_id = payload.get("pr_id")
+        ref_type = payload.get("ref_type", "pr")  # pr, branch, or tag
+        ref_id = payload.get("ref_id")
 
-        if not pr_id:
+        # Backwards compatibility: support pr_id for PR type
+        if not ref_id and ref_type == "pr":
+            ref_id = payload.get("pr_id")
+
+        if not ref_id:
             return JsonResponse(
-                {"success": False, "error": "No PR ID provided"},
+                {"success": False, "error": f"No {ref_type} ID provided"},
                 status=400
             )
 
-        try:
-            pr_id = int(pr_id)
-        except (ValueError, TypeError):
-            return JsonResponse(
-                {"success": False, "error": "PR ID must be a number"},
-                status=400
-            )
+        # Validate PR ID is a number
+        if ref_type == "pr":
+            try:
+                ref_id = str(int(ref_id))
+            except (ValueError, TypeError):
+                return JsonResponse(
+                    {"success": False, "error": "PR ID must be a number"},
+                    status=400
+                )
 
-        # Check if PR is already cached
-        cached_pr = pr_service.get_cached_pr(pr_id)
-        was_cached = cached_pr is not None
+        # Check if ref is already cached
+        cached_ref = ref_service.get_cached_ref(ref_type, ref_id)
+        was_cached = cached_ref is not None
 
-        # Fetch (and cache if needed) the PR
-        pr_info = pr_service.fetch_pr(pr_id)
+        # Fetch (and cache if needed) the ref
+        ref_info = ref_service.fetch_ref(ref_type, ref_id)
 
         return JsonResponse({
             "success": True,
-            "pr": {
-                "id": pr_info.pr_id,
-                "title": pr_info.title,
-                "sha": pr_info.sha,
-                "state": pr_info.state,
-                "author": pr_info.author,
-                "branch": pr_info.branch,
+            "ref": {
+                "type": ref_info.ref_type,
+                "id": ref_info.ref_id,
+                "title": ref_info.title,
+                "sha": ref_info.sha,
+                "state": ref_info.state,
+                "author": ref_info.author,
                 "cached": was_cached,
             }
         })
 
-    except PRNotFoundError:
+    except RefNotFoundError as e:
         return JsonResponse(
-            {"success": False, "error": f"PR #{pr_id} not found"},
+            {"success": False, "error": str(e)},
             status=404
         )
-    except PRFetchError as e:
+    except RefFetchError as e:
         return JsonResponse(
             {"success": False, "error": str(e)},
             status=500
@@ -200,6 +207,10 @@ def fetch_pr(request):
             {"success": False, "error": "Invalid JSON"},
             status=400
         )
+
+
+# Backwards compatibility alias
+fetch_pr = fetch_ref
 
 
 @csrf_exempt
@@ -214,7 +225,15 @@ def execute(request):
         database = payload.get("database", "sqlite")
         orm_version = payload.get("orm_version", "django-5.2.8")
         ignore_cache = payload.get("ignore_cache", False)
-        pr_id = payload.get("pr_id")  # Optional PR mode
+
+        # Ref mode (PR, branch, or tag)
+        ref_type = payload.get("ref_type")  # pr, branch, or tag
+        ref_id = payload.get("ref_id")
+
+        # Backwards compatibility: support pr_id
+        if not ref_type and payload.get("pr_id"):
+            ref_type = "pr"
+            ref_id = str(payload.get("pr_id"))
 
         if not code:
             return JsonResponse(
@@ -223,18 +242,17 @@ def execute(request):
             )
 
         # Execute the task synchronously
-        if pr_id:
-            # PR mode - get cached PR info and pass to executor
+        if ref_type and ref_id:
+            # Ref mode - get cached ref info and pass to executor
             try:
-                pr_id = int(pr_id)
-                pr_info = pr_service.get_cached_pr(pr_id)
-                if not pr_info:
+                ref_info = ref_service.get_cached_ref(ref_type, ref_id)
+                if not ref_info:
                     # Try to fetch if not cached
-                    pr_info = pr_service.fetch_pr(pr_id)
-                result = tasks.run_django_pr_sync(
-                    code, database, ignore_cache, pr_id, pr_info.sha, pr_info.host_path
+                    ref_info = ref_service.fetch_ref(ref_type, ref_id)
+                result = tasks.run_django_ref_sync(
+                    code, database, ignore_cache, ref_type, ref_id, ref_info.sha, ref_info.host_path
                 )
-            except (PRNotFoundError, PRFetchError) as e:
+            except (RefNotFoundError, RefFetchError) as e:
                 return JsonResponse(
                     {"event": constants.JOB_CODE_ERROR_EVENT, "error": str(e)},
                     status=400

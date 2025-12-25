@@ -152,20 +152,30 @@ document.addEventListener('DOMContentLoaded', function() {
     var orm_version_select = document.getElementById('orm-version-select');
     var ignore_cache = document.getElementById('ignore-cache');
     var erd_link = document.getElementById('erd');
+    // Ref dialog elements (PR/Branch/Tag)
+    var ref_dialog = document.getElementById('ref-dialog');
+    var select_ref_button = document.getElementById('select-ref-button');
+    var close_ref_dialog = document.getElementById('close-ref-dialog');
+    var cancel_ref_button = document.getElementById('cancel-ref-button');
+    var use_ref_button = document.getElementById('use-ref-button');
+    var ref_select_actions = document.getElementById('ref-select-actions');
+    var ref_status = document.getElementById('ref-status');
+    var selected_ref_indicator = document.getElementById('selected-ref-indicator');
+    var selected_ref_label = document.getElementById('selected-ref-label');
+    var clear_ref_button = document.getElementById('clear-ref-button');
+
+    // Tab-specific inputs
     var pr_id_input = document.getElementById('pr-id-input');
     var fetch_pr_button = document.getElementById('fetch-pr-button');
-    var pr_status = document.getElementById('pr-status');
-    var pr_dialog = document.getElementById('pr-dialog');
-    var select_pr_button = document.getElementById('select-pr-button');
-    var close_pr_dialog = document.getElementById('close-pr-dialog');
-    var cancel_pr_button = document.getElementById('cancel-pr-button');
-    var use_pr_button = document.getElementById('use-pr-button');
-    var pr_select_actions = document.getElementById('pr-select-actions');
-    var selected_pr_indicator = document.getElementById('selected-pr-indicator');
-    var selected_pr_label = document.getElementById('selected-pr-label');
-    var clear_pr_button = document.getElementById('clear-pr-button');
-    window.currentPrInfo = null;  // Store current PR info when fetched
-    var pendingPrInfo = null;  // PR info waiting to be confirmed in dialog
+    var branch_input = document.getElementById('branch-input');
+    var fetch_branch_button = document.getElementById('fetch-branch-button');
+    var tag_input = document.getElementById('tag-input');
+    var fetch_tag_button = document.getElementById('fetch-tag-button');
+
+    // Current ref state
+    window.currentRefInfo = null;  // Store current ref info {type, id, title, sha, ...}
+    var pendingRefInfo = null;  // Ref info waiting to be confirmed in dialog
+    var currentRefTab = 'pr';  // Current active tab in dialog
     var query_filters = document.getElementById('query-filters');
     var query_count_number = document.getElementById('query-count-number');
     const show_template = document.getElementById('show-template');
@@ -436,9 +446,10 @@ document.addEventListener('DOMContentLoaded', function() {
             database: database_select.value,
         };
 
-        // Check if a PR is selected, otherwise use version
-        if (window.currentPrInfo) {
-            payload.pr_id = window.currentPrInfo.id;
+        // Check if a ref is selected (PR/Branch/Tag), otherwise use version
+        if (window.currentRefInfo) {
+            payload.ref_type = window.currentRefInfo.type;
+            payload.ref_id = window.currentRefInfo.id;
         } else {
             payload.orm_version = orm_version_select.value;
         }
@@ -474,44 +485,75 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // PR Dialog: Open dialog
-    select_pr_button.addEventListener('click', function() {
+    // Ref Dialog: Tab switching
+    function switchRefTab(tabName) {
+        currentRefTab = tabName;
+
+        // Update tab styles
+        document.querySelectorAll('.ref-tab').forEach(tab => {
+            if (tab.dataset.refTab === tabName) {
+                tab.classList.add('border-django-primary', 'text-django-primary', 'dark:text-green-100');
+                tab.classList.remove('border-transparent', 'text-django-text/60', 'dark:text-green-300');
+            } else {
+                tab.classList.remove('border-django-primary', 'text-django-primary', 'dark:text-green-100');
+                tab.classList.add('border-transparent', 'text-django-text/60', 'dark:text-green-300');
+            }
+        });
+
+        // Show/hide tab content
+        document.querySelectorAll('.ref-tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        document.getElementById('ref-tab-' + tabName).classList.remove('hidden');
+
+        // Clear status and actions when switching tabs
+        ref_status.innerHTML = '';
+        ref_select_actions.classList.add('hidden');
+        pendingRefInfo = null;
+    }
+
+    document.querySelectorAll('.ref-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            switchRefTab(this.dataset.refTab);
+        });
+    });
+
+    // Ref Dialog: Open dialog
+    select_ref_button.addEventListener('click', function() {
         pr_id_input.value = '';
-        pr_status.innerHTML = '';
-        pr_select_actions.classList.add('hidden');
-        pendingPrInfo = null;
-        pr_dialog.showModal();
+        branch_input.value = '';
+        tag_input.value = '';
+        ref_status.innerHTML = '';
+        ref_select_actions.classList.add('hidden');
+        pendingRefInfo = null;
+        switchRefTab('pr');  // Default to PR tab
+        ref_dialog.showModal();
         pr_id_input.focus();
     });
 
-    // PR Dialog: Close handlers
-    close_pr_dialog.addEventListener('click', function() {
-        pr_dialog.close();
+    // Ref Dialog: Close handlers
+    close_ref_dialog.addEventListener('click', function() {
+        ref_dialog.close();
     });
 
-    cancel_pr_button.addEventListener('click', function() {
-        pr_dialog.close();
+    cancel_ref_button.addEventListener('click', function() {
+        ref_dialog.close();
     });
 
-    pr_dialog.addEventListener('click', function(e) {
-        if (e.target === pr_dialog) {
-            pr_dialog.close();
+    ref_dialog.addEventListener('click', function(e) {
+        if (e.target === ref_dialog) {
+            ref_dialog.close();
         }
     });
 
-    // PR Dialog: Fetch PR button handler
-    fetch_pr_button.addEventListener('click', async function() {
-        const prId = pr_id_input.value.trim();
+    // Generic fetch function for any ref type
+    async function fetchRef(refType, refId, fetchButton) {
+        const typeLabels = { pr: 'PR', branch: 'branch', tag: 'tag' };
+        const typeLabel = typeLabels[refType];
 
-        if (!prId || isNaN(parseInt(prId))) {
-            pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Please enter a valid PR number</span>';
-            pr_select_actions.classList.add('hidden');
-            return;
-        }
-
-        pr_status.innerHTML = '<span class="text-django-text dark:text-green-100">Fetching PR #' + prId + '...</span>';
-        pr_select_actions.classList.add('hidden');
-        fetch_pr_button.disabled = true;
+        ref_status.innerHTML = `<span class="text-django-text dark:text-green-100">Fetching ${typeLabel} ${refId}...</span>`;
+        ref_select_actions.classList.add('hidden');
+        fetchButton.disabled = true;
 
         try {
             const response = await fetch('/fetch-pr', {
@@ -519,66 +561,124 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ pr_id: parseInt(prId) })
+                body: JSON.stringify({ ref_type: refType, ref_id: refId })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                pendingPrInfo = data.pr;
-                const stateColor = data.pr.state === 'open'
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-yellow-600 dark:text-yellow-400';
-                const cachedBadge = data.pr.cached
+                pendingRefInfo = data.ref;
+                const cachedBadge = data.ref.cached
                     ? '<span class="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-200 rounded">cached</span>'
                     : '<span class="px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-200 rounded">fetched</span>';
 
-                pr_status.innerHTML = `
+                let statusHtml = `
                     <div class="p-2 bg-django-secondary/10 dark:bg-green-800 rounded border border-django-primary/20 dark:border-green-600">
                         <div class="flex items-center gap-2">
-                            <span class="font-medium text-django-text dark:text-green-100">${escapeHtml(data.pr.title)}</span>
+                            <span class="font-medium text-django-text dark:text-green-100">${escapeHtml(data.ref.title)}</span>
                             ${cachedBadge}
                         </div>
-                        <div class="text-xs mt-1 flex gap-3 flex-wrap">
-                            <span class="${stateColor} font-medium">${data.pr.state}</span>
-                            <span class="text-django-text/70 dark:text-green-200">by ${data.pr.author}</span>
-                            <span class="text-django-text/70 dark:text-green-200">branch: ${data.pr.branch}</span>
-                            <span class="text-django-text/50 dark:text-green-300 font-mono">${data.pr.sha.substring(0, 7)}</span>
+                        <div class="text-xs mt-1 flex gap-3 flex-wrap">`;
+
+                if (refType === 'pr' && data.ref.state) {
+                    const stateColor = data.ref.state === 'open'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-yellow-600 dark:text-yellow-400';
+                    statusHtml += `<span class="${stateColor} font-medium">${data.ref.state}</span>`;
+                }
+
+                if (data.ref.author) {
+                    statusHtml += `<span class="text-django-text/70 dark:text-green-200">by ${data.ref.author}</span>`;
+                }
+
+                statusHtml += `<span class="text-django-text/50 dark:text-green-300 font-mono">${data.ref.sha.substring(0, 7)}</span>
                         </div>
                     </div>
                 `;
-                pr_select_actions.classList.remove('hidden');
+
+                ref_status.innerHTML = statusHtml;
+                ref_select_actions.classList.remove('hidden');
             } else {
-                pendingPrInfo = null;
-                pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">' + escapeHtml(data.error) + '</span>';
-                pr_select_actions.classList.add('hidden');
+                pendingRefInfo = null;
+                ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">' + escapeHtml(data.error) + '</span>';
+                ref_select_actions.classList.add('hidden');
             }
         } catch (error) {
-            pendingPrInfo = null;
-            pr_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Error fetching PR: ' + escapeHtml(error.message) + '</span>';
-            pr_select_actions.classList.add('hidden');
+            pendingRefInfo = null;
+            ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Error fetching: ' + escapeHtml(error.message) + '</span>';
+            ref_select_actions.classList.add('hidden');
         } finally {
-            fetch_pr_button.disabled = false;
+            fetchButton.disabled = false;
         }
+    }
+
+    // Fetch PR button handler
+    fetch_pr_button.addEventListener('click', async function() {
+        const prId = pr_id_input.value.trim();
+        if (!prId || isNaN(parseInt(prId))) {
+            ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Please enter a valid PR number</span>';
+            ref_select_actions.classList.add('hidden');
+            return;
+        }
+        await fetchRef('pr', prId, fetch_pr_button);
     });
 
-    // PR Dialog: Use this PR button
-    use_pr_button.addEventListener('click', function() {
-        if (pendingPrInfo) {
-            window.currentPrInfo = pendingPrInfo;
-            selected_pr_label.textContent = `PR #${pendingPrInfo.id}`;
-            selected_pr_indicator.classList.remove('hidden');
-            selected_pr_indicator.classList.add('flex');
+    // Fetch Branch button handler
+    fetch_branch_button.addEventListener('click', async function() {
+        const branchName = branch_input.value.trim();
+        if (!branchName) {
+            ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Please enter a branch name</span>';
+            ref_select_actions.classList.add('hidden');
+            return;
+        }
+        await fetchRef('branch', branchName, fetch_branch_button);
+    });
+
+    // Fetch Tag button handler
+    fetch_tag_button.addEventListener('click', async function() {
+        const tagName = tag_input.value.trim();
+        if (!tagName) {
+            ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Please enter a tag name</span>';
+            ref_select_actions.classList.add('hidden');
+            return;
+        }
+        await fetchRef('tag', tagName, fetch_tag_button);
+    });
+
+    // Ref Dialog: Use this version button
+    use_ref_button.addEventListener('click', function() {
+        if (pendingRefInfo) {
+            window.currentRefInfo = pendingRefInfo;
+
+            // Create label based on ref type
+            let label;
+            switch (pendingRefInfo.type) {
+                case 'pr':
+                    label = `PR #${pendingRefInfo.id}`;
+                    break;
+                case 'branch':
+                    label = `branch:${pendingRefInfo.id}`;
+                    break;
+                case 'tag':
+                    label = `tag:${pendingRefInfo.id}`;
+                    break;
+                default:
+                    label = pendingRefInfo.id;
+            }
+
+            selected_ref_label.textContent = label;
+            selected_ref_indicator.classList.remove('hidden');
+            selected_ref_indicator.classList.add('flex');
             orm_version_select.classList.add('hidden');
-            pr_dialog.close();
+            ref_dialog.close();
         }
     });
 
-    // Clear selected PR
-    clear_pr_button.addEventListener('click', function() {
-        window.currentPrInfo = null;
-        selected_pr_indicator.classList.add('hidden');
-        selected_pr_indicator.classList.remove('flex');
+    // Clear selected ref
+    clear_ref_button.addEventListener('click', function() {
+        window.currentRefInfo = null;
+        selected_ref_indicator.classList.add('hidden');
+        selected_ref_indicator.classList.remove('flex');
         orm_version_select.classList.remove('hidden');
     });
 
