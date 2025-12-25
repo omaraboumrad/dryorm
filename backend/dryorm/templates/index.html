@@ -191,9 +191,13 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 <!-- CODE/RESULT Panel Container -->
 <div class="flex items-center gap-0.5 flex-1 h-full overflow-hidden w-full max-w-full">
     <!-- Code Panel -->
-    <div class="bg-white dark:bg-green-900 hidden flex-col h-full w-full min-w-0 overflow-hidden lg:flex lg:w-1/2 lg:flex-shrink-0"
+    <div class="bg-white dark:bg-green-900 hidden flex-col h-full w-full min-w-0 overflow-hidden lg:flex lg:w-1/2 lg:flex-shrink-0 relative"
          :class="{'!flex': showCode && !showResult}"
          x-cloak>
+        <!-- Version Label -->
+        <div id="version-label" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs font-mono rounded bg-django-secondary/20 dark:bg-green-800 text-django-text/70 dark:text-green-200 border border-django-primary/20 dark:border-green-600">
+            <span id="version-label-orm"></span> · <span id="version-label-db"></span>
+        </div>
         <div class="flex-1 min-w-0 overflow-auto w-full">
             <textarea id="code_models" class="w-full">{% if object %}{{ object.code }}{% else %}{{first}}{% endif %}</textarea>
         </div>

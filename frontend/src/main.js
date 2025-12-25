@@ -179,6 +179,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var query_filters = document.getElementById('query-filters');
     var query_count_number = document.getElementById('query-count-number');
     const show_template = document.getElementById('show-template');
+    var version_label_orm = document.getElementById('version-label-orm');
+    var version_label_db = document.getElementById('version-label-db');
     const dialog = document.getElementById('html-dialog');
     const iframe = document.getElementById('html-iframe');
     const shareDialog = document.getElementById('share-dialog');
@@ -198,6 +200,38 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ormVersion.startsWith('sqlalchemy-')) return 'sqlalchemy';
         if (ormVersion.startsWith('prisma-')) return 'prisma';
         return 'django';
+    }
+
+    // Function to update the version label in the code editor
+    function updateVersionLabel() {
+        // Get ORM version - either from ref or from dropdown
+        let ormText;
+        if (window.currentRefInfo) {
+            switch (window.currentRefInfo.type) {
+                case 'pr':
+                    ormText = `PR #${window.currentRefInfo.id}`;
+                    break;
+                case 'branch':
+                    ormText = `${window.currentRefInfo.id}`;
+                    break;
+                case 'tag':
+                    ormText = `${window.currentRefInfo.id}`;
+                    break;
+                default:
+                    ormText = window.currentRefInfo.id;
+            }
+        } else {
+            // Get the selected option text from dropdown
+            const selectedOption = orm_version_select.options[orm_version_select.selectedIndex];
+            ormText = selectedOption ? selectedOption.text : orm_version_select.value;
+        }
+
+        // Get database version - get the selected option text
+        const selectedDb = database_select.options[database_select.selectedIndex];
+        const dbText = selectedDb ? selectedDb.text : database_select.value;
+
+        version_label_orm.textContent = ormText;
+        version_label_db.textContent = dbText;
     }
 
     // Function to update template dropdown based on ORM type
@@ -483,6 +517,12 @@ document.addEventListener('DOMContentLoaded', function() {
             currentOrmType = newOrmType;
             updateTemplateDropdown(newOrmType, true); // Auto-load template when switching ORMs
         }
+        updateVersionLabel();
+    });
+
+    // Event listener for database changes
+    database_select.addEventListener('change', function() {
+        updateVersionLabel();
     });
 
     // Ref Dialog: Tab switching
@@ -671,6 +711,7 @@ document.addEventListener('DOMContentLoaded', function() {
             selected_ref_indicator.classList.add('flex');
             orm_version_select.classList.add('hidden');
             ref_dialog.close();
+            updateVersionLabel();
         }
     });
 
@@ -680,6 +721,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selected_ref_indicator.classList.add('hidden');
         selected_ref_indicator.classList.remove('flex');
         orm_version_select.classList.remove('hidden');
+        updateVersionLabel();
     });
 
     // Event listener for template selection changes
@@ -695,6 +737,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize template dropdown for current ORM version (don't auto-load to preserve saved snippets)
     currentOrmType = getOrmType(orm_version_select.value);
     updateTemplateDropdown(currentOrmType, false);
+
+    // Initialize version label
+    updateVersionLabel();
 
     show_template.addEventListener('click', function() {
         dialog.showModal();
