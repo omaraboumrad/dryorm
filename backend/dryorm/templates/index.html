@@ -58,7 +58,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 </div>
 
 <div class="flex flex-col p-4 bg-white dark:bg-green-900 border-b border-django-primary/20 dark:border-green-700 gap-2" x-show="showSettings" x-cloak>
-    <div class="flex flex-wrap gap-2 items-center">
+    <div class="flex flex-col md:flex-row md:flex-wrap gap-2 items-stretch md:items-center">
         <!-- No Cache -->
         <div class="flex items-center gap-2">
             <input type="checkbox" id="ignore-cache" class="w-4 h-4 rounded-sm accent-django-primary border-2 border-django-secondary text-django-secondary focus:ring-django-secondary focus:ring-2">
@@ -80,27 +80,30 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
             {% endfor %}
         </select>
 
-        <!-- Version Selector (hidden when PR is selected) -->
-        <select id="orm-version-select" class="px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">
-            {% for key, version in orm_versions.items %}
-            <option value="{{key}}" {% if object.django_version == key or not object and key == "django-5.2.8" %}selected{% endif %}>{{version.description}}</option>
-            {% endfor %}
-        </select>
+        <!-- Version/PR Group - stays together on same row -->
+        <div class="flex gap-2 items-center">
+            <!-- Version Selector (hidden when PR is selected) -->
+            <select id="orm-version-select" class="flex-1 md:flex-none px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">
+                {% for key, version in orm_versions.items %}
+                <option value="{{key}}" {% if object.django_version == key or not object and key == "django-5.2.8" %}selected{% endif %}>{{version.description}}</option>
+                {% endfor %}
+            </select>
 
-        <!-- Selected PR badge (replaces version selector when PR is selected) -->
-        <div id="selected-pr-indicator" class="hidden items-center gap-2 px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-django-secondary/20 dark:bg-green-700">
-            <span class="text-sm text-django-text dark:text-green-100" id="selected-pr-label"></span>
-            <button type="button" id="clear-pr-button" class="text-django-text/50 dark:text-green-300 hover:text-red-500 dark:hover:text-red-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <!-- Selected PR badge (replaces version selector when PR is selected) -->
+            <div id="selected-pr-indicator" class="hidden items-center gap-2 px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-django-secondary/20 dark:bg-green-700">
+                <span class="text-sm text-django-text dark:text-green-100" id="selected-pr-label"></span>
+                <button type="button" id="clear-pr-button" class="text-django-text/50 dark:text-green-300 hover:text-red-500 dark:hover:text-red-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Select PR Button -->
+            <button type="button"
+                    id="select-pr-button"
+                    class="px-2 py-2 text-sm font-medium rounded-sm bg-django-primary text-white hover:bg-django-primary-dark transition-colors whitespace-nowrap">
+                Select PR
             </button>
         </div>
-
-        <!-- Select PR Button -->
-        <button type="button"
-                id="select-pr-button"
-                class="px-2 py-2 text-sm font-medium rounded-sm bg-django-primary text-white hover:bg-django-primary-dark transition-colors whitespace-nowrap">
-            Select PR
-        </button>
     </div>
 </div>
 
