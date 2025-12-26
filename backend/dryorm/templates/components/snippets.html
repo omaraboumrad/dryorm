@@ -4,9 +4,17 @@
             <li class="border-b border-gray-200" x-data="{ expanded: false }">
                 <div class="flex items-center px-4 py-3 hover:bg-django-secondary/10 transition cursor-pointer" @click="expanded = !expanded">
                     <div class="flex flex-col flex-grow truncate">
-                        <div class="flex items-center gap-2">
-                            <a href="{% url 'detail' object.slug %}" class="text-lg font-semibold text-django-primary truncate hover:underline" @click.stop>{{ object.name }}</a>
-                            <span class="text-sm text-gray-400">{{ object.database }} • {{ object.created|timesince }}</span>
+                        <a href="{% url 'detail' object.slug %}" class="text-lg font-semibold text-django-primary truncate hover:underline" @click.stop>{{ object.name }}</a>
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                            <span>{{ object.database }}</span>
+                            <span>•</span>
+                            {% if object.ref_type %}
+                                <span class="text-purple-600" title="{% if object.sha %}{{ object.sha }}{% endif %}">{% if object.ref_type == 'pr' %}PR #{{ object.ref_id }}{% elif object.ref_type == 'branch' %}{{ object.ref_id }}{% elif object.ref_type == 'tag' %}{{ object.ref_id }}{% endif %}{% if object.sha %} <span class="hidden sm:inline font-mono">@ {{ object.sha|slice:":7" }}</span>{% endif %}</span>
+                            {% elif object.orm_version %}
+                                <span>{{ object.orm_version }}</span>
+                            {% endif %}
+                            <span>•</span>
+                            <span>{{ object.created|timesince }}</span>
                         </div>
                     </div>
                     <div class="ml-2 p-1">
