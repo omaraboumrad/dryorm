@@ -16,7 +16,7 @@ def generate_random_string(length=8):
 
 class SnippetManager(models.Manager):
 
-    def create_snippet(self, name, code, database, private, orm_version=None, ref_type=None, ref_id=None):
+    def create_snippet(self, name, code, database, private, orm_version=None, ref_type=None, ref_id=None, sha=None):
         if not name:
             name = generate_random_string()
         slug = slugify(name)
@@ -30,6 +30,7 @@ class SnippetManager(models.Manager):
             orm_version=orm_version,
             ref_type=ref_type,
             ref_id=ref_id,
+            sha=sha,
         )
 
 
@@ -43,10 +44,11 @@ class Snippet(models.Model):
     private = models.BooleanField(default=False)
     database = models.CharField(max_length=50, default="sqlite")
 
-    # Version info - either orm_version OR (ref_type + ref_id) should be set
+    # Version info - either orm_version OR (ref_type + ref_id + sha) should be set
     orm_version = models.CharField(max_length=50, null=True, blank=True)  # e.g., "django-5.2.8", "sqlalchemy-2.0"
     ref_type = models.CharField(max_length=10, null=True, blank=True)  # "pr", "branch", or "tag"
     ref_id = models.CharField(max_length=100, null=True, blank=True)  # PR number, branch name, or tag name
+    sha = models.CharField(max_length=40, null=True, blank=True)  # Git commit SHA to pin to specific version
 
     # Keep for backwards compatibility during migration
     django_version = models.CharField(max_length=20, default="5.2.8")

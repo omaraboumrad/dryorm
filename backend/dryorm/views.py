@@ -56,10 +56,12 @@ class SnippetDetailView(generic.DetailView):
             context["snippet_orm_version"] = snippet.orm_version
             context["snippet_ref_type"] = snippet.ref_type
             context["snippet_ref_id"] = snippet.ref_id
+            context["snippet_sha"] = snippet.sha
             if snippet.ref_type:
                 context["snippet_ref_info"] = {
                     "type": snippet.ref_type,
                     "id": snippet.ref_id,
+                    "sha": snippet.sha,
                 }
         return context
 
@@ -89,10 +91,11 @@ def save(request):
     if request.method != "POST":
         return http.HttpResponseNotAllowed("nope!")
 
-    # Get version info - either orm_version or ref_type+ref_id
+    # Get version info - either orm_version or ref_type+ref_id+sha
     orm_version = request.POST.get("orm_version")
     ref_type = request.POST.get("ref_type")
     ref_id = request.POST.get("ref_id")
+    sha = request.POST.get("sha")
 
     # Backwards compatibility: convert old django_version to new orm_version format
     if not orm_version and not ref_type:
@@ -107,6 +110,7 @@ def save(request):
         orm_version=orm_version,
         ref_type=ref_type,
         ref_id=ref_id,
+        sha=sha,
     )
 
     return http.HttpResponse(f'"{instance.slug}"')

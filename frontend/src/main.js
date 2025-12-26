@@ -879,10 +879,13 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('private', isPrivate.checked);
         formData.append('csrfmiddlewaretoken', csrftoken);
 
-        // Add version info - either orm_version or ref_type+ref_id
+        // Add version info - either orm_version or ref_type+ref_id+sha
         if (window.currentRefInfo) {
             formData.append('ref_type', window.currentRefInfo.type);
             formData.append('ref_id', window.currentRefInfo.id);
+            if (window.currentRefInfo.sha) {
+                formData.append('sha', window.currentRefInfo.sha);
+            }
         } else {
             formData.append('orm_version', orm_version_select.value);
         }
