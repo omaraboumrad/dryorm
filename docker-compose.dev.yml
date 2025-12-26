@@ -211,18 +211,18 @@ services:
         image: dryorm-executor/python-django-pr-postgres
         command: /bin/true
 
-    # executor-python-django-pr-mariadb:
-    #     build:
-    #         context: ./executors/python-django
-    #         dockerfile: Dockerfile.multi
-    #         target: pr-base-mariadb
-    #     image: dryorm-executor/python-django-pr-mariadb
-    #     command: /bin/true
+    executor-python-django-pr-mariadb:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: pr-base-mariadb
+        image: dryorm-executor/python-django-pr-mariadb
+        command: /bin/true
 
-    # executor-python-django-pr-postgis:
-    #     build:
-    #         context: ./executors/python-django
-    #         dockerfile: Dockerfile.multi
-    #         target: pr-base-postgis
-    #     image: dryorm-executor/python-django-pr-postgis
-    #     command: /bin/true
+    executor-python-django-pr-postgis:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: pr-base-postgis
+        image: dryorm-executor/python-django-pr-postgis
+        command: /bin/true

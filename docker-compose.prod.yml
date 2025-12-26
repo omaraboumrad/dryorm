@@ -5,6 +5,7 @@ volumes:
     postgis_snippets_data: {}
     mariadb_snippets_data: {}
     django_cache: {}
+    pr_cache: {}
 
 networks:
     default:
@@ -212,4 +213,30 @@ services:
             dockerfile: Dockerfile.multi
             target: sqlite-6.3
         image: dryorm-executor/nodejs-prisma-sqlite-6.3
+        command: /bin/true
+
+    # Django PR Mode Executors (no Django pre-installed)
+
+    executor-python-django-pr-postgres:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: pr-base-postgres
+        image: dryorm-executor/python-django-pr-postgres
+        command: /bin/true
+
+    executor-python-django-pr-mariadb:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: pr-base-mariadb
+        image: dryorm-executor/python-django-pr-mariadb
+        command: /bin/true
+
+    executor-python-django-pr-postgis:
+        build:
+            context: ./executors/python-django
+            dockerfile: Dockerfile.multi
+            target: pr-base-postgis
+        image: dryorm-executor/python-django-pr-postgis
         command: /bin/true
