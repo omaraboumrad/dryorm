@@ -177,8 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var branch_search_results = document.getElementById('branch-search-results');
     var tag_search_results = document.getElementById('tag-search-results');
 
-    // Current ref state
-    window.currentRefInfo = null;  // Store current ref info {type, id, title, sha, ...}
+    // Current ref state - initialize from json_script if loading a saved snippet with ref
+    var snippetRefInfoEl = document.getElementById('snippet-ref-info');
+    window.currentRefInfo = snippetRefInfoEl ? JSON.parse(snippetRefInfoEl.textContent) : null;
     var pendingRefInfo = null;  // Ref info waiting to be confirmed in dialog
     var currentRefTab = 'pr';  // Current active tab in dialog
     var searchDebounceTimers = { pr: null, branch: null, tag: null };
@@ -875,9 +876,16 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('code', getEditorValue());
         formData.append('name', name.value);
         formData.append('database', database_select.value);
-        formData.append('django_version', orm_version_select.value);
         formData.append('private', isPrivate.checked);
         formData.append('csrfmiddlewaretoken', csrftoken);
+
+        // Add version info - either orm_version or ref_type+ref_id
+        if (window.currentRefInfo) {
+            formData.append('ref_type', window.currentRefInfo.type);
+            formData.append('ref_id', window.currentRefInfo.id);
+        } else {
+            formData.append('orm_version', orm_version_select.value);
+        }
 
         fetch('/save', {
             method: 'POST',

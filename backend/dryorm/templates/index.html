@@ -27,6 +27,10 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 {% endblock %}
 
 {% block content %}
+{% if snippet_ref_type %}
+{{ snippet_ref_info|json_script:"snippet-ref-info" }}
+{% endif %}
+
         <div class="flex flex-1 overflow-hidden w-full max-w-full">
 <!-- Journey Navigation Panel - Desktop Only -->
 <div class="bg-django-secondary/10 dark:bg-[#0f2e1e] border-r border-django-primary/20 dark:border-green-600 w-80 flex-shrink-0 overflow-y-auto hidden lg:block" x-show="showJourneyNav" x-cloak>
@@ -83,15 +87,15 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
         <!-- Version/PR Group - stays together on same row -->
         <div class="flex gap-2 items-center">
             <!-- Version Selector (hidden when PR is selected) -->
-            <select id="orm-version-select" class="flex-1 md:flex-none px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">
+            <select id="orm-version-select" class="flex-1 md:flex-none px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary{% if snippet_ref_type %} hidden{% endif %}">
                 {% for key, version in orm_versions.items %}
-                <option value="{{key}}" {% if object.django_version == key or not object and key == "django-5.2.8" %}selected{% endif %}>{{version.description}}</option>
+                <option value="{{key}}" {% if object.orm_version == key or not object and key == "django-5.2.8" %}selected{% endif %}>{{version.description}}</option>
                 {% endfor %}
             </select>
 
             <!-- Selected ref badge (replaces version selector when a ref is selected) -->
-            <div id="selected-ref-indicator" class="hidden items-center gap-2 px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-django-secondary/20 dark:bg-green-700">
-                <span class="text-sm text-django-text dark:text-green-100" id="selected-ref-label"></span>
+            <div id="selected-ref-indicator" class="{% if not snippet_ref_type %}hidden{% else %}flex{% endif %} items-center gap-2 px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-django-secondary/20 dark:bg-green-700">
+                <span class="text-sm text-django-text dark:text-green-100" id="selected-ref-label">{% if snippet_ref_type == 'pr' %}PR #{{ snippet_ref_id }}{% elif snippet_ref_type == 'branch' %}branch:{{ snippet_ref_id }}{% elif snippet_ref_type == 'tag' %}tag:{{ snippet_ref_id }}{% endif %}</span>
                 <button type="button" id="clear-ref-button" class="text-django-text/50 dark:text-green-300 hover:text-red-500 dark:hover:text-red-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -101,7 +105,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
             <button type="button"
                     id="select-ref-button"
                     class="px-2 py-2 text-sm font-medium rounded-sm bg-django-primary text-white hover:bg-django-primary-dark transition-colors whitespace-nowrap">
-                GitHub
+                Pick from GitHub
             </button>
         </div>
     </div>

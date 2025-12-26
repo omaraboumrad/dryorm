@@ -49,6 +49,18 @@ class SnippetDetailView(generic.DetailView):
         context["templates"] = templates.EXECUTOR_TEMPLATES
         context["first"] = templates.EXECUTOR_TEMPLATES["django"]["basic"]
         context["journeys"] = {}
+
+        # Pass snippet version info for restoring state
+        snippet = self.object
+        if snippet:
+            context["snippet_orm_version"] = snippet.orm_version
+            context["snippet_ref_type"] = snippet.ref_type
+            context["snippet_ref_id"] = snippet.ref_id
+            if snippet.ref_type:
+                context["snippet_ref_info"] = {
+                    "type": snippet.ref_type,
+                    "id": snippet.ref_id,
+                }
         return context
 
 
@@ -77,12 +89,24 @@ def save(request):
     if request.method != "POST":
         return http.HttpResponseNotAllowed("nope!")
 
+    # Get version info - either orm_version or ref_type+ref_id
+    orm_version = request.POST.get("orm_version")
+    ref_type = request.POST.get("ref_type")
+    ref_id = request.POST.get("ref_id")
+
+    # Backwards compatibility: convert old django_version to new orm_version format
+    if not orm_version and not ref_type:
+        django_version = request.POST.get("django_version", "5.2.8")
+        orm_version = f"django-{django_version}"
+
     instance = models.Snippet.objects.create_snippet(
         name=request.POST.get("name"),
         code=request.POST.get("code"),
         database=request.POST.get("database"),
         private=request.POST.get("private") == "true",
-        django_version=request.POST.get("django_version", "5.2.8"),
+        orm_version=orm_version,
+        ref_type=ref_type,
+        ref_id=ref_id,
     )
 
     return http.HttpResponse(f'"{instance.slug}"')
