@@ -8,7 +8,11 @@ def migrate_version_forward(apps, schema_editor):
     Snippet = apps.get_model('dryorm', 'Snippet')
     for snippet in Snippet.objects.filter(orm_version__isnull=True):
         if snippet.django_version:
-            snippet.orm_version = f"django-{snippet.django_version}"
+            # Handle case where django_version already has prefix
+            if snippet.django_version.startswith('django-'):
+                snippet.orm_version = snippet.django_version
+            else:
+                snippet.orm_version = f"django-{snippet.django_version}"
             snippet.save(update_fields=['orm_version'])
 
 
