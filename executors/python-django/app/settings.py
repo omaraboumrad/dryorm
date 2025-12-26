@@ -12,6 +12,7 @@ ALLOWED_HOSTS = ["testserver"]
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.postgres",
     "app.apps.BaseAppConfig",
 ]
 
