@@ -1,6 +1,5 @@
 import os
-import tarfile
-import shutil
+import subprocess
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,6 +9,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+# Base cache directory - now contains git repo and worktrees
 REF_CACHE_DIR = Path(os.environ.get("PR_CACHE_DIR", "/app/pr_cache"))
 HOST_REF_CACHE_PATH = os.environ.get("HOST_PR_CACHE_PATH", "/app/pr_cache")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
@@ -58,10 +58,14 @@ PRFetchError = RefFetchError
 class RefService:
     GITHUB_API_BASE = "https://api.github.com"
     DJANGO_REPO = "django/django"
+    DJANGO_GIT_URL = "https://github.com/django/django.git"
 
     def __init__(self):
         self.cache_dir = REF_CACHE_DIR
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.git_repo_path = self.cache_dir / "django.git"
+        self.worktrees_path = self.cache_dir / "worktrees"
+        self.worktrees_path.mkdir(parents=True, exist_ok=True)
 
     def _get_headers(self) -> dict:
         headers = {
@@ -71,6 +75,98 @@ class RefService:
         if GITHUB_TOKEN:
             headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
         return headers
+
+    def _run_git(self, *args, cwd=None) -> subprocess.CompletedProcess:
+        """Run a git command and return the result."""
+        cmd = ["git"] + list(args)
+        logger.debug(f"Running: {' '.join(cmd)}")
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                timeout=300,  # 5 min timeout for clone/fetch
+            )
+            if result.returncode != 0:
+                logger.error(f"Git command failed: {result.stderr}")
+            return result
+        except subprocess.TimeoutExpired:
+            raise RefFetchError("Git command timed out")
+
+    def _ensure_repo_cloned(self):
+        """Ensure the Django repo is cloned. Clone if not exists."""
+        if self.git_repo_path.exists():
+            return
+
+        logger.info(f"Cloning Django repository to {self.git_repo_path}")
+        result = self._run_git(
+            "clone", "--bare", self.DJANGO_GIT_URL, str(self.git_repo_path)
+        )
+        if result.returncode != 0:
+            raise RefFetchError(f"Failed to clone repository: {result.stderr}")
+
+        # Configure the bare repo to fetch all refs including tags
+        self._run_git(
+            "config", "--add", "remote.origin.fetch",
+            "+refs/heads/*:refs/heads/*",
+            cwd=str(self.git_repo_path)
+        )
+        self._run_git(
+            "config", "--add", "remote.origin.fetch",
+            "+refs/tags/*:refs/tags/*",
+            cwd=str(self.git_repo_path)
+        )
+        # Fetch all tags
+        self._run_git("fetch", "--tags", "origin", cwd=str(self.git_repo_path))
+        logger.info("Django repository cloned successfully")
+
+    def _fetch_ref(self, refspec: str):
+        """Fetch a specific ref from origin."""
+        self._ensure_repo_cloned()
+        logger.info(f"Fetching ref: {refspec}")
+        result = self._run_git(
+            "fetch", "origin", refspec,
+            cwd=str(self.git_repo_path)
+        )
+        if result.returncode != 0:
+            raise RefFetchError(f"Failed to fetch ref: {result.stderr}")
+
+    def _get_worktree_path(self, ref_type: RefType, ref_id: str, sha: str) -> Path:
+        """Get the worktree path for a ref. Includes SHA to handle updates."""
+        safe_ref_id = ref_id.replace("/", "__")
+        # For PRs and branches, include SHA since they can change
+        # For tags, they're immutable so no SHA needed
+        if ref_type == "tag":
+            return self.worktrees_path / ref_type / safe_ref_id
+        else:
+            return self.worktrees_path / ref_type / safe_ref_id / sha[:12]
+
+    def _ensure_worktree(self, ref_type: RefType, ref_id: str, sha: str, git_ref: str) -> Path:
+        """Ensure a worktree exists for the given ref. Create if not exists."""
+        worktree_path = self._get_worktree_path(ref_type, ref_id, sha)
+
+        if worktree_path.exists():
+            logger.info(f"Worktree already exists at {worktree_path}")
+            return worktree_path
+
+        # Create parent directories
+        worktree_path.parent.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Creating worktree at {worktree_path} for {git_ref}")
+        result = self._run_git(
+            "worktree", "add", "--detach", str(worktree_path), sha,
+            cwd=str(self.git_repo_path)
+        )
+        if result.returncode != 0:
+            raise RefFetchError(f"Failed to create worktree: {result.stderr}")
+
+        return worktree_path
+
+    def _get_host_path(self, worktree_path: Path) -> str:
+        """Convert local worktree path to host path for Docker mounting."""
+        relative = worktree_path.relative_to(self.cache_dir)
+        return os.path.join(HOST_REF_CACHE_PATH, str(relative))
 
     # ========== PR Methods ==========
 
@@ -83,15 +179,14 @@ class RefService:
         state = pr_data["state"]
         author = pr_data["user"]["login"]
 
-        # Cache structure: pr/{pr_id}/{sha}/
-        ref_path = self.cache_dir / "pr" / str(pr_id) / sha
-        host_ref_path = os.path.join(HOST_REF_CACHE_PATH, "pr", str(pr_id), sha)
+        # Fetch the PR ref
+        self._fetch_ref(f"pull/{pr_id}/head:refs/pr/{pr_id}")
 
-        if ref_path.exists():
-            logger.info(f"PR {pr_id} already cached at {ref_path}")
-        else:
-            self._download_source(sha, ref_path)
-            logger.info(f"PR {pr_id} source cached at {ref_path}")
+        # Create/get worktree
+        worktree_path = self._ensure_worktree("pr", str(pr_id), sha, f"refs/pr/{pr_id}")
+        host_path = self._get_host_path(worktree_path)
+
+        logger.info(f"PR {pr_id} ready at {worktree_path}")
 
         return RefInfo(
             ref_type="pr",
@@ -99,8 +194,8 @@ class RefService:
             title=title,
             sha=sha,
             state=state,
-            local_path=str(ref_path),
-            host_path=host_ref_path,
+            local_path=str(worktree_path),
+            host_path=host_path,
             author=author,
         )
 
@@ -124,16 +219,18 @@ class RefService:
 
     def get_cached_pr(self, pr_id: int) -> Optional[RefInfo]:
         """Get cached PR info if exists."""
-        pr_dir = self.cache_dir / "pr" / str(pr_id)
+        pr_dir = self.worktrees_path / "pr" / str(pr_id)
         if not pr_dir.exists():
             return None
 
+        # Find the latest SHA directory
         cached_shas = [d for d in pr_dir.iterdir() if d.is_dir()]
         if not cached_shas:
             return None
 
-        latest = cached_shas[0]
-        host_ref_path = os.path.join(HOST_REF_CACHE_PATH, "pr", str(pr_id), latest.name)
+        latest = sorted(cached_shas, key=lambda d: d.stat().st_mtime, reverse=True)[0]
+        host_path = self._get_host_path(latest)
+
         return RefInfo(
             ref_type="pr",
             ref_id=str(pr_id),
@@ -141,7 +238,7 @@ class RefService:
             sha=latest.name,
             state="unknown",
             local_path=str(latest),
-            host_path=host_ref_path,
+            host_path=host_path,
         )
 
     # ========== Branch Methods ==========
@@ -153,24 +250,23 @@ class RefService:
         sha = branch_data["commit"]["sha"]
         author = branch_data["commit"]["author"]["login"] if branch_data["commit"].get("author") else "unknown"
 
-        # Cache structure: branch/{branch_name}/{sha}/
-        safe_branch_name = branch_name.replace("/", "__")
-        ref_path = self.cache_dir / "branch" / safe_branch_name / sha
-        host_ref_path = os.path.join(HOST_REF_CACHE_PATH, "branch", safe_branch_name, sha)
+        # Fetch the branch
+        safe_branch = branch_name.replace("/", "__")
+        self._fetch_ref(f"{branch_name}:refs/heads/{safe_branch}")
 
-        if ref_path.exists():
-            logger.info(f"Branch {branch_name} already cached at {ref_path}")
-        else:
-            self._download_source(sha, ref_path)
-            logger.info(f"Branch {branch_name} source cached at {ref_path}")
+        # Create/get worktree
+        worktree_path = self._ensure_worktree("branch", branch_name, sha, f"refs/heads/{safe_branch}")
+        host_path = self._get_host_path(worktree_path)
+
+        logger.info(f"Branch {branch_name} ready at {worktree_path}")
 
         return RefInfo(
             ref_type="branch",
             ref_id=branch_name,
             title=branch_name,
             sha=sha,
-            local_path=str(ref_path),
-            host_path=host_ref_path,
+            local_path=str(worktree_path),
+            host_path=host_path,
             author=author,
         )
 
@@ -195,7 +291,7 @@ class RefService:
     def get_cached_branch(self, branch_name: str) -> Optional[RefInfo]:
         """Get cached branch info if exists."""
         safe_branch_name = branch_name.replace("/", "__")
-        branch_dir = self.cache_dir / "branch" / safe_branch_name
+        branch_dir = self.worktrees_path / "branch" / safe_branch_name
         if not branch_dir.exists():
             return None
 
@@ -203,15 +299,16 @@ class RefService:
         if not cached_shas:
             return None
 
-        latest = cached_shas[0]
-        host_ref_path = os.path.join(HOST_REF_CACHE_PATH, "branch", safe_branch_name, latest.name)
+        latest = sorted(cached_shas, key=lambda d: d.stat().st_mtime, reverse=True)[0]
+        host_path = self._get_host_path(latest)
+
         return RefInfo(
             ref_type="branch",
             ref_id=branch_name,
             title=branch_name,
             sha=latest.name,
             local_path=str(latest),
-            host_path=host_ref_path,
+            host_path=host_path,
         )
 
     # ========== Tag Methods ==========
@@ -222,24 +319,22 @@ class RefService:
 
         sha = tag_data["commit"]["sha"]
 
-        # Cache structure: tag/{tag_name}/  (tags are immutable, no SHA subdirectory needed)
-        safe_tag_name = tag_name.replace("/", "__")
-        ref_path = self.cache_dir / "tag" / safe_tag_name
-        host_ref_path = os.path.join(HOST_REF_CACHE_PATH, "tag", safe_tag_name)
+        # Fetch the tag
+        self._fetch_ref(f"refs/tags/{tag_name}:refs/tags/{tag_name}")
 
-        if ref_path.exists():
-            logger.info(f"Tag {tag_name} already cached at {ref_path}")
-        else:
-            self._download_source(sha, ref_path)
-            logger.info(f"Tag {tag_name} source cached at {ref_path}")
+        # Create/get worktree (tags are immutable, so no SHA in path)
+        worktree_path = self._ensure_worktree("tag", tag_name, sha, f"refs/tags/{tag_name}")
+        host_path = self._get_host_path(worktree_path)
+
+        logger.info(f"Tag {tag_name} ready at {worktree_path}")
 
         return RefInfo(
             ref_type="tag",
             ref_id=tag_name,
             title=tag_name,
             sha=sha,
-            local_path=str(ref_path),
-            host_path=host_ref_path,
+            local_path=str(worktree_path),
+            host_path=host_path,
         )
 
     def _get_tag_info(self, tag_name: str) -> dict:
@@ -277,57 +372,20 @@ class RefService:
     def get_cached_tag(self, tag_name: str) -> Optional[RefInfo]:
         """Get cached tag info if exists."""
         safe_tag_name = tag_name.replace("/", "__")
-        tag_path = self.cache_dir / "tag" / safe_tag_name
+        tag_path = self.worktrees_path / "tag" / safe_tag_name
         if not tag_path.exists():
             return None
 
-        # For tags, we need to read the SHA from a metadata file or just return unknown
         return RefInfo(
             ref_type="tag",
             ref_id=tag_name,
             title=tag_name,
             sha="cached",
             local_path=str(tag_path),
-            host_path=os.path.join(HOST_REF_CACHE_PATH, "tag", safe_tag_name),
+            host_path=self._get_host_path(tag_path),
         )
 
     # ========== Common Methods ==========
-
-    def _download_source(self, sha: str, target_path: Path):
-        """Download and extract source tarball for a given SHA."""
-        tarball_url = f"https://github.com/{self.DJANGO_REPO}/archive/{sha}.tar.gz"
-
-        try:
-            with httpx.Client(timeout=120.0, follow_redirects=True) as client:
-                response = client.get(tarball_url, headers=self._get_headers())
-                response.raise_for_status()
-
-                # Create parent directory
-                target_path.parent.mkdir(parents=True, exist_ok=True)
-
-                # Save tarball temporarily
-                tarball_path = target_path.parent / f"{sha}.tar.gz"
-                tarball_path.write_bytes(response.content)
-
-                # Extract tarball
-                temp_extract = target_path.parent / f"{sha}_temp"
-                with tarfile.open(tarball_path, "r:gz") as tar:
-                    tar.extractall(temp_extract)
-
-                # Move the extracted django directory to target
-                extracted_dirs = list(temp_extract.iterdir())
-                if extracted_dirs:
-                    shutil.move(str(extracted_dirs[0]), str(target_path))
-
-                # Cleanup
-                tarball_path.unlink()
-                if temp_extract.exists():
-                    shutil.rmtree(temp_extract)
-
-        except httpx.HTTPError as e:
-            raise RefFetchError(f"Failed to download source: {e}")
-        except (tarfile.TarError, OSError) as e:
-            raise RefFetchError(f"Failed to extract source: {e}")
 
     def fetch_ref(self, ref_type: RefType, ref_id: str) -> RefInfo:
         """Generic method to fetch any ref type."""
@@ -350,6 +408,128 @@ class RefService:
             return self.get_cached_tag(ref_id)
         else:
             raise ValueError(f"Unknown ref type: {ref_type}")
+
+    # ========== Search Methods ==========
+
+    def search_prs(self, query: str, limit: int = 10) -> list[dict]:
+        """Search for Django PRs by number or title."""
+        # If query is a number, search by PR number
+        if query.isdigit():
+            url = f"{self.GITHUB_API_BASE}/repos/{self.DJANGO_REPO}/pulls/{query}"
+            try:
+                with httpx.Client(timeout=10.0) as client:
+                    response = client.get(url, headers=self._get_headers())
+                    if response.status_code == 200:
+                        pr = response.json()
+                        return [{
+                            "id": pr["number"],
+                            "title": pr["title"],
+                            "state": pr["state"],
+                            "author": pr["user"]["login"],
+                        }]
+                    return []
+            except httpx.HTTPError:
+                return []
+
+        # Otherwise search by title using GitHub search API
+        url = f"{self.GITHUB_API_BASE}/search/issues"
+        params = {
+            "q": f"repo:{self.DJANGO_REPO} type:pr {query}",
+            "per_page": limit,
+            "sort": "updated",
+            "order": "desc",
+        }
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                response = client.get(url, headers=self._get_headers(), params=params)
+                if response.status_code == 200:
+                    data = response.json()
+                    return [{
+                        "id": item["number"],
+                        "title": item["title"],
+                        "state": item["state"],
+                        "author": item["user"]["login"],
+                    } for item in data.get("items", [])]
+                return []
+        except httpx.HTTPError:
+            return []
+
+    def search_branches(self, query: str, limit: int = 10) -> list[dict]:
+        """Search for Django branches by name."""
+        url = f"{self.GITHUB_API_BASE}/repos/{self.DJANGO_REPO}/branches"
+        params = {"per_page": 100}  # Get more to filter client-side
+
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                response = client.get(url, headers=self._get_headers(), params=params)
+                if response.status_code == 200:
+                    branches = response.json()
+                    # Filter by query (case-insensitive)
+                    query_lower = query.lower()
+                    filtered = [
+                        {"name": b["name"], "sha": b["commit"]["sha"][:12]}
+                        for b in branches
+                        if query_lower in b["name"].lower()
+                    ]
+                    return filtered[:limit]
+                return []
+        except httpx.HTTPError:
+            return []
+
+    def search_tags(self, query: str, limit: int = 10) -> list[dict]:
+        """Search for Django tags by name."""
+        url = f"{self.GITHUB_API_BASE}/repos/{self.DJANGO_REPO}/tags"
+        params = {"per_page": 100}  # Get more to filter client-side
+
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                response = client.get(url, headers=self._get_headers(), params=params)
+                if response.status_code == 200:
+                    tags = response.json()
+                    # Filter by query (case-insensitive)
+                    query_lower = query.lower()
+                    filtered = [
+                        {"name": t["name"], "sha": t["commit"]["sha"][:12]}
+                        for t in tags
+                        if query_lower in t["name"].lower()
+                    ]
+                    return filtered[:limit]
+                return []
+        except httpx.HTTPError:
+            return []
+
+    def cleanup_old_worktrees(self, max_age_days: int = 7):
+        """Remove worktrees older than max_age_days. Call periodically to free disk space."""
+        import time
+        now = time.time()
+        max_age_seconds = max_age_days * 24 * 60 * 60
+
+        # Prune any stale worktree references first
+        self._run_git("worktree", "prune", cwd=str(self.git_repo_path))
+
+        for ref_type_dir in self.worktrees_path.iterdir():
+            if not ref_type_dir.is_dir():
+                continue
+            for ref_dir in ref_type_dir.iterdir():
+                if not ref_dir.is_dir():
+                    continue
+                # For tags, check the ref_dir itself
+                # For PRs/branches, check SHA subdirectories
+                if ref_type_dir.name == "tag":
+                    if now - ref_dir.stat().st_mtime > max_age_seconds:
+                        logger.info(f"Removing old worktree: {ref_dir}")
+                        self._run_git(
+                            "worktree", "remove", "--force", str(ref_dir),
+                            cwd=str(self.git_repo_path)
+                        )
+                else:
+                    for sha_dir in ref_dir.iterdir():
+                        if sha_dir.is_dir() and now - sha_dir.stat().st_mtime > max_age_seconds:
+                            logger.info(f"Removing old worktree: {sha_dir}")
+                            self._run_git(
+                                "worktree", "remove", "--force", str(sha_dir),
+                                cwd=str(self.git_repo_path)
+                            )
 
 
 # Singleton instance

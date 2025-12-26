@@ -11,6 +11,7 @@ urlpatterns = [
     path("save", views.save, name="save"),
     path("execute", views.execute, name="execute"),
     path("fetch-pr", views.fetch_pr, name="fetch_pr"),
+    path("search-refs", views.search_refs, name="search_refs"),
     path("api/journeys", views.journeys_api, name="journeys_api"),
     path("j/", views.home, name="journeys"),
     path("j/<slug:journey_slug>", views.home, name="journey"),

@@ -214,6 +214,33 @@ fetch_pr = fetch_ref
 
 
 @csrf_exempt
+def search_refs(request):
+    """HTTP endpoint for searching Django refs (PRs, branches, tags)."""
+    if request.method != "GET":
+        return http.HttpResponseNotAllowed(["GET"])
+
+    ref_type = request.GET.get("type", "pr")
+    query = request.GET.get("q", "").strip()
+
+    if not query:
+        return JsonResponse({"results": []})
+
+    try:
+        if ref_type == "pr":
+            results = ref_service.search_prs(query)
+        elif ref_type == "branch":
+            results = ref_service.search_branches(query)
+        elif ref_type == "tag":
+            results = ref_service.search_tags(query)
+        else:
+            return JsonResponse({"error": "Invalid ref type"}, status=400)
+
+        return JsonResponse({"results": results})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
 def execute(request):
     """HTTP endpoint for executing ORM snippets synchronously."""
     if request.method != "POST":

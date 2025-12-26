@@ -172,10 +172,16 @@ document.addEventListener('DOMContentLoaded', function() {
     var tag_input = document.getElementById('tag-input');
     var fetch_tag_button = document.getElementById('fetch-tag-button');
 
+    // Search result containers
+    var pr_search_results = document.getElementById('pr-search-results');
+    var branch_search_results = document.getElementById('branch-search-results');
+    var tag_search_results = document.getElementById('tag-search-results');
+
     // Current ref state
     window.currentRefInfo = null;  // Store current ref info {type, id, title, sha, ...}
     var pendingRefInfo = null;  // Ref info waiting to be confirmed in dialog
     var currentRefTab = 'pr';  // Current active tab in dialog
+    var searchDebounceTimers = { pr: null, branch: null, tag: null };
     var query_filters = document.getElementById('query-filters');
     var query_count_number = document.getElementById('query-count-number');
     const show_template = document.getElementById('show-template');
@@ -558,6 +564,113 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Debounced search for refs
+    function debounceSearch(refType, query) {
+        // Clear any pending timer for this ref type
+        if (searchDebounceTimers[refType]) {
+            clearTimeout(searchDebounceTimers[refType]);
+        }
+
+        const resultsContainer = {
+            pr: pr_search_results,
+            branch: branch_search_results,
+            tag: tag_search_results
+        }[refType];
+
+        // Clear results if query is empty
+        if (!query || query.trim() === '') {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+
+        // Show loading state
+        resultsContainer.innerHTML = '<div class="text-sm text-django-text/50 dark:text-green-300 p-2">Searching...</div>';
+
+        // Set debounce timer
+        searchDebounceTimers[refType] = setTimeout(async () => {
+            try {
+                const response = await fetch(`/search-refs?type=${refType}&q=${encodeURIComponent(query.trim())}`);
+                const data = await response.json();
+                renderSearchResults(refType, data.results || [], resultsContainer);
+            } catch (error) {
+                resultsContainer.innerHTML = '<div class="text-sm text-red-500 p-2">Search failed</div>';
+            }
+        }, 500);
+    }
+
+    function renderSearchResults(refType, results, container) {
+        if (results.length === 0) {
+            container.innerHTML = '<div class="text-sm text-django-text/50 dark:text-green-300 p-2">No results found</div>';
+            return;
+        }
+
+        container.innerHTML = results.map(item => {
+            if (refType === 'pr') {
+                const stateColor = item.state === 'open'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-gray-500 dark:text-gray-400';
+                return `
+                    <div class="search-result-item p-2 hover:bg-django-secondary/20 dark:hover:bg-green-700 cursor-pointer rounded border-b border-django-primary/10 dark:border-green-700 last:border-b-0"
+                         data-ref-type="pr" data-ref-id="${item.id}">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-django-primary dark:text-green-300">#${item.id}</span>
+                            <span class="${stateColor} text-xs">${item.state}</span>
+                        </div>
+                        <div class="text-sm text-django-text dark:text-green-100 truncate">${escapeHtml(item.title)}</div>
+                        <div class="text-xs text-django-text/50 dark:text-green-300">by ${item.author}</div>
+                    </div>
+                `;
+            } else {
+                // Branch or tag
+                return `
+                    <div class="search-result-item p-2 hover:bg-django-secondary/20 dark:hover:bg-green-700 cursor-pointer rounded border-b border-django-primary/10 dark:border-green-700 last:border-b-0"
+                         data-ref-type="${refType}" data-ref-id="${item.name}">
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-django-primary dark:text-green-300">${escapeHtml(item.name)}</span>
+                            <span class="text-xs text-django-text/50 dark:text-green-300 font-mono">${item.sha}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }).join('');
+
+        // Add click handlers to results
+        container.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const refType = this.dataset.refType;
+                const refId = this.dataset.refId;
+
+                // Set the input value and trigger fetch
+                if (refType === 'pr') {
+                    pr_id_input.value = refId;
+                    fetch_pr_button.click();
+                } else if (refType === 'branch') {
+                    branch_input.value = refId;
+                    fetch_branch_button.click();
+                } else if (refType === 'tag') {
+                    tag_input.value = refId;
+                    fetch_tag_button.click();
+                }
+
+                // Clear search results
+                container.innerHTML = '';
+            });
+        });
+    }
+
+    // Add input event listeners for search
+    pr_id_input.addEventListener('input', function() {
+        debounceSearch('pr', this.value);
+    });
+
+    branch_input.addEventListener('input', function() {
+        debounceSearch('branch', this.value);
+    });
+
+    tag_input.addEventListener('input', function() {
+        debounceSearch('tag', this.value);
+    });
+
     // Ref Dialog: Open dialog
     select_ref_button.addEventListener('click', function() {
         pr_id_input.value = '';
@@ -566,6 +679,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ref_status.innerHTML = '';
         ref_select_actions.classList.add('hidden');
         pendingRefInfo = null;
+        // Clear search results
+        pr_search_results.innerHTML = '';
+        branch_search_results.innerHTML = '';
+        tag_search_results.innerHTML = '';
         switchRefTab('pr');  // Default to PR tab
         ref_dialog.showModal();
         pr_id_input.focus();

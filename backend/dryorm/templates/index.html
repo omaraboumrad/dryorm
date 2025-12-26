@@ -132,10 +132,11 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
 
         <!-- PR Tab Content -->
         <div id="ref-tab-pr" class="ref-tab-content">
-            <div class="flex gap-2 mb-4">
+            <div class="flex gap-2 mb-2">
                 <input type="text"
                        id="pr-id-input"
-                       placeholder="Enter PR number"
+                       placeholder="Search PRs by number or title..."
+                       autocomplete="off"
                        class="flex-1 px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">
                 <button type="button"
                         id="fetch-pr-button"
@@ -143,14 +144,16 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                     Fetch
                 </button>
             </div>
+            <div id="pr-search-results" class="max-h-48 overflow-y-auto mb-4"></div>
         </div>
 
         <!-- Branch Tab Content -->
         <div id="ref-tab-branch" class="ref-tab-content hidden">
-            <div class="flex gap-2 mb-4">
+            <div class="flex gap-2 mb-2">
                 <input type="text"
                        id="branch-input"
-                       placeholder="Enter branch name (e.g., main)"
+                       placeholder="Search branches..."
+                       autocomplete="off"
                        class="flex-1 px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">
                 <button type="button"
                         id="fetch-branch-button"
@@ -158,14 +161,16 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                     Fetch
                 </button>
             </div>
+            <div id="branch-search-results" class="max-h-48 overflow-y-auto mb-4"></div>
         </div>
 
         <!-- Tag Tab Content -->
         <div id="ref-tab-tag" class="ref-tab-content hidden">
-            <div class="flex gap-2 mb-4">
+            <div class="flex gap-2 mb-2">
                 <input type="text"
                        id="tag-input"
-                       placeholder="Enter tag name (e.g., v5.0)"
+                       placeholder="Search tags (e.g., 5.2)..."
+                       autocomplete="off"
                        class="flex-1 px-2 py-2 rounded-sm border border-django-primary/50 dark:border-green-600 bg-white dark:bg-green-800 text-django-text dark:text-green-100 focus:outline-none focus:border-django-secondary">
                 <button type="button"
                         id="fetch-tag-button"
@@ -173,6 +178,7 @@ x-data="{ showSettings: false, showCode: true, showResult: false, loading: false
                     Fetch
                 </button>
             </div>
+            <div id="tag-search-results" class="max-h-48 overflow-y-auto mb-4"></div>
         </div>
 
         <div id="ref-status" class="text-sm"></div>

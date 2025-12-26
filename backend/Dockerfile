@@ -1,11 +1,11 @@
-FROM python:3.12-slim-bullseye
+FROM python:3.12-slim-bookworm
 
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update
 RUN apt-get install -y \
   build-essential \
-  python-dev \
+  python3-dev \
   libpq-dev \
   zlib1g \
   zlib1g-dev \
@@ -22,6 +22,7 @@ RUN apt-get install -y \
   default-libmysqlclient-dev \
   mariadb-client \
   wget \
+  git \
   && rm -rf /var/lib/apt/lists/*
 
 ADD ./requirements.txt /app/requirements.txt
