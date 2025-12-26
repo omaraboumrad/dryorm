@@ -83,7 +83,10 @@ services:
         volumes:
             - static:/app/static
             - django_cache:/app/cache
+            - ./pr_cache:/app/pr_cache
             - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+            - HOST_PR_CACHE_PATH=${PWD}/pr_cache
         depends_on:
             - database
             - database_postgres
