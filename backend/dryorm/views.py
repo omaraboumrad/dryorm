@@ -284,6 +284,8 @@ def execute(request):
         # Ref mode (PR, branch, or tag)
         ref_type = payload.get("ref_type")  # pr, branch, or tag
         ref_id = payload.get("ref_id")
+        ref_sha = payload.get("ref_sha")  # Specific SHA to use
+        print(f"[DEBUG] Received: ref_type={ref_type}, ref_id={ref_id}, ref_sha={ref_sha}")
 
         # Backwards compatibility: support pr_id
         if not ref_type and payload.get("pr_id"):
@@ -300,12 +302,29 @@ def execute(request):
         if ref_type and ref_id:
             # Ref mode - get cached ref info and pass to executor
             try:
-                ref_info = ref_service.get_cached_ref(ref_type, ref_id)
+                ref_info = None
+                # If a specific SHA is requested, check if that exact SHA is cached
+                if ref_sha:
+                    ref_info = ref_service.get_cached_ref_by_sha(ref_type, ref_id, ref_sha)
+                    print(f"[DEBUG] get_cached_ref_by_sha({ref_type}, {ref_id}, {ref_sha}) -> {ref_info}")
+                else:
+                    # No SHA specified (old snippet) - use any cached version
+                    ref_info = ref_service.get_cached_ref(ref_type, ref_id)
+                    print(f"[DEBUG] get_cached_ref({ref_type}, {ref_id}) -> {ref_info}")
+
                 if not ref_info:
-                    # Try to fetch if not cached
+                    # Fetch the ref (will use current SHA from GitHub)
+                    print(f"[DEBUG] Worktree not cached, fetching fresh...")
                     ref_info = ref_service.fetch_ref(ref_type, ref_id)
+                    print(f"[DEBUG] Fetched ref_info.sha = {ref_info.sha}")
+
+                # Normalize SHA to 12 chars for cache key consistency
+                # (worktree directories use sha[:12], so cache keys should too)
+                raw_sha = ref_sha if ref_sha else ref_info.sha
+                execution_sha = raw_sha[:12]
+                print(f"[DEBUG] execution_sha = {execution_sha}, ref_info.host_path = {ref_info.host_path}")
                 result = tasks.run_django_ref_sync(
-                    code, database, ignore_cache, ref_type, ref_id, ref_info.sha, ref_info.host_path
+                    code, database, ignore_cache, ref_type, ref_id, execution_sha, ref_info.host_path
                 )
             except (RefNotFoundError, RefFetchError) as e:
                 return JsonResponse(

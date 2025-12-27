@@ -409,10 +409,44 @@ class RefService:
         else:
             raise ValueError(f"Unknown ref type: {ref_type}")
 
+    def get_cached_ref_by_sha(self, ref_type: RefType, ref_id: str, sha: str) -> Optional[RefInfo]:
+        """Check if a specific SHA is cached for the given ref."""
+        safe_ref_id = ref_id.replace("/", "__")
+        sha_prefix = sha[:12]
+
+        if ref_type == "tag":
+            # Tags are immutable, just check if the tag exists
+            tag_path = self.worktrees_path / "tag" / safe_ref_id
+            if tag_path.exists():
+                return RefInfo(
+                    ref_type="tag",
+                    ref_id=ref_id,
+                    title=ref_id,
+                    sha=sha_prefix,
+                    local_path=str(tag_path),
+                    host_path=self._get_host_path(tag_path),
+                )
+            return None
+
+        # For PRs and branches, check if the specific SHA directory exists
+        ref_dir = self.worktrees_path / ref_type / safe_ref_id / sha_prefix
+        if ref_dir.exists():
+            return RefInfo(
+                ref_type=ref_type,
+                ref_id=ref_id,
+                title=ref_id if ref_type == "branch" else f"PR #{ref_id}",
+                sha=sha_prefix,
+                local_path=str(ref_dir),
+                host_path=self._get_host_path(ref_dir),
+            )
+        return None
+
     # ========== Search Methods ==========
 
     def search_prs(self, query: str, limit: int = 10) -> list[dict]:
-        """Search for Django PRs by number or title."""
+        """Search for Django PRs by number or title. Includes SHA and cache status."""
+        results = []
+
         # If query is a number, search by PR number
         if query.isdigit():
             url = f"{self.GITHUB_API_BASE}/repos/{self.DJANGO_REPO}/pulls/{query}"
@@ -421,15 +455,21 @@ class RefService:
                     response = client.get(url, headers=self._get_headers())
                     if response.status_code == 200:
                         pr = response.json()
-                        return [{
+                        sha = pr["head"]["sha"]
+                        cached_ref = self.get_cached_pr(pr["number"])
+                        # Check if cached version matches current SHA
+                        is_cached = cached_ref is not None and cached_ref.sha == sha[:12]
+                        results = [{
                             "id": pr["number"],
                             "title": pr["title"],
                             "state": pr["state"],
                             "author": pr["user"]["login"],
+                            "sha": sha,
+                            "cached": is_cached,
                         }]
-                    return []
             except httpx.HTTPError:
-                return []
+                pass
+            return results
 
         # Otherwise search by title using GitHub search API
         url = f"{self.GITHUB_API_BASE}/search/issues"
@@ -444,18 +484,29 @@ class RefService:
                 response = client.get(url, headers=self._get_headers(), params=params)
                 if response.status_code == 200:
                     data = response.json()
-                    return [{
-                        "id": item["number"],
-                        "title": item["title"],
-                        "state": item["state"],
-                        "author": item["user"]["login"],
-                    } for item in data.get("items", [])]
-                return []
+                    # For each PR, we need to get the full PR data to get the SHA
+                    for item in data.get("items", []):
+                        pr_url = f"{self.GITHUB_API_BASE}/repos/{self.DJANGO_REPO}/pulls/{item['number']}"
+                        pr_response = client.get(pr_url, headers=self._get_headers())
+                        if pr_response.status_code == 200:
+                            pr = pr_response.json()
+                            sha = pr["head"]["sha"]
+                            cached_ref = self.get_cached_pr(pr["number"])
+                            is_cached = cached_ref is not None and cached_ref.sha == sha[:12]
+                            results.append({
+                                "id": pr["number"],
+                                "title": pr["title"],
+                                "state": pr["state"],
+                                "author": pr["user"]["login"],
+                                "sha": sha,
+                                "cached": is_cached,
+                            })
         except httpx.HTTPError:
-            return []
+            pass
+        return results
 
     def search_branches(self, query: str, limit: int = 10) -> list[dict]:
-        """Search for Django branches by name."""
+        """Search for Django branches by name. Includes cache status."""
         url = f"{self.GITHUB_API_BASE}/repos/{self.DJANGO_REPO}/branches"
         params = {"per_page": 100}  # Get more to filter client-side
 
@@ -466,18 +517,26 @@ class RefService:
                     branches = response.json()
                     # Filter by query (case-insensitive)
                     query_lower = query.lower()
-                    filtered = [
-                        {"name": b["name"], "sha": b["commit"]["sha"][:12]}
-                        for b in branches
-                        if query_lower in b["name"].lower()
-                    ]
-                    return filtered[:limit]
+                    results = []
+                    for b in branches:
+                        if query_lower in b["name"].lower():
+                            sha = b["commit"]["sha"]
+                            cached_ref = self.get_cached_branch(b["name"])
+                            is_cached = cached_ref is not None and cached_ref.sha == sha[:12]
+                            results.append({
+                                "name": b["name"],
+                                "sha": sha[:12],
+                                "cached": is_cached,
+                            })
+                            if len(results) >= limit:
+                                break
+                    return results
                 return []
         except httpx.HTTPError:
             return []
 
     def search_tags(self, query: str, limit: int = 10) -> list[dict]:
-        """Search for Django tags by name."""
+        """Search for Django tags by name. Includes cache status."""
         url = f"{self.GITHUB_API_BASE}/repos/{self.DJANGO_REPO}/tags"
         params = {"per_page": 100}  # Get more to filter client-side
 
@@ -488,12 +547,20 @@ class RefService:
                     tags = response.json()
                     # Filter by query (case-insensitive)
                     query_lower = query.lower()
-                    filtered = [
-                        {"name": t["name"], "sha": t["commit"]["sha"][:12]}
-                        for t in tags
-                        if query_lower in t["name"].lower()
-                    ]
-                    return filtered[:limit]
+                    results = []
+                    for t in tags:
+                        if query_lower in t["name"].lower():
+                            sha = t["commit"]["sha"]
+                            cached_ref = self.get_cached_tag(t["name"])
+                            is_cached = cached_ref is not None
+                            results.append({
+                                "name": t["name"],
+                                "sha": sha[:12],
+                                "cached": is_cached,
+                            })
+                            if len(results) >= limit:
+                                break
+                    return results
                 return []
         except httpx.HTTPError:
             return []

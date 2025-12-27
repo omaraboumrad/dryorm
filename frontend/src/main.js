@@ -491,6 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.currentRefInfo) {
             payload.ref_type = window.currentRefInfo.type;
             payload.ref_id = window.currentRefInfo.id;
+            payload.ref_sha = window.currentRefInfo.sha;
         } else {
             payload.orm_version = orm_version_select.value;
         }
@@ -606,16 +607,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         container.innerHTML = results.map(item => {
+            const cachedBadge = item.cached
+                ? '<span class="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-200 rounded">cached</span>'
+                : '';
+
             if (refType === 'pr') {
                 const stateColor = item.state === 'open'
                     ? 'text-green-600 dark:text-green-400'
                     : 'text-gray-500 dark:text-gray-400';
                 return `
                     <div class="search-result-item p-2 hover:bg-django-secondary/20 dark:hover:bg-green-700 cursor-pointer rounded border-b border-django-primary/10 dark:border-green-700 last:border-b-0"
-                         data-ref-type="pr" data-ref-id="${item.id}">
+                         data-ref-type="pr" data-ref-id="${item.id}" data-ref-title="${escapeHtml(item.title)}"
+                         data-ref-sha="${item.sha}" data-ref-state="${item.state}" data-ref-author="${item.author}"
+                         data-ref-cached="${item.cached}">
                         <div class="flex items-center gap-2">
                             <span class="font-mono text-django-primary dark:text-green-300">#${item.id}</span>
                             <span class="${stateColor} text-xs">${item.state}</span>
+                            ${cachedBadge}
                         </div>
                         <div class="text-sm text-django-text dark:text-green-100 truncate">${escapeHtml(item.title)}</div>
                         <div class="text-xs text-django-text/50 dark:text-green-300">by ${item.author}</div>
@@ -625,33 +633,82 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Branch or tag
                 return `
                     <div class="search-result-item p-2 hover:bg-django-secondary/20 dark:hover:bg-green-700 cursor-pointer rounded border-b border-django-primary/10 dark:border-green-700 last:border-b-0"
-                         data-ref-type="${refType}" data-ref-id="${item.name}">
+                         data-ref-type="${refType}" data-ref-id="${item.name}" data-ref-title="${escapeHtml(item.name)}"
+                         data-ref-sha="${item.sha}" data-ref-cached="${item.cached}">
                         <div class="flex items-center justify-between">
                             <span class="font-mono text-django-primary dark:text-green-300">${escapeHtml(item.name)}</span>
-                            <span class="text-xs text-django-text/50 dark:text-green-300 font-mono">${item.sha}</span>
+                            <div class="flex items-center gap-2">
+                                ${cachedBadge}
+                                <span class="text-xs text-django-text/50 dark:text-green-300 font-mono">${item.sha}</span>
+                            </div>
                         </div>
                     </div>
                 `;
             }
         }).join('');
 
-        // Add click handlers to results
+        // Add click handlers to results - directly set pendingRefInfo without fetching
         container.querySelectorAll('.search-result-item').forEach(item => {
             item.addEventListener('click', function() {
                 const refType = this.dataset.refType;
                 const refId = this.dataset.refId;
+                const title = this.dataset.refTitle;
+                const sha = this.dataset.refSha;
+                const cached = this.dataset.refCached === 'true';
+                const state = this.dataset.refState || '';
+                const author = this.dataset.refAuthor || '';
 
-                // Set the input value and trigger fetch
+                // Set pendingRefInfo directly from search result data
+                pendingRefInfo = {
+                    type: refType,
+                    id: refId,
+                    title: title,
+                    sha: sha,
+                    state: state,
+                    author: author,
+                    cached: cached,
+                };
+
+                // Update the input field
                 if (refType === 'pr') {
                     pr_id_input.value = refId;
-                    fetch_pr_button.click();
                 } else if (refType === 'branch') {
                     branch_input.value = refId;
-                    fetch_branch_button.click();
                 } else if (refType === 'tag') {
                     tag_input.value = refId;
-                    fetch_tag_button.click();
                 }
+
+                // Show status and enable "Use" button
+                const cachedBadge = cached
+                    ? '<span class="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-200 rounded">cached</span>'
+                    : '<span class="px-1.5 py-0.5 text-xs bg-yellow-100 dark:bg-yellow-700 text-yellow-700 dark:text-yellow-200 rounded">will fetch on run</span>';
+
+                let statusHtml = `
+                    <div class="p-2 bg-django-secondary/10 dark:bg-green-800 rounded border border-django-primary/20 dark:border-green-600">
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-django-text dark:text-green-100">${escapeHtml(title)}</span>
+                            ${cachedBadge}
+                        </div>
+                        <div class="text-xs mt-1 flex gap-3 flex-wrap">`;
+
+                if (refType === 'pr' && state) {
+                    const stateColor = state === 'open'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-yellow-600 dark:text-yellow-400';
+                    statusHtml += `<span class="${stateColor} font-medium">${state}</span>`;
+                }
+
+                if (author) {
+                    statusHtml += `<span class="text-django-text/70 dark:text-green-200">by ${author}</span>`;
+                }
+
+                statusHtml += `<span class="text-django-text/50 dark:text-green-300 font-mono">${sha.substring(0, 7)}</span>
+                        </div>
+                    </div>
+                `;
+
+                ref_status.innerHTML = statusHtml;
+                ref_select_actions.classList.remove('hidden');
 
                 // Clear search results
                 container.innerHTML = '';
@@ -704,69 +761,89 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Generic fetch function for any ref type
-    async function fetchRef(refType, refId, fetchButton) {
+    // Helper function to search and auto-select a ref
+    async function searchAndSelectRef(refType, query, button) {
         const typeLabels = { pr: 'PR', branch: 'branch', tag: 'tag' };
         const typeLabel = typeLabels[refType];
 
-        ref_status.innerHTML = `<span class="text-django-text dark:text-green-100">Fetching ${typeLabel} ${refId}...</span>`;
+        ref_status.innerHTML = `<span class="text-django-text dark:text-green-100">Looking up ${typeLabel} ${query}...</span>`;
         ref_select_actions.classList.add('hidden');
-        fetchButton.disabled = true;
+        button.disabled = true;
 
         try {
-            const response = await fetch('/fetch-pr', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ ref_type: refType, ref_id: refId })
-            });
-
+            const response = await fetch(`/search-refs?type=${refType}&q=${encodeURIComponent(query)}`);
             const data = await response.json();
+            const results = data.results || [];
 
-            if (data.success) {
-                pendingRefInfo = data.ref;
-                const cachedBadge = data.ref.cached
-                    ? '<span class="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-200 rounded">cached</span>'
-                    : '<span class="px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-700 text-blue-700 dark:text-blue-200 rounded">fetched</span>';
-
-                let statusHtml = `
-                    <div class="p-2 bg-django-secondary/10 dark:bg-green-800 rounded border border-django-primary/20 dark:border-green-600">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-django-text dark:text-green-100">${escapeHtml(data.ref.title)}</span>
-                            ${cachedBadge}
-                        </div>
-                        <div class="text-xs mt-1 flex gap-3 flex-wrap">`;
-
-                if (refType === 'pr' && data.ref.state) {
-                    const stateColor = data.ref.state === 'open'
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-yellow-600 dark:text-yellow-400';
-                    statusHtml += `<span class="${stateColor} font-medium">${data.ref.state}</span>`;
-                }
-
-                if (data.ref.author) {
-                    statusHtml += `<span class="text-django-text/70 dark:text-green-200">by ${data.ref.author}</span>`;
-                }
-
-                statusHtml += `<span class="text-django-text/50 dark:text-green-300 font-mono">${data.ref.sha.substring(0, 7)}</span>
-                        </div>
-                    </div>
-                `;
-
-                ref_status.innerHTML = statusHtml;
-                ref_select_actions.classList.remove('hidden');
-            } else {
+            if (results.length === 0) {
+                ref_status.innerHTML = `<span class="text-red-600 dark:text-red-400">${typeLabel} not found</span>`;
                 pendingRefInfo = null;
-                ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">' + escapeHtml(data.error) + '</span>';
-                ref_select_actions.classList.add('hidden');
+                return;
             }
+
+            // Auto-select the first result
+            const item = results[0];
+            const cached = item.cached;
+
+            if (refType === 'pr') {
+                pendingRefInfo = {
+                    type: 'pr',
+                    id: String(item.id),
+                    title: item.title,
+                    sha: item.sha,
+                    state: item.state,
+                    author: item.author,
+                    cached: cached,
+                };
+            } else {
+                pendingRefInfo = {
+                    type: refType,
+                    id: item.name,
+                    title: item.name,
+                    sha: item.sha,
+                    state: '',
+                    author: '',
+                    cached: cached,
+                };
+            }
+
+            // Show status
+            const cachedBadge = cached
+                ? '<span class="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-700 text-green-700 dark:text-green-200 rounded">cached</span>'
+                : '<span class="px-1.5 py-0.5 text-xs bg-yellow-100 dark:bg-yellow-700 text-yellow-700 dark:text-yellow-200 rounded">will fetch on run</span>';
+
+            let statusHtml = `
+                <div class="p-2 bg-django-secondary/10 dark:bg-green-800 rounded border border-django-primary/20 dark:border-green-600">
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-django-text dark:text-green-100">${escapeHtml(pendingRefInfo.title)}</span>
+                        ${cachedBadge}
+                    </div>
+                    <div class="text-xs mt-1 flex gap-3 flex-wrap">`;
+
+            if (refType === 'pr' && pendingRefInfo.state) {
+                const stateColor = pendingRefInfo.state === 'open'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-yellow-600 dark:text-yellow-400';
+                statusHtml += `<span class="${stateColor} font-medium">${pendingRefInfo.state}</span>`;
+            }
+
+            if (pendingRefInfo.author) {
+                statusHtml += `<span class="text-django-text/70 dark:text-green-200">by ${pendingRefInfo.author}</span>`;
+            }
+
+            statusHtml += `<span class="text-django-text/50 dark:text-green-300 font-mono">${pendingRefInfo.sha.substring(0, 7)}</span>
+                    </div>
+                </div>
+            `;
+
+            ref_status.innerHTML = statusHtml;
+            ref_select_actions.classList.remove('hidden');
         } catch (error) {
             pendingRefInfo = null;
-            ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Error fetching: ' + escapeHtml(error.message) + '</span>';
+            ref_status.innerHTML = '<span class="text-red-600 dark:text-red-400">Error: ' + escapeHtml(error.message) + '</span>';
             ref_select_actions.classList.add('hidden');
         } finally {
-            fetchButton.disabled = false;
+            button.disabled = false;
         }
     }
 
@@ -778,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ref_select_actions.classList.add('hidden');
             return;
         }
-        await fetchRef('pr', prId, fetch_pr_button);
+        await searchAndSelectRef('pr', prId, fetch_pr_button);
     });
 
     // Fetch Branch button handler
@@ -789,7 +866,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ref_select_actions.classList.add('hidden');
             return;
         }
-        await fetchRef('branch', branchName, fetch_branch_button);
+        await searchAndSelectRef('branch', branchName, fetch_branch_button);
     });
 
     // Fetch Tag button handler
@@ -800,7 +877,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ref_select_actions.classList.add('hidden');
             return;
         }
-        await fetchRef('tag', tagName, fetch_tag_button);
+        await searchAndSelectRef('tag', tagName, fetch_tag_button);
     });
 
     // Ref Dialog: Use this version button

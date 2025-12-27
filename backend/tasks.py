@@ -257,7 +257,9 @@ def run_django_ref_sync(code, database, ignore_cache=False, ref_type=None, ref_i
     executor = constants.get_pr_executor(database)
     selected_db = DATABASES.get(database, "sqlite")
     cache_key = f"{ref_type}-{ref_id}-{ref_sha}-{database}-{key}"
+    print(f"[DEBUG] Result cache_key = {cache_key}")
     cached_reply = cache.get(cache_key)
+    print(f"[DEBUG] cached_reply exists = {cached_reply is not None}")
     unique_name = None
     container = None
     container_slot_acquired = False
