@@ -169,6 +169,96 @@ def journeys_api(request):
     return JsonResponse(journeys)
 
 
+def config_api(request):
+    """API endpoint to return app configuration for the React frontend."""
+    if request.method != "GET":
+        return http.HttpResponseNotAllowed(["GET"])
+
+    # Build databases list
+    databases_list = [
+        {"value": key, "label": db.description}
+        for key, db in databases.DATABASES.items()
+    ]
+
+    # Build ORM versions list
+    orm_versions_list = [
+        {"value": key, "label": version.description}
+        for key, version in constants.ORM_VERSIONS.items()
+    ]
+
+    # Build templates grouped by ORM type
+    templates_grouped = {}
+    for orm_type, orm_templates in templates.EXECUTOR_TEMPLATES.items():
+        templates_grouped[orm_type] = [
+            {"value": name, "label": name.title(), "code": code}
+            for name, code in orm_templates.items()
+        ]
+
+    return JsonResponse({
+        "databases": databases_list,
+        "ormVersions": orm_versions_list,
+        "templates": templates_grouped,
+    })
+
+
+def snippet_api(request, slug):
+    """API endpoint to return snippet data for loading."""
+    if request.method != "GET":
+        return http.HttpResponseNotAllowed(["GET"])
+
+    try:
+        snippet = models.Snippet.objects.get(slug=slug)
+    except models.Snippet.DoesNotExist:
+        return JsonResponse({"error": "Snippet not found"}, status=404)
+
+    data = {
+        "code": snippet.code,
+        "database": snippet.database,
+        "ormVersion": snippet.orm_version,
+        "name": snippet.name,
+    }
+
+    # Add ref info if present
+    if snippet.ref_type:
+        data["refInfo"] = {
+            "type": snippet.ref_type,
+            "id": snippet.ref_id,
+            "sha": snippet.sha,
+        }
+
+    return JsonResponse(data)
+
+
+def journey_chapter_api(request, journey_slug, chapter_slug):
+    """API endpoint to return a specific journey chapter's code."""
+    if request.method != "GET":
+        return http.HttpResponseNotAllowed(["GET"])
+
+    journeys = load_journeys()
+
+    if journey_slug not in journeys:
+        return JsonResponse({"error": "Journey not found"}, status=404)
+
+    journey = journeys[journey_slug]
+    chapters = journey.get("chapters", [])
+
+    # Find the chapter by slug
+    chapter = None
+    for ch in chapters:
+        if ch.get("slug") == chapter_slug:
+            chapter = ch
+            break
+
+    if not chapter:
+        return JsonResponse({"error": "Chapter not found"}, status=404)
+
+    return JsonResponse({
+        "code": chapter.get("code", ""),
+        "title": chapter.get("title", ""),
+        "description": chapter.get("description", ""),
+    })
+
+
 @csrf_exempt
 def fetch_ref(request):
     """HTTP endpoint for fetching and caching a Django ref (PR, branch, or tag) from GitHub."""
@@ -350,7 +440,14 @@ def execute(request):
 
 # Define templates as a dictionary
 
+class ReactHomeView(generic.TemplateView):
+    """Serves the React frontend."""
+    template_name = "react.html"
+
+
+# View instances
 home = SnippetHomeView.as_view()
+react_home = ReactHomeView.as_view()
 about = AboutView.as_view()
 detail = SnippetDetailView.as_view()
 list_snippets = SnippetListView.as_view()

@@ -1,7 +1,7 @@
-module.exports = {
+/** @type {import('tailwindcss').Config} */
+export default {
   content: [
-    '../backend/dryorm/templates/**/*.html',
-    './src/**/*.js',
+    './src/**/*.{js,jsx}',
   ],
   darkMode: 'class',
   theme: {

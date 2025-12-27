@@ -1,0 +1,306 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Django green theme colors */
+:root {
+  --django-green: #44b78b;
+  --django-green-dark: #234f32;
+  --django-green-light: #c9f4db;
+}
+
+/* CodeMirror base styles */
+.cm-editor {
+  height: 100%;
+  font-size: 14px;
+}
+
+.cm-editor .cm-scroller {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+}
+
+.cm-editor.cm-focused {
+  outline: none;
+}
+
+/* Query gutter markers */
+.cm-lineNumbers .cm-gutterElement {
+  padding: 0 8px 0 5px;
+}
+
+.query-gutter-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  color: var(--django-green);
+  cursor: pointer;
+}
+
+.query-gutter-marker:hover {
+  color: var(--django-green-dark);
+}
+
+/* Query popup */
+.query-popup {
+  position: fixed;
+  z-index: 100;
+  max-width: 600px;
+  max-height: 400px;
+  overflow: auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+}
+
+.dark .query-popup {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+/* Query highlight animation */
+.query-highlight {
+  animation: query-fade 3s ease-out;
+}
+
+@keyframes query-fade {
+  0% {
+    background-color: rgba(68, 183, 139, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.dark .query-highlight {
+  animation: query-fade-dark 3s ease-out;
+}
+
+@keyframes query-fade-dark {
+  0% {
+    background-color: rgba(68, 183, 139, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* SQL syntax highlighting */
+.sql-keyword {
+  color: #0066cc;
+  font-weight: 600;
+}
+
+.dark .sql-keyword {
+  color: #60a5fa;
+}
+
+.sql-string {
+  color: #22863a;
+}
+
+.dark .sql-string {
+  color: #86efac;
+}
+
+.sql-number {
+  color: #e36209;
+}
+
+.dark .sql-number {
+  color: #fbbf24;
+}
+
+.sql-comment {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Query type badges */
+.badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+}
+
+.badge-select {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+}
+
+.badge-insert {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.badge-update {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+.badge-delete {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+.badge-ddl {
+  @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
+}
+
+.badge-tcl {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200;
+}
+
+/* Zen mode styles */
+.zen-mode {
+  overflow: hidden;
+}
+
+.zen-mode .zen-editor {
+  height: 100vh;
+}
+
+.zen-fade-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.zen-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+.zen-fade-exit {
+  opacity: 1;
+}
+
+.zen-fade-exit-active {
+  opacity: 0;
+  transition: opacity 150ms ease-in;
+}
+
+/* Floating controls in zen mode */
+.floating-controls {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.floating-run-btn {
+  @apply bg-green-600 hover:bg-green-700 text-white rounded-full p-4 shadow-lg transition-all;
+  opacity: 0.8;
+}
+
+.floating-run-btn:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Slide panel for zen mode results */
+.slide-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  max-width: 600px;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 300ms ease-out;
+  z-index: 40;
+  overflow: auto;
+}
+
+.slide-panel.open {
+  transform: translateX(0);
+}
+
+.dark .slide-panel {
+  background: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .slide-panel {
+    width: 100%;
+    max-width: none;
+    top: auto;
+    height: 60%;
+    transform: translateY(100%);
+  }
+
+  .slide-panel.open {
+    transform: translateY(0);
+  }
+}
+
+/* Collapsible sections */
+.collapsible-header {
+  @apply flex items-center justify-between cursor-pointer select-none;
+}
+
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 200ms ease-out;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin h-5 w-5;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* CodeMirror dark theme overrides */
+.dark .cm-editor {
+  background-color: #1f2937;
+}
+
+.dark .cm-gutters {
+  background-color: #111827;
+  border-right-color: #374151;
+}
+
+.dark .cm-activeLineGutter {
+  background-color: #374151;
+}
+
+.dark .cm-activeLine {
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+.dark .cm-selectionBackground {
+  background-color: rgba(68, 183, 139, 0.3) !important;
+}
+
+.dark .cm-cursor {
+  border-left-color: #44b78b;
+}
+
+/* Line highlight for query navigation */
+.cm-line-highlight {
+  background-color: rgba(68, 183, 139, 0.15);
+}
+
+.dark .cm-line-highlight {
+  background-color: rgba(68, 183, 139, 0.1);
+}

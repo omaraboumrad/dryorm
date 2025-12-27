@@ -35,7 +35,7 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
     key = hashlib.md5(code.encode("utf-8")).hexdigest()
 
     executor = constants.get_executor(database, orm_version)
-    selected_db = DATABASES.get(database, "sqlite")
+    selected_db = DATABASES.get(database, DATABASES["sqlite"])
     cached_reply = cache.get(f"{database}-{orm_version}-{key}")
     unique_name = None
     container = None
@@ -255,7 +255,7 @@ def run_django_ref_sync(code, database, ignore_cache=False, ref_type=None, ref_i
     key = hashlib.md5(code.encode("utf-8")).hexdigest()
 
     executor = constants.get_pr_executor(database)
-    selected_db = DATABASES.get(database, "sqlite")
+    selected_db = DATABASES.get(database, DATABASES["sqlite"])
     cache_key = f"{ref_type}-{ref_id}-{ref_sha}-{database}-{key}"
     print(f"[DEBUG] Result cache_key = {cache_key}")
     cached_reply = cache.get(cache_key)
