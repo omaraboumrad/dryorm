@@ -6,24 +6,27 @@ function VersionLabel() {
   const dispatch = useAppDispatch();
 
   const handleClick = () => {
-    dispatch({ type: 'TOGGLE_REF_DIALOG' });
+    dispatch({ type: 'TOGGLE_SETTINGS' });
   };
 
   // Determine what to display
-  let label = state.ormVersion || 'django-5.2';
+  let versionLabel = state.ormVersion || 'django-5.2';
   let badge = null;
 
   if (state.currentRefInfo) {
     const { type, id, title } = state.currentRefInfo;
     if (type === 'pr') {
-      label = `PR #${id}`;
+      versionLabel = `PR #${id}`;
       badge = title ? title.slice(0, 30) + (title.length > 30 ? '...' : '') : null;
     } else if (type === 'branch') {
-      label = id;
+      versionLabel = id;
     } else if (type === 'tag') {
-      label = id;
+      versionLabel = id;
     }
   }
+
+  // Get database label
+  const dbLabel = state.database || 'sqlite';
 
   return (
     <button
@@ -32,9 +35,11 @@ function VersionLabel() {
         bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
         text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600
         transition-colors shadow-sm flex items-center gap-2"
-      title="Change Django ORM version or select a GitHub ref"
+      title="Open settings"
     >
-      <span className="text-django-secondary">{label}</span>
+      <span className="text-django-secondary">{versionLabel}</span>
+      <span className="text-gray-400">·</span>
+      <span className="text-gray-600 dark:text-gray-400">{dbLabel}</span>
       {badge && (
         <span className="text-xs text-gray-500 dark:text-gray-400 max-w-[150px] truncate">
           {badge}
