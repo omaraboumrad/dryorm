@@ -14,7 +14,7 @@ function OutputSection() {
     <Collapsible
       title={
         <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
-          <TerminalIcon size={18} />
+          <TerminalIcon size={18} className="text-django-secondary" />
           Output
         </span>
       }

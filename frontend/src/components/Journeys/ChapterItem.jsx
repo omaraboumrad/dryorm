@@ -36,7 +36,7 @@ function ChapterItem({ chapter, journeySlug, isCurrent, index }) {
       onClick={handleClick}
       className={`w-full text-left px-6 py-1.5 text-sm transition-colors
         ${isCurrent
-          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 font-medium'
+          ? 'bg-django-secondary/20 dark:bg-django-primary/30 text-django-primary dark:text-django-secondary font-medium'
           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
         }`}
     >

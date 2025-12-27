@@ -75,7 +75,7 @@ function SettingsPanel() {
                 handleClose();
                 dispatch({ type: 'TOGGLE_REF_DIALOG' });
               }}
-              className="text-green-600 hover:underline"
+              className="text-django-secondary hover:underline"
             >
               GitHub ref (PR/branch/tag)
             </button>
@@ -117,13 +117,13 @@ function SettingsPanel() {
 
         {/* GitHub ref info */}
         {state.currentRefInfo && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+          <div className="bg-django-secondary/10 dark:bg-django-primary/20 border border-django-secondary/30 dark:border-django-primary rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                <p className="text-sm font-medium text-django-primary dark:text-django-secondary">
                   Using GitHub {state.currentRefInfo.type}
                 </p>
-                <p className="text-xs text-green-600 dark:text-green-400">
+                <p className="text-xs text-django-secondary dark:text-django-secondary">
                   {state.currentRefInfo.type === 'pr' && `#${state.currentRefInfo.id}`}
                   {state.currentRefInfo.type !== 'pr' && state.currentRefInfo.id}
                   {state.currentRefInfo.sha && ` (${state.currentRefInfo.sha.slice(0, 7)})`}

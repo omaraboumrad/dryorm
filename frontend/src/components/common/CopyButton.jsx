@@ -27,7 +27,7 @@ export function CopyButton({
       title={copied ? successLabel : label}
     >
       {copied ? (
-        <CheckIcon size={size} className="text-green-600" />
+        <CheckIcon size={size} className="text-django-secondary" />
       ) : (
         <ClipboardCopyIcon size={size} />
       )}

@@ -48,7 +48,7 @@ function QueriesSection() {
         <div className="flex items-center gap-2">
           <IconComponent size={16} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
           <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
-            <ListIcon size={18} />
+            <ListIcon size={18} className="text-django-secondary" />
             Queries
             <span className="text-sm font-normal text-gray-500">
               ({shownCount === totalCount ? totalCount : `${shownCount}/${totalCount}`})

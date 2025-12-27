@@ -34,7 +34,7 @@ function VersionLabel() {
         transition-colors shadow-sm flex items-center gap-2"
       title="Change Django ORM version or select a GitHub ref"
     >
-      <span className="text-green-600 dark:text-green-400">{label}</span>
+      <span className="text-django-secondary">{label}</span>
       {badge && (
         <span className="text-xs text-gray-500 dark:text-gray-400 max-w-[150px] truncate">
           {badge}

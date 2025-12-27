@@ -29,7 +29,7 @@ function QueryItem({ query, index, isHighlighted }) {
     <div
       className={`rounded-lg border transition-colors ${
         isHighlighted
-          ? 'border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20 query-highlight'
+          ? 'border-django-secondary/50 dark:border-django-primary bg-django-secondary/10/50 dark:bg-django-primary/20 query-highlight'
           : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
       }`}
     >
@@ -55,7 +55,7 @@ function QueryItem({ query, index, isHighlighted }) {
                   e.stopPropagation();
                   handleLineClick();
                 }}
-                className="text-green-600 hover:text-green-700 font-mono hover:underline"
+                className="text-django-secondary hover:text-django-tertiary font-mono hover:underline"
               >
                 L{query.line}
               </button>

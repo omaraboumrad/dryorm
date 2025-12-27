@@ -20,7 +20,7 @@ export function Select({
           w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600
           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
           px-3 py-2 pr-10 text-sm
-          focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+          focus:outline-none focus:ring-2 focus:ring-django-secondary focus:border-transparent
           disabled:opacity-50 disabled:cursor-not-allowed
           ${className}
         `}
@@ -65,7 +65,7 @@ export function GroupedSelect({
           w-full appearance-none rounded-md border border-gray-300 dark:border-gray-600
           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
           px-3 py-2 pr-10 text-sm
-          focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+          focus:outline-none focus:ring-2 focus:ring-django-secondary focus:border-transparent
           disabled:opacity-50 disabled:cursor-not-allowed
           ${className}
         `}

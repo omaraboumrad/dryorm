@@ -26,7 +26,7 @@ function QueryFilters() {
           onClick={() => toggleFilter(type)}
           className={`px-2 py-1 text-xs font-medium rounded transition-colors
             ${state.queryFilters[type]
-              ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 ring-1 ring-green-300 dark:ring-green-700'
+              ? 'bg-django-secondary/20 dark:bg-django-primary text-django-primary dark:text-django-secondary ring-1 ring-django-secondary/50 dark:ring-django-primary'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
         >
@@ -40,7 +40,7 @@ function QueryFilters() {
         onClick={() => toggleFilter('reverse')}
         className={`p-1.5 rounded transition-colors
           ${state.queryFilters.reverse
-            ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+            ? 'bg-django-secondary/20 dark:bg-django-primary text-django-tertiary dark:text-django-secondary'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
           }`}
         title="Reverse order"

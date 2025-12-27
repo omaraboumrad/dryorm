@@ -253,7 +253,7 @@ def journey_chapter_api(request, journey_slug, chapter_slug):
         return JsonResponse({"error": "Chapter not found"}, status=404)
 
     return JsonResponse({
-        "code": chapter.get("code", ""),
+        "code": chapter.get("content", "") or chapter.get("code", ""),
         "title": chapter.get("title", ""),
         "description": chapter.get("description", ""),
     })

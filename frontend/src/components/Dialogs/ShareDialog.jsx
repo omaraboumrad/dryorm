@@ -76,8 +76,8 @@ function ShareDialog() {
       {savedUrl ? (
         // Success state
         <div className="text-center py-4">
-          <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
-            <CheckIcon size={24} className="text-green-600" />
+          <div className="w-12 h-12 rounded-full bg-django-secondary/20 dark:bg-django-primary/30 flex items-center justify-center mx-auto mb-4">
+            <CheckIcon size={24} className="text-django-secondary" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             Saved!
@@ -121,7 +121,7 @@ function ShareDialog() {
               placeholder="Give your snippet a name..."
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md
                 bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-green-500"
+                focus:outline-none focus:ring-2 focus:ring-django-secondary"
             />
           </div>
 

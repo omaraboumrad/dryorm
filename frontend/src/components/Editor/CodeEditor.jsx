@@ -14,6 +14,12 @@ function CodeEditor() {
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const darkModeRef = useRef(state.darkMode);
+  const executeRef = useRef(execute);
+
+  // Keep executeRef up to date
+  useEffect(() => {
+    executeRef.current = execute;
+  }, [execute]);
 
   // Create editor on mount (and recreate when dark mode changes)
   useEffect(() => {
@@ -26,8 +32,13 @@ function CodeEditor() {
     }
 
     const extensions = [
+      // Execute keymap must come first to take precedence
+      // Use refs to always get the latest execute function
+      createExecuteKeymap(
+        () => executeRef.current(false),
+        () => executeRef.current(true)
+      ),
       ...createBaseExtensions(state.darkMode),
-      createExecuteKeymap(() => execute(false), () => execute(true)),
       // Update state when content changes
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {

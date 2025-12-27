@@ -113,7 +113,7 @@ function RefDialog() {
             }}
             className={`px-4 py-2 text-sm font-medium transition-colors
               ${activeTab === tab.id
-                ? 'text-green-600 border-b-2 border-green-600'
+                ? 'text-django-secondary border-b-2 border-django-secondary'
                 : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
           >
@@ -136,7 +136,7 @@ function RefDialog() {
           }
           className="w-full pl-10 pr-20 py-2 border border-gray-300 dark:border-gray-600 rounded-md
             bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-            focus:outline-none focus:ring-2 focus:ring-green-500"
+            focus:outline-none focus:ring-2 focus:ring-django-secondary"
         />
         <Button
           variant="secondary"
@@ -160,7 +160,7 @@ function RefDialog() {
       <div className="max-h-64 overflow-y-auto mb-4 space-y-2">
         {loading && (
           <div className="flex items-center justify-center py-8">
-            <SpinnerIcon size={24} className="text-green-600" />
+            <SpinnerIcon size={24} className="text-django-secondary" />
           </div>
         )}
 
@@ -183,21 +183,21 @@ function RefDialog() {
 
       {/* Selected ref info */}
       {selectedRef && (
-        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+        <div className="mb-4 p-3 bg-django-secondary/10 dark:bg-django-primary/20 border border-django-secondary/30 dark:border-django-primary rounded-lg">
           <div className="flex items-start gap-2">
-            <CheckIcon size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
+            <CheckIcon size={18} className="text-django-secondary flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-green-800 dark:text-green-200">
+              <p className="font-medium text-django-primary dark:text-django-secondary">
                 {activeTab === 'pr' && `PR #${selectedRef.number}`}
                 {activeTab !== 'pr' && selectedRef.name}
               </p>
               {selectedRef.title && (
-                <p className="text-sm text-green-600 dark:text-green-400 truncate">
+                <p className="text-sm text-django-secondary dark:text-django-secondary truncate">
                   {selectedRef.title}
                 </p>
               )}
               {(selectedRef.sha || selectedRef.head?.sha) && (
-                <p className="text-xs text-green-500 font-mono">
+                <p className="text-xs text-django-secondary font-mono">
                   {(selectedRef.sha || selectedRef.head?.sha).slice(0, 12)}
                 </p>
               )}
@@ -229,7 +229,7 @@ function RefResultItem({ result, type, isSelected, onSelect }) {
       onClick={onSelect}
       className={`w-full text-left p-3 rounded-lg border transition-colors
         ${isSelected
-          ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+          ? 'border-django-secondary bg-django-secondary/10 dark:bg-django-primary/20'
           : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
         }`}
     >
@@ -244,7 +244,7 @@ function RefResultItem({ result, type, isSelected, onSelect }) {
             {result.state && (
               <span className={`text-xs px-1.5 py-0.5 rounded ${
                 result.state === 'open'
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                  ? 'bg-django-secondary/20 text-django-tertiary dark:bg-django-primary dark:text-django-secondary'
                   : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
               }`}>
                 {result.state}

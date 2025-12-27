@@ -30,7 +30,7 @@ function JourneyItem({ slug, journey, isCurrentJourney, currentChapter }) {
   return (
     <Collapsible
       title={
-        <span className={`text-sm ${isCurrentJourney ? 'text-green-600 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
+        <span className={`text-sm ${isCurrentJourney ? 'text-django-secondary font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
           {journey.title || slug}
         </span>
       }

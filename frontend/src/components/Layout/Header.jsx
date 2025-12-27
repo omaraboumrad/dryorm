@@ -37,7 +37,7 @@ function Header() {
         {/* Left: Logo and title */}
         <div className="flex items-center gap-3">
           <a href="/" className="flex items-center gap-2 text-gray-900 dark:text-white">
-            <DryormIcon size={32} className="text-green-600" />
+            <DryormIcon size={32} className="text-django-secondary" />
             <span className="font-semibold text-lg hidden sm:inline">DryORM</span>
           </a>
         </div>
@@ -52,7 +52,7 @@ function Header() {
             title="Learning Journeys"
             className="hidden lg:flex"
           >
-            <JourneyIcon size={20} className={state.showJourneyNav ? 'text-green-600' : ''} />
+            <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : ''} />
           </Button>
 
           {/* Zen mode toggle */}
@@ -92,7 +92,7 @@ function Header() {
             onClick={() => dispatch({ type: 'TOGGLE_SETTINGS' })}
             title="Settings"
           >
-            <CogIcon size={20} className={state.showSettings ? 'text-green-600' : ''} />
+            <CogIcon size={20} className={state.showSettings ? 'text-django-secondary' : ''} />
           </Button>
 
           {/* Run button */}

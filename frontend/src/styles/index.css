@@ -190,11 +190,13 @@
 }
 
 .floating-run-btn {
-  @apply bg-green-600 hover:bg-green-700 text-white rounded-full p-4 shadow-lg transition-all;
+  @apply text-white rounded-full p-4 shadow-lg transition-all;
+  background-color: var(--django-green);
   opacity: 0.8;
 }
 
 .floating-run-btn:hover {
+  background-color: #47bd90;
   opacity: 1;
   transform: scale(1.05);
 }

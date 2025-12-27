@@ -25,7 +25,7 @@ export function Checkbox({
           disabled={disabled}
           className="sr-only peer"
         />
-        <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 peer-checked:bg-green-600 peer-checked:border-green-600 peer-focus:ring-2 peer-focus:ring-green-500 peer-focus:ring-offset-2 transition-colors">
+        <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 peer-checked:bg-django-secondary peer-checked:border-django-secondary peer-focus:ring-2 peer-focus:ring-django-secondary peer-focus:ring-offset-2 transition-colors">
           {checked && (
             <CheckIcon size={16} className="text-white absolute top-0.5 left-0.5" />
           )}
