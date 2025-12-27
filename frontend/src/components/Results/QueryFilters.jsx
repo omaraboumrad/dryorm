@@ -1,12 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAppState, useAppDispatch } from '../../context/AppContext';
 import { ReverseIcon } from '../icons';
+import { getQueryType } from '../../lib/utils';
 
 const FILTER_TYPES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DDL', 'TCL'];
 
 function QueryFilters() {
   const state = useAppState();
   const dispatch = useAppDispatch();
+
+  // Count queries by type
+  const typeCounts = useMemo(() => {
+    const counts = {};
+    FILTER_TYPES.forEach(type => counts[type] = 0);
+    state.rawQueries.forEach(query => {
+      const type = getQueryType(query.sql);
+      if (counts[type] !== undefined) {
+        counts[type]++;
+      }
+    });
+    return counts;
+  }, [state.rawQueries]);
 
   const toggleFilter = (filter) => {
     dispatch({
@@ -19,7 +33,7 @@ function QueryFilters() {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-3">
+    <div className="flex flex-wrap items-center gap-2">
       {FILTER_TYPES.map((type) => (
         <button
           key={type}
@@ -31,6 +45,9 @@ function QueryFilters() {
             }`}
         >
           {type}
+          {typeCounts[type] > 0 && (
+            <span className="ml-1 opacity-70">{typeCounts[type]}</span>
+          )}
         </button>
       ))}
 

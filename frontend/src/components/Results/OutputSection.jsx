@@ -14,13 +14,13 @@ function OutputSection() {
     <Collapsible
       title={
         <span className="flex items-center gap-2 font-bold text-django-text dark:text-green-100">
-          <TerminalIcon size={18} className="text-django-secondary" />
+          <TerminalIcon size={18} />
           Output
         </span>
       }
       defaultOpen={true}
       className=""
-      headerClassName="p-4 bg-django-secondary/20 dark:bg-green-800 border-b border-django-primary/10 dark:border-green-700"
+      headerClassName="px-4 py-2 bg-django-secondary/20 dark:bg-green-800 border-b border-django-primary/10 dark:border-green-700"
       contentClassName=""
       rightContent={
         <CopyButton text={state.rawOutput} className="hover:bg-gray-200 dark:hover:bg-gray-600" />
