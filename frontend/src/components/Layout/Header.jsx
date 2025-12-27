@@ -32,11 +32,11 @@ function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+    <header className="bg-django-primary px-4 py-2">
       <div className="flex items-center justify-between">
         {/* Left: Logo and title */}
         <div className="flex items-center gap-3">
-          <a href="/" className="flex items-center gap-2 text-gray-900 dark:text-white">
+          <a href="/" className="flex items-center gap-2 text-white">
             <DryormIcon size={32} className="text-django-secondary" />
             <span className="font-semibold text-lg hidden sm:inline">DryORM</span>
           </a>
@@ -46,7 +46,7 @@ function Header() {
         <div className="flex items-center gap-2">
           {/* Journey toggle */}
           <Button
-            variant="ghost"
+            variant="header"
             size="icon"
             onClick={() => dispatch({ type: 'TOGGLE_JOURNEY_NAV' })}
             title="Learning Journeys"
@@ -57,7 +57,7 @@ function Header() {
 
           {/* Zen mode toggle */}
           <Button
-            variant="ghost"
+            variant="header"
             size="icon"
             onClick={toggleZenMode}
             title="Zen Mode (Cmd+.)"
@@ -67,7 +67,7 @@ function Header() {
 
           {/* Dark mode toggle */}
           <Button
-            variant="ghost"
+            variant="header"
             size="icon"
             onClick={() => dispatch({ type: 'TOGGLE_DARK_MODE' })}
             title={state.darkMode ? 'Light Mode' : 'Dark Mode'}
@@ -77,7 +77,7 @@ function Header() {
 
           {/* Share button */}
           <Button
-            variant="ghost"
+            variant="header"
             size="icon"
             onClick={() => dispatch({ type: 'TOGGLE_SHARE_DIALOG' })}
             title="Share"
@@ -87,7 +87,7 @@ function Header() {
 
           {/* Settings toggle */}
           <Button
-            variant="ghost"
+            variant="header"
             size="icon"
             onClick={() => dispatch({ type: 'TOGGLE_SETTINGS' })}
             title="Settings"
@@ -102,14 +102,12 @@ function Header() {
             onKeyDown={handleForceRun}
             disabled={loading}
             title="Run (Cmd+Enter)"
-            className="gap-2"
           >
             {loading ? (
               <SpinnerIcon size={18} />
             ) : (
               <PlayIcon size={18} />
             )}
-            <span className="hidden sm:inline">Run</span>
           </Button>
         </div>
       </div>

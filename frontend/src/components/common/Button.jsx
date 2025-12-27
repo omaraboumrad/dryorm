@@ -5,6 +5,7 @@ const variants = {
   primary: 'bg-django-secondary hover:bg-django-tertiary text-white',
   secondary: 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200',
   ghost: 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400',
+  header: 'hover:bg-django-primary-light text-white/80 hover:text-white',
   danger: 'bg-red-600 hover:bg-red-700 text-white',
 };
 

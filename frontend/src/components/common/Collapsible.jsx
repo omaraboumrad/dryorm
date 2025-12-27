@@ -8,6 +8,7 @@ export function Collapsible({
   className = '',
   headerClassName = '',
   contentClassName = '',
+  iconClassName = 'text-gray-500 dark:text-gray-400',
   icon = 'chevron', // 'chevron' or 'plusminus'
   rightContent,
 }) {
@@ -32,7 +33,7 @@ export function Collapsible({
         className={`w-full flex items-center justify-between text-left ${headerClassName}`}
       >
         <div className="flex items-center gap-2">
-          <IconComponent size={16} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
+          <IconComponent size={16} className={`flex-shrink-0 ${iconClassName}`} />
           <span>{title}</span>
         </div>
         {rightContent && (

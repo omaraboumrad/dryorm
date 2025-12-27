@@ -28,16 +28,16 @@ function JourneyNav() {
   };
 
   return (
-    <aside className="w-72 flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 h-[calc(100vh-57px)] overflow-hidden flex flex-col">
+    <aside className="w-72 flex-shrink-0 bg-django-primary h-[calc(100vh-49px)] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-          <JourneyIcon size={20} />
+      <div className="flex items-center justify-between px-4 py-3 border-b border-django-primary-light">
+        <div className="flex items-center gap-2 text-white">
+          <JourneyIcon size={20} className="text-django-secondary" />
           <span className="font-medium">Learning Journeys</span>
         </div>
         <button
           onClick={handleClose}
-          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500"
+          className="p-1 rounded hover:bg-django-primary-light text-white/70 hover:text-white"
         >
           <XIcon size={18} />
         </button>
