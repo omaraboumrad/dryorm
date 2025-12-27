@@ -38,14 +38,14 @@ function ResultPanel() {
 
       {/* Output section */}
       {state.rawOutput && (
-        <div className={`flex-shrink-0 ${state.rawQueries.length > 0 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}>
+        <div className="flex-shrink-0">
           <OutputSection />
         </div>
       )}
 
       {/* ERD link */}
       {state.erdLink && (
-        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-django-primary/10 dark:border-green-700">
           <ErdIcon size={20} className="text-django-secondary" />
           <a
             href={state.erdLink}
@@ -61,7 +61,7 @@ function ResultPanel() {
 
       {/* HTML template link */}
       {state.htmlTemplate && (
-        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-django-primary/10 dark:border-green-700">
           <button
             onClick={() => state.dispatch({ type: 'TOGGLE_HTML_PREVIEW' })}
             className="text-django-secondary hover:text-django-tertiary underline"

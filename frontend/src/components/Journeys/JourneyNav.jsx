@@ -28,29 +28,29 @@ function JourneyNav() {
   };
 
   return (
-    <aside className="w-72 flex-shrink-0 bg-django-primary h-[calc(100vh-49px)] overflow-hidden flex flex-col">
+    <aside className="w-80 flex-shrink-0 bg-django-secondary/10 dark:bg-[#0f2e1e] border-r border-django-primary/20 dark:border-green-600 h-[calc(100vh-49px)] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-django-primary-light">
-        <div className="flex items-center gap-2 text-white">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-django-primary/20 dark:border-green-600">
+        <div className="flex items-center gap-2 text-django-text dark:text-green-100">
           <JourneyIcon size={20} className="text-django-secondary" />
           <span className="font-medium">Learning Journeys</span>
         </div>
         <button
           onClick={handleClose}
-          className="p-1 rounded hover:bg-django-primary-light text-white/70 hover:text-white"
+          className="p-1 rounded hover:bg-django-primary/10 dark:hover:bg-green-800 text-django-text/70 dark:text-green-300 hover:text-django-text dark:hover:text-green-100"
         >
           <XIcon size={18} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
         {!state.journeysLoaded ? (
           <div className="flex items-center justify-center py-12">
             <SpinnerIcon size={24} className="text-django-secondary" />
           </div>
         ) : Object.keys(state.journeys).length === 0 ? (
-          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+          <div className="p-4 text-center text-django-text/50 dark:text-green-300">
             No journeys available
           </div>
         ) : (

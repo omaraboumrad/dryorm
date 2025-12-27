@@ -37,7 +37,7 @@ function Header() {
         {/* Left: Logo and title */}
         <div className="flex items-center gap-3">
           <a href="/" className="flex items-center gap-2 text-white">
-            <DryormIcon size={32} className="text-django-secondary" />
+            <DryormIcon size={32} className="text-white" />
             <span className="font-semibold text-lg hidden sm:inline">DryORM</span>
           </a>
         </div>
@@ -52,7 +52,7 @@ function Header() {
             title="Learning Journeys"
             className="hidden lg:flex"
           >
-            <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : ''} />
+            <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : 'text-white'} />
           </Button>
 
           {/* Zen mode toggle */}
@@ -62,7 +62,7 @@ function Header() {
             onClick={toggleZenMode}
             title="Zen Mode (Cmd+.)"
           >
-            <ExpandIcon size={20} />
+            <ExpandIcon size={20} className="text-white" />
           </Button>
 
           {/* Dark mode toggle */}
@@ -72,7 +72,7 @@ function Header() {
             onClick={() => dispatch({ type: 'TOGGLE_DARK_MODE' })}
             title={state.darkMode ? 'Light Mode' : 'Dark Mode'}
           >
-            {state.darkMode ? <SunIcon size={20} /> : <MoonIcon size={20} />}
+            {state.darkMode ? <SunIcon size={20} className="text-white" /> : <MoonIcon size={20} className="text-white" />}
           </Button>
 
           {/* Share button */}
@@ -82,7 +82,7 @@ function Header() {
             onClick={() => dispatch({ type: 'TOGGLE_SHARE_DIALOG' })}
             title="Share"
           >
-            <ShareIcon size={20} />
+            <ShareIcon size={20} className="text-white" />
           </Button>
 
           {/* Settings toggle */}
@@ -92,7 +92,7 @@ function Header() {
             onClick={() => dispatch({ type: 'TOGGLE_SETTINGS' })}
             title="Settings"
           >
-            <CogIcon size={20} className={state.showSettings ? 'text-django-secondary' : ''} />
+            <CogIcon size={20} className={state.showSettings ? 'text-django-secondary' : 'text-white'} />
           </Button>
 
           {/* Run button */}
@@ -104,9 +104,9 @@ function Header() {
             title="Run (Cmd+Enter)"
           >
             {loading ? (
-              <SpinnerIcon size={18} />
+              <SpinnerIcon size={18} className="text-white" />
             ) : (
-              <PlayIcon size={18} />
+              <PlayIcon size={18} className="text-white" />
             )}
           </Button>
         </div>

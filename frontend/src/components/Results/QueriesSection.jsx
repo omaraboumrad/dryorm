@@ -39,18 +39,18 @@ function QueriesSection() {
   const IconComponent = isOpen ? ChevronDownIcon : ChevronRightIcon;
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-800">
+    <div className="h-full flex flex-col">
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex-shrink-0 w-full flex items-center justify-between text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+        className="flex-shrink-0 w-full flex items-center justify-between text-left p-4 bg-django-secondary/20 dark:bg-green-800 border-b border-django-primary/10 dark:border-green-700"
       >
         <div className="flex items-center gap-2">
-          <IconComponent size={16} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
-          <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+          <IconComponent size={16} className="text-django-text dark:text-green-100 flex-shrink-0" />
+          <span className="flex items-center gap-2 font-bold text-django-text dark:text-green-100">
             <ListIcon size={18} className="text-django-secondary" />
             Queries
-            <span className="text-sm font-normal text-gray-500">
+            <span className="text-sm font-normal text-django-text/60 dark:text-green-300">
               ({shownCount === totalCount ? totalCount : `${shownCount}/${totalCount}`})
             </span>
           </span>
@@ -66,7 +66,7 @@ function QueriesSection() {
 
       {/* Content - fills remaining height when open */}
       {isOpen && (
-        <div className="flex-1 min-h-0 flex flex-col border-t border-gray-200 dark:border-gray-700">
+        <div className="flex-1 min-h-0 flex flex-col">
           <div className="flex-shrink-0 px-3 py-2">
             <QueryFilters />
           </div>
@@ -76,7 +76,7 @@ function QueriesSection() {
               No queries match the current filters
             </p>
           ) : (
-            <div className="flex-1 min-h-0 overflow-auto px-3 pb-2 space-y-2">
+            <div className="flex-1 min-h-0 overflow-auto px-3 pb-2 space-y-2 border-b border-django-primary/10 dark:border-green-700">
               {filteredQueries.map((query) => (
                 <QueryItem
                   key={query.originalIndex}
