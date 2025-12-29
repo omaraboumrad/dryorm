@@ -13,6 +13,7 @@ function VersionLabel() {
   // Determine what to display
   let versionLabel;
   let sha = null;
+  let title = null;
 
   if (state.currentRefInfo) {
     const { type, id } = state.currentRefInfo;
@@ -25,6 +26,9 @@ function VersionLabel() {
     }
     if (state.currentRefInfo.sha) {
       sha = state.currentRefInfo.sha.slice(0, 7);
+    }
+    if (state.currentRefInfo.title) {
+      title = state.currentRefInfo.title;
     }
   } else {
     // Get ORM version label (verbose version)
@@ -46,6 +50,9 @@ function VersionLabel() {
         <span className="text-django-secondary">{versionLabel}</span>
         {sha && (
           <span className="text-xs text-gray-500 dark:text-gray-400">({sha})</span>
+        )}
+        {title && (
+          <span className="text-xs text-gray-600 dark:text-gray-400 max-w-[200px] truncate">{title}</span>
         )}
         <span className="text-gray-400">·</span>
         <span className="text-django-secondary">{dbLabel}</span>

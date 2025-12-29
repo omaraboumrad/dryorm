@@ -84,7 +84,7 @@ function RefDialog() {
         type: 'SET_CURRENT_REF',
         payload: {
           type: activeTab,
-          id: selectedRef.id || selectedRef.number || selectedRef.name,
+          id: selectedRef.id || selectedRef.name,
           sha: selectedRef.sha || selectedRef.head?.sha,
           title: selectedRef.title,
           cached: selectedRef.cached,
@@ -175,7 +175,7 @@ function RefDialog() {
             key={index}
             result={result}
             type={activeTab}
-            isSelected={selectedRef?.id === result.id || selectedRef?.number === result.number}
+            isSelected={selectedRef?.id === result.id || selectedRef?.name === result.name}
             onSelect={() => handleSelect(result)}
           />
         ))}
@@ -188,7 +188,7 @@ function RefDialog() {
             <CheckIcon size={18} className="text-django-secondary flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <p className="font-medium text-django-primary dark:text-django-secondary">
-                {activeTab === 'pr' && `PR #${selectedRef.number}`}
+                {activeTab === 'pr' && `PR #${selectedRef.id}`}
                 {activeTab !== 'pr' && selectedRef.name}
               </p>
               {selectedRef.title && (
@@ -224,6 +224,8 @@ function RefDialog() {
 }
 
 function RefResultItem({ result, type, isSelected, onSelect }) {
+  const sha = result.sha || result.head?.sha;
+
   return (
     <button
       onClick={onSelect}
@@ -236,13 +238,13 @@ function RefResultItem({ result, type, isSelected, onSelect }) {
       <div className="flex items-start gap-2">
         <GitHubIcon size={18} className="text-gray-400 flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
+          {/* Row 1: Title/Name, state badge, cached badge */}
           <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-900 dark:text-white">
-              {type === 'pr' && `#${result.number}`}
-              {type !== 'pr' && result.name}
+            <span className="font-bold text-gray-900 dark:text-white truncate">
+              {type === 'pr' ? result.title : result.name}
             </span>
             {result.state && (
-              <span className={`text-xs px-1.5 py-0.5 rounded ${
+              <span className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0 ${
                 result.state === 'open'
                   ? 'bg-django-secondary/20 text-django-tertiary dark:bg-django-primary dark:text-django-secondary'
                   : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
@@ -251,21 +253,17 @@ function RefResultItem({ result, type, isSelected, onSelect }) {
               </span>
             )}
             {result.cached && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              <span className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 flex-shrink-0">
                 cached
               </span>
             )}
           </div>
-          {result.title && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-              {result.title}
-            </p>
-          )}
-          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-            {result.user?.login && <span>by {result.user.login}</span>}
-            {(result.sha || result.head?.sha) && (
-              <span className="font-mono">{(result.sha || result.head?.sha).slice(0, 7)}</span>
+          {/* Row 2: SHA and author */}
+          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {sha && (
+              <span className="font-mono">{sha.slice(0, 7)}</span>
             )}
+            {result.author && <span>by {result.author}</span>}
           </div>
         </div>
       </div>
