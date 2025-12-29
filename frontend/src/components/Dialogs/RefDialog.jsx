@@ -183,16 +183,16 @@ function RefDialog() {
 
       {/* Selected ref info */}
       {selectedRef && (
-        <div className="mb-4 p-3 bg-django-secondary/10 dark:bg-django-primary/20 border border-django-secondary/30 dark:border-django-primary rounded-lg">
+        <div className="mb-4 p-3 bg-theme-surface border border-theme-border rounded-lg">
           <div className="flex items-start gap-2">
-            <CheckIcon size={18} className="text-django-secondary flex-shrink-0 mt-0.5" />
+            <CheckIcon size={18} className="text-brand flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-django-primary dark:text-django-secondary">
+              <p className="font-medium text-theme-text">
                 {activeTab === 'pr' && `PR #${selectedRef.id}`}
                 {activeTab !== 'pr' && selectedRef.name}
               </p>
               {selectedRef.title && (
-                <p className="text-sm text-django-secondary dark:text-django-secondary truncate">
+                <p className="text-sm text-theme-text-secondary truncate">
                   {selectedRef.title}
                 </p>
               )}
@@ -231,8 +231,8 @@ function RefResultItem({ result, type, isSelected, onSelect }) {
       onClick={onSelect}
       className={`w-full text-left p-3 rounded-lg border transition-colors
         ${isSelected
-          ? 'border-django-secondary bg-django-secondary/10 dark:bg-django-primary/20'
-          : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+          ? 'border-brand bg-theme-surface'
+          : 'border-theme-border hover:bg-theme-surface'
         }`}
     >
       <div className="flex items-start gap-2">
@@ -246,7 +246,7 @@ function RefResultItem({ result, type, isSelected, onSelect }) {
             {result.state && (
               <span className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0 ${
                 result.state === 'open'
-                  ? 'bg-django-secondary/20 text-django-tertiary dark:bg-django-primary dark:text-django-secondary'
+                  ? 'bg-theme-surface text-brand'
                   : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
               }`}>
                 {result.state}

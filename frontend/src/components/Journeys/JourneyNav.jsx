@@ -28,16 +28,16 @@ function JourneyNav() {
   };
 
   return (
-    <aside className="w-80 flex-shrink-0 bg-django-secondary/10 dark:bg-[#0f2e1e] border-r border-django-primary/20 dark:border-green-600 h-[calc(100vh-49px)] overflow-hidden flex flex-col">
+    <aside className="w-80 flex-shrink-0 bg-theme-panel border-r border-theme-border h-[calc(100vh-49px)] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-django-primary/20 dark:border-green-600">
-        <div className="flex items-center gap-2 text-django-text dark:text-green-100">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-theme-border">
+        <div className="flex items-center gap-2 text-theme-text">
           <JourneyIcon size={20} className="text-django-secondary" />
           <span className="font-medium">Learning Journeys</span>
         </div>
         <button
           onClick={handleClose}
-          className="p-1 rounded hover:bg-django-primary/10 dark:hover:bg-green-800 text-django-text/70 dark:text-green-300 hover:text-django-text dark:hover:text-green-100"
+          className="p-1 rounded hover:bg-theme-surface text-theme-text-secondary hover:text-theme-text"
         >
           <XIcon size={18} />
         </button>
@@ -50,7 +50,7 @@ function JourneyNav() {
             <SpinnerIcon size={24} className="text-django-secondary" />
           </div>
         ) : Object.keys(state.journeys).length === 0 ? (
-          <div className="p-4 text-center text-django-text/50 dark:text-green-300">
+          <div className="p-4 text-center text-theme-text-muted">
             No journeys available
           </div>
         ) : (

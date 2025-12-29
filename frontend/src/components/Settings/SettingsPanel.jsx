@@ -117,13 +117,13 @@ function SettingsPanel() {
 
         {/* GitHub ref info */}
         {state.currentRefInfo && (
-          <div className="bg-django-secondary/10 dark:bg-django-primary/20 border border-django-secondary/30 dark:border-django-primary rounded-lg p-3">
+          <div className="bg-theme-surface border border-theme-border rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-django-primary dark:text-django-secondary">
+                <p className="text-sm font-medium text-theme-text">
                   Using GitHub {state.currentRefInfo.type}
                 </p>
-                <p className="text-xs text-django-secondary dark:text-django-secondary">
+                <p className="text-xs text-theme-text-secondary">
                   {state.currentRefInfo.type === 'pr' && `#${state.currentRefInfo.id}`}
                   {state.currentRefInfo.type !== 'pr' && state.currentRefInfo.id}
                   {state.currentRefInfo.sha && ` (${state.currentRefInfo.sha.slice(0, 7)})`}

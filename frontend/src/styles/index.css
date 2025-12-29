@@ -2,11 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Django green theme colors */
+/* ==============================================
+   THEME CONFIGURATION
+   Change colors here to update the entire app
+   ============================================== */
+
 :root {
+  /* Brand colors (same in light/dark) */
+  --color-brand: #44B78B;
+  --color-brand-dark: #0C4B33;
+  --color-brand-light: #47bd90;
+
+  /* Light mode - Editor (left section) */
+  --color-editor-bg: #ffffff;
+  --color-editor-gutter: #f8f8f8;
+
+  /* Light mode - Results (right section) - Django green tinted */
+  --color-results-bg: rgba(68, 183, 139, 0.1);
+  --color-results-header: rgba(68, 183, 139, 0.2);
+  --color-results-surface: rgba(68, 183, 139, 0.1);
+
+  /* Light mode - General */
+  --color-bg-page: #ffffff;
+  --color-bg-panel: #f8f8f8;
+  --color-bg-surface: #f3f4f6;
+  --color-bg-elevated: #ffffff;
+
+  /* Light mode text */
+  --color-text-primary: #333333;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+
+  /* Light mode borders */
+  --color-border: #e5e7eb;
+  --color-border-light: rgba(12, 75, 51, 0.1);
+
+  /* Legacy aliases */
   --django-green: #44b78b;
   --django-green-dark: #234f32;
   --django-green-light: #c9f4db;
+}
+
+.dark {
+  /* Dark mode - Editor (left section) */
+  --color-editor-bg: #181d27;
+  --color-editor-gutter: #0e1117;
+
+  /* Dark mode - Results (right section) */
+  --color-results-bg: #181d27;
+  --color-results-header: #1f2937;
+  --color-results-surface: #252d3d;
+
+  /* Dark mode - General */
+  --color-bg-page: #0e1117;
+  --color-bg-panel: #181d27;
+  --color-bg-surface: #1f2937;
+  --color-bg-elevated: #252d3d;
+
+  /* Dark mode text */
+  --color-text-primary: #f3f4f6;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+
+  /* Dark mode borders */
+  --color-border: #374151;
+  --color-border-light: rgba(55, 65, 81, 0.5);
 }
 
 /* CodeMirror base styles */
@@ -50,16 +110,11 @@
   max-width: 600px;
   max-height: 400px;
   overflow: auto;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   padding: 12px;
-}
-
-.dark .query-popup {
-  background: #1f2937;
-  border-color: #374151;
 }
 
 /* Query highlight animation */
@@ -126,27 +181,27 @@
 }
 
 .badge-select {
-  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+  @apply bg-blue-200 text-blue-900 dark:bg-blue-900 dark:text-blue-200;
 }
 
 .badge-insert {
-  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+  @apply bg-green-200 text-green-900 dark:bg-green-900 dark:text-green-200;
 }
 
 .badge-update {
-  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+  @apply bg-yellow-200 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-200;
 }
 
 .badge-delete {
-  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+  @apply bg-red-200 text-red-900 dark:bg-red-900 dark:text-red-200;
 }
 
 .badge-ddl {
-  @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
+  @apply bg-purple-200 text-purple-900 dark:bg-purple-900 dark:text-purple-200;
 }
 
 .badge-tcl {
-  @apply bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200;
+  @apply bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-200;
 }
 
 /* Zen mode styles */
@@ -209,7 +264,7 @@
   bottom: 0;
   width: 50%;
   max-width: 600px;
-  background: white;
+  background: var(--color-bg-panel);
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   transform: translateX(100%);
   transition: transform 300ms ease-out;
@@ -219,10 +274,6 @@
 
 .slide-panel.open {
   transform: translateX(0);
-}
-
-.dark .slide-panel {
-  background: #1f2937;
 }
 
 @media (max-width: 768px) {
@@ -272,22 +323,22 @@
   @apply bg-gray-400 dark:bg-gray-500;
 }
 
-/* CodeMirror dark theme overrides */
-.dark .cm-editor {
-  background-color: #1f2937;
+/* CodeMirror theme - uses CSS variables */
+.cm-editor {
+  background-color: var(--color-editor-bg);
 }
 
-.dark .cm-gutters {
-  background-color: #111827;
-  border-right-color: #374151;
+.cm-gutters {
+  background-color: var(--color-editor-gutter);
+  border-right-color: var(--color-border);
 }
 
-.dark .cm-activeLineGutter {
-  background-color: #374151;
+.cm-activeLineGutter {
+  background-color: var(--color-bg-surface);
 }
 
-.dark .cm-activeLine {
-  background-color: rgba(55, 65, 81, 0.5);
+.cm-activeLine {
+  background-color: var(--color-border-light);
 }
 
 .dark .cm-selectionBackground {

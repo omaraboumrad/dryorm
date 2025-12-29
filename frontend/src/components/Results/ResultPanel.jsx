@@ -45,8 +45,8 @@ function ResultPanel() {
 
       {/* ERD link */}
       {state.erdLink && (
-        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-django-primary/10 dark:border-green-700">
-          <ErdIcon size={20} className="text-django-secondary" />
+        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-theme-border">
+          <ErdIcon size={20} className="text-brand" />
           <a
             href={state.erdLink}
             target="_blank"
@@ -61,7 +61,7 @@ function ResultPanel() {
 
       {/* HTML template link */}
       {state.htmlTemplate && (
-        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-django-primary/10 dark:border-green-700">
+        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-theme-border">
           <button
             onClick={() => state.dispatch({ type: 'TOGGLE_HTML_PREVIEW' })}
             className="text-django-secondary hover:text-django-tertiary underline"

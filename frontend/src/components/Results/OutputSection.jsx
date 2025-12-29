@@ -13,21 +13,21 @@ function OutputSection() {
   return (
     <Collapsible
       title={
-        <span className="flex items-center gap-2 font-bold text-django-text dark:text-green-100">
+        <span className="flex items-center gap-2 font-bold text-theme-text">
           <TerminalIcon size={18} />
           Output
         </span>
       }
       defaultOpen={true}
       className=""
-      headerClassName="px-4 py-2 bg-django-secondary/20 dark:bg-green-800 border-b border-django-primary/10 dark:border-green-700"
+      headerClassName="px-4 py-2 bg-results-header border-b border-theme-border"
       contentClassName=""
       rightContent={
         <CopyButton text={state.rawOutput} className="hover:bg-gray-200 dark:hover:bg-gray-600" />
       }
     >
-      <pre className="p-3 text-sm font-mono whitespace-pre-wrap text-django-text dark:text-green-100 overflow-x-auto custom-scrollbar">
-        {state.rawOutput || <span className="text-django-text/50 dark:text-green-300">No output</span>}
+      <pre className="p-3 text-sm font-mono whitespace-pre-wrap text-theme-text overflow-x-auto custom-scrollbar">
+        {state.rawOutput || <span className="text-theme-text-muted">No output</span>}
       </pre>
     </Collapsible>
   );

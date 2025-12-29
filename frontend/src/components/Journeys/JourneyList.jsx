@@ -30,14 +30,14 @@ function JourneyItem({ slug, journey, isCurrentJourney, currentChapter }) {
   return (
     <Collapsible
       title={
-        <span className={`text-sm ${isCurrentJourney ? 'text-django-primary dark:text-django-secondary font-medium' : 'text-django-text dark:text-green-100'}`}>
+        <span className={`text-sm ${isCurrentJourney ? 'text-brand font-medium' : 'text-theme-text'}`}>
           {journey.title || slug}
         </span>
       }
       defaultOpen={isCurrentJourney}
-      className="border-b border-django-primary/10 dark:border-green-700"
-      headerClassName="px-4 py-2 hover:bg-django-primary/10 dark:hover:bg-green-800"
-      iconClassName="text-django-text/50 dark:text-green-300"
+      className="border-b border-theme-border"
+      headerClassName="px-4 py-2 hover:bg-theme-surface"
+      iconClassName="text-theme-text-muted"
     >
       <div className="pb-2">
         {chapters.map((chapter, index) => (

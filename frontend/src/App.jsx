@@ -95,7 +95,7 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className={`min-h-screen bg-white dark:bg-gray-900 ${state.zenMode ? 'zen-mode' : ''}`}>
+    <div className={`min-h-screen bg-theme-page ${state.zenMode ? 'zen-mode' : ''}`}>
       {!state.zenMode && <Header />}
 
       <div className="flex">

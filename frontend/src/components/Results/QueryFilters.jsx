@@ -40,8 +40,8 @@ function QueryFilters() {
           onClick={() => toggleFilter(type)}
           className={`px-2 py-1 text-xs font-medium rounded transition-colors
             ${state.queryFilters[type]
-              ? 'bg-django-secondary/20 dark:bg-django-primary text-django-primary dark:text-django-secondary ring-1 ring-django-secondary/50 dark:ring-django-primary'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+              ? 'bg-django-primary text-white'
+              : 'bg-theme-surface/50 text-theme-text-muted hover:bg-theme-surface hover:text-theme-text'
             }`}
         >
           {type}
@@ -51,14 +51,14 @@ function QueryFilters() {
         </button>
       ))}
 
-      <div className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1" />
+      <div className="w-px h-5 bg-theme-border mx-1" />
 
       <button
         onClick={() => toggleFilter('reverse')}
         className={`p-1.5 rounded transition-colors
           ${state.queryFilters.reverse
-            ? 'bg-django-secondary/20 dark:bg-django-primary text-django-tertiary dark:text-django-secondary'
-            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+            ? 'bg-django-primary text-white'
+            : 'bg-theme-surface/50 text-theme-text-muted hover:bg-theme-surface hover:text-theme-text'
           }`}
         title="Reverse order"
       >

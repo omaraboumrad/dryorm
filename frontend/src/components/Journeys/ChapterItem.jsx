@@ -36,11 +36,11 @@ function ChapterItem({ chapter, journeySlug, isCurrent, index }) {
       onClick={handleClick}
       className={`w-full text-left px-6 py-1.5 text-sm transition-colors
         ${isCurrent
-          ? 'bg-django-secondary/20 text-django-primary dark:text-django-secondary font-medium'
-          : 'text-django-text/60 dark:text-green-300 hover:bg-django-primary/10 dark:hover:bg-green-800 hover:text-django-text dark:hover:text-green-100'
+          ? 'bg-theme-surface text-brand font-medium'
+          : 'text-theme-text-secondary hover:bg-theme-surface hover:text-theme-text'
         }`}
     >
-      <span className="mr-2 text-django-text/40 dark:text-green-400">{index + 1}.</span>
+      <span className="mr-2 text-theme-text-muted">{index + 1}.</span>
       {chapter.title || chapter.name || `Chapter ${index + 1}`}
     </button>
   );

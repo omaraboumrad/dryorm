@@ -19,7 +19,7 @@ function SplitPane() {
 
       {/* Results pane */}
       <div
-        className={`lg:w-1/2 h-full overflow-auto bg-django-secondary/10 dark:bg-[#0f2e1e] ${
+        className={`lg:w-1/2 h-full overflow-auto bg-results-bg ${
           state.showResult ? 'block' : 'hidden lg:block'
         }`}
       >

@@ -76,7 +76,7 @@ function ShareDialog() {
       {savedUrl ? (
         // Success state
         <div className="text-center py-4">
-          <div className="w-12 h-12 rounded-full bg-django-secondary/20 dark:bg-django-primary/30 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-full bg-theme-surface flex items-center justify-center mx-auto mb-4">
             <CheckIcon size={24} className="text-django-secondary" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
