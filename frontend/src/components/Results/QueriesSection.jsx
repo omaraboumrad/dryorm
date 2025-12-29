@@ -43,7 +43,7 @@ function QueriesSection() {
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex-shrink-0 w-full flex items-center justify-between text-left px-4 py-2 bg-results-header border-b border-theme-border"
+        className="group flex-shrink-0 w-full flex items-center justify-between text-left px-4 py-2 bg-results-header border-b border-theme-border"
       >
         <div className="flex items-center gap-2">
           <IconComponent size={16} className="text-theme-text flex-shrink-0" />
@@ -55,7 +55,7 @@ function QueriesSection() {
             </span>
           </span>
         </div>
-        <div onClick={(e) => e.stopPropagation()}>
+        <div onClick={(e) => e.stopPropagation()} className="opacity-0 group-hover:opacity-100 transition-opacity">
           <CopyButton
             text={allSql}
             className="hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -76,7 +76,7 @@ function QueriesSection() {
               No queries match the current filters
             </p>
           ) : (
-            <div className="flex-1 min-h-0 overflow-auto px-3 py-2 space-y-2 border-b border-theme-border">
+            <div className="flex-1 min-h-0 overflow-auto border-b border-theme-border">
               {filteredQueries.map((query) => (
                 <QueryItem
                   key={query.originalIndex}

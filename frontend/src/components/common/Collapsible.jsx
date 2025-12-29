@@ -30,14 +30,14 @@ export function Collapsible({
     <div className={className}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between text-left ${headerClassName}`}
+        className={`group w-full flex items-center justify-between text-left ${headerClassName}`}
       >
         <div className="flex items-center gap-2">
           <IconComponent size={16} className={`flex-shrink-0 ${iconClassName}`} />
           <span>{title}</span>
         </div>
         {rightContent && (
-          <div onClick={(e) => e.stopPropagation()}>
+          <div onClick={(e) => e.stopPropagation()} className="opacity-0 group-hover:opacity-100 transition-opacity">
             {rightContent}
           </div>
         )}

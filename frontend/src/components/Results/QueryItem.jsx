@@ -27,7 +27,7 @@ function QueryItem({ query, index, isHighlighted }) {
 
   return (
     <div
-      className={`border-b border-theme-border last:border-b-0 ${
+      className={`border-b border-theme-border last:border-b-0 hover:bg-results-surface transition-colors ${
         isHighlighted ? 'bg-results-surface query-highlight' : ''
       }`}
     >
@@ -55,26 +55,24 @@ function QueryItem({ query, index, isHighlighted }) {
           </div>
         }
         defaultOpen={false}
-        headerClassName="py-3 hover:bg-results-surface rounded-sm"
+        headerClassName="px-3 py-2"
         rightContent={
           <CopyButton text={query.sql} size={16} />
         }
       >
-        <div className="pb-3">
-          <div className="bg-results-surface p-3 rounded border border-theme-border">
-            <pre
-              className="whitespace-pre-wrap text-xs font-mono text-theme-text overflow-auto"
-              dangerouslySetInnerHTML={{ __html: colorizeSql(query.sql) }}
-            />
-            {query.params && query.params.length > 0 && (
-              <div className="mt-2 pt-2 border-t border-theme-border">
-                <span className="text-xs text-theme-text-muted">Params: </span>
-                <code className="text-xs font-mono text-theme-text">
-                  {JSON.stringify(query.params)}
-                </code>
-              </div>
-            )}
-          </div>
+        <div className="pl-8 pr-3 pb-3">
+          <pre
+            className="whitespace-pre-wrap text-xs font-mono text-theme-text overflow-auto"
+            dangerouslySetInnerHTML={{ __html: colorizeSql(query.sql) }}
+          />
+          {query.params && query.params.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-theme-border">
+              <span className="text-xs text-theme-text-muted">Params: </span>
+              <code className="text-xs font-mono text-theme-text">
+                {JSON.stringify(query.params)}
+              </code>
+            </div>
+          )}
         </div>
       </Collapsible>
     </div>
