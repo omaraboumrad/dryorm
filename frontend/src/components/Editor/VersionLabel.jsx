@@ -41,7 +41,7 @@ function VersionLabel() {
   const dbLabel = db?.label || 'SQLite';
 
   return (
-    <div className="flex items-center justify-end gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div className="h-10 flex items-center justify-end gap-2 px-3 bg-theme-surface border-b border-theme-border">
       <button
         onClick={handleClick}
         className="flex items-center gap-2 text-sm font-mono text-gray-700 dark:text-gray-300 hover:text-django-primary dark:hover:text-django-secondary transition-colors"

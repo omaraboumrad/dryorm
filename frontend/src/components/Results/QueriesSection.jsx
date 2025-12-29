@@ -43,7 +43,7 @@ function QueriesSection() {
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="group flex-shrink-0 w-full flex items-center justify-between text-left px-4 py-2 bg-results-header border-b border-theme-border"
+        className="group h-10 flex-shrink-0 w-full flex items-center justify-between text-left px-3 bg-results-header border-b border-theme-border"
       >
         <div className="flex items-center gap-2">
           <IconComponent size={16} className="text-theme-text flex-shrink-0" />
@@ -67,7 +67,7 @@ function QueriesSection() {
       {/* Content - fills remaining height when open */}
       {isOpen && (
         <div className="flex-1 min-h-0 flex flex-col">
-          <div className="flex-shrink-0 px-3 py-2 border-b border-theme-border">
+          <div className="h-10 flex-shrink-0 flex items-center px-3 border-b border-theme-border">
             <QueryFilters />
           </div>
 

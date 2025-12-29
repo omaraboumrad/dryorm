@@ -20,7 +20,7 @@ function OutputSection() {
       }
       defaultOpen={true}
       className=""
-      headerClassName="px-4 py-2 bg-results-header border-b border-theme-border"
+      headerClassName="h-10 px-3 bg-results-header border-b border-theme-border"
       contentClassName=""
       rightContent={
         <CopyButton text={state.rawOutput} className="hover:bg-gray-200 dark:hover:bg-gray-600" />

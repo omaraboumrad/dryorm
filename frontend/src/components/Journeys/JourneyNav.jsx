@@ -30,7 +30,7 @@ function JourneyNav() {
   return (
     <aside className="w-80 flex-shrink-0 bg-theme-panel border-r border-theme-border h-[calc(100vh-49px)] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-theme-border">
+      <div className="h-10 flex items-center justify-between px-3 border-b border-theme-border">
         <div className="flex items-center gap-2 text-theme-text">
           <JourneyIcon size={20} className="text-django-secondary" />
           <span className="font-medium">Learning Journeys</span>
