@@ -76,7 +76,7 @@
 }
 
 .cm-editor .cm-scroller {
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+  font-family: monospace;
 }
 
 .cm-editor.cm-focused {
@@ -144,18 +144,19 @@
   }
 }
 
-/* SQL syntax highlighting */
+/* SQL syntax highlighting - Django green theme */
 .sql-keyword {
-  color: #0066cc;
-  font-weight: 600;
+  color: #0C4B33;
+  font-weight: 700;
 }
 
 .dark .sql-keyword {
-  color: #60a5fa;
+  color: #44b78b;
+  font-weight: 700;
 }
 
 .sql-string {
-  color: #22863a;
+  color: #116644;
 }
 
 .dark .sql-string {
@@ -163,11 +164,11 @@
 }
 
 .sql-number {
-  color: #e36209;
+  color: #116644;
 }
 
 .dark .sql-number {
-  color: #fbbf24;
+  color: #5eead4;
 }
 
 .sql-comment {

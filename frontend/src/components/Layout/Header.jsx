@@ -6,7 +6,6 @@ import { Button } from '../common';
 import {
   DryormIcon,
   PlayIcon,
-  CogIcon,
   ShareIcon,
   JourneyIcon,
   MoonIcon,
@@ -83,16 +82,6 @@ function Header() {
             title="Share"
           >
             <ShareIcon size={20} className="text-white" />
-          </Button>
-
-          {/* Settings toggle */}
-          <Button
-            variant="header"
-            size="icon"
-            onClick={() => dispatch({ type: 'TOGGLE_SETTINGS' })}
-            title="Settings"
-          >
-            <CogIcon size={20} className={state.showSettings ? 'text-django-secondary' : 'text-white'} />
           </Button>
 
           {/* Run button */}
