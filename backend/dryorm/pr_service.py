@@ -134,7 +134,7 @@ class RefService:
 
     def _get_worktree_path(self, ref_type: RefType, ref_id: str, sha: str) -> Path:
         """Get the worktree path for a ref. Includes SHA to handle updates."""
-        safe_ref_id = ref_id.replace("/", "__")
+        safe_ref_id = str(ref_id).replace("/", "__")
         # For PRs and branches, include SHA since they can change
         # For tags, they're immutable so no SHA needed
         if ref_type == "tag":
@@ -411,7 +411,7 @@ class RefService:
 
     def get_cached_ref_by_sha(self, ref_type: RefType, ref_id: str, sha: str) -> Optional[RefInfo]:
         """Check if a specific SHA is cached for the given ref."""
-        safe_ref_id = ref_id.replace("/", "__")
+        safe_ref_id = str(ref_id).replace("/", "__")
         sha_prefix = sha[:12]
 
         if ref_type == "tag":
