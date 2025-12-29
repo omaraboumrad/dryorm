@@ -44,7 +44,7 @@ function JourneyNav() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
         {!state.journeysLoaded ? (
           <div className="flex items-center justify-center py-12">
             <SpinnerIcon size={24} className="text-django-secondary" />

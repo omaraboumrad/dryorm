@@ -34,7 +34,7 @@ function ChapterItem({ chapter, journeySlug, isCurrent, index }) {
   return (
     <button
       onClick={handleClick}
-      className={`w-full text-left px-6 py-1.5 text-sm transition-colors
+      className={`w-full text-left pl-6 pr-3 py-1 text-sm transition-colors
         ${isCurrent
           ? 'bg-theme-surface text-brand font-medium'
           : 'text-theme-text-secondary hover:bg-theme-surface hover:text-theme-text'

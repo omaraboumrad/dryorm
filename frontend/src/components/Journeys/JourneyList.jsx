@@ -10,7 +10,7 @@ function JourneyList() {
   const journeyEntries = Object.entries(state.journeys);
 
   return (
-    <div className="py-2">
+    <div>
       {journeyEntries.map(([slug, journey]) => (
         <JourneyItem
           key={slug}
@@ -36,10 +36,10 @@ function JourneyItem({ slug, journey, isCurrentJourney, currentChapter }) {
       }
       defaultOpen={isCurrentJourney}
       className="border-b border-theme-border"
-      headerClassName="px-4 py-2 hover:bg-theme-surface"
+      headerClassName="px-3 py-1.5 hover:bg-theme-surface"
       iconClassName="text-theme-text-muted"
     >
-      <div className="pb-2">
+      <div>
         {chapters.map((chapter, index) => (
           <ChapterItem
             key={chapter.id || index}
