@@ -18,7 +18,18 @@ const initialState = {
   darkMode: false,
 
   // Editor
-  code: '',
+  code: `from django.db import models
+
+class Person(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+def run():
+    instance = Person.objects.create(name='John Doe')
+    print(f'Created: {instance}')
+`,
   editorView: null,
 
   // Execution Results
@@ -30,7 +41,7 @@ const initialState = {
   error: null,
 
   // Settings
-  database: 'postgresql',
+  database: 'sqlite',
   ormVersion: 'django-5.2',
   ignoreCache: false,
   currentRefInfo: null,

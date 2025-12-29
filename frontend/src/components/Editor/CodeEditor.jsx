@@ -86,12 +86,12 @@ function CodeEditor() {
   }, [state.code]);
 
   return (
-    <div className="relative h-full">
+    <div className="h-full flex flex-col">
+      <VersionLabel />
       <div
         ref={editorRef}
-        className="h-full overflow-auto"
+        className="flex-1 overflow-auto"
       />
-      <VersionLabel />
     </div>
   );
 }
