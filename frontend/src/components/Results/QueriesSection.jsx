@@ -39,11 +39,11 @@ function QueriesSection() {
   const IconComponent = isOpen ? ChevronDownIcon : ChevronRightIcon;
 
   return (
-    <div className="h-full flex flex-col">
+    <div>
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="group h-10 flex-shrink-0 w-full flex items-center justify-between text-left px-3 bg-results-header border-b border-theme-border"
+        className="group h-10 w-full flex items-center justify-between text-left px-3 bg-results-header border-b border-theme-border"
       >
         <div className="flex items-center gap-2">
           <IconComponent size={16} className="text-theme-text flex-shrink-0" />
@@ -64,10 +64,10 @@ function QueriesSection() {
         </div>
       </button>
 
-      {/* Content - fills remaining height when open */}
+      {/* Content */}
       {isOpen && (
-        <div className="flex-1 min-h-0 flex flex-col">
-          <div className="h-10 flex-shrink-0 flex items-center px-3 border-b border-theme-border">
+        <div>
+          <div className="h-10 flex items-center px-3 border-b border-theme-border">
             <QueryFilters />
           </div>
 
@@ -76,7 +76,7 @@ function QueriesSection() {
               No queries match the current filters
             </p>
           ) : (
-            <div className="flex-1 min-h-0 overflow-auto border-b border-theme-border">
+            <div>
               {filteredQueries.map((query) => (
                 <QueryItem
                   key={query.originalIndex}

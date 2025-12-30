@@ -3,7 +3,7 @@ import { useAppState } from '../../context/AppContext';
 import OutputSection from './OutputSection';
 import QueriesSection from './QueriesSection';
 import ReturnedData from './ReturnedData';
-import { ErdIcon, ExternalLinkIcon } from '../icons';
+import { ErdIcon, ExternalLinkIcon, SpinnerIcon } from '../icons';
 
 function ResultPanel() {
   const state = useAppState();
@@ -15,20 +15,29 @@ function ResultPanel() {
     return (
       <div className="h-full flex items-center justify-center text-gray-400 dark:text-gray-500 p-8">
         <div className="text-center">
-          <p className="text-lg mb-2">No results yet</p>
-          <p className="text-sm">
-            Write some Python code and press <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Cmd+Enter</kbd> to run
-          </p>
+          {state.loading ? (
+            <>
+              <SpinnerIcon size={32} className="mx-auto mb-3 text-django-secondary" />
+              <p className="text-lg">Executing code, please wait!</p>
+            </>
+          ) : (
+            <>
+              <p className="text-lg mb-2">No results yet</p>
+              <p className="text-sm">
+                Write some Python code and press <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Cmd+Enter</kbd> to run
+              </p>
+            </>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div>
       {/* Error display */}
       {state.error && (
-        <div className="flex-shrink-0 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-3 py-2">
+        <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-3 py-2">
           <h3 className="text-red-800 dark:text-red-200 font-medium mb-1">Error</h3>
           <pre className="text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap font-mono">
             {state.error}
@@ -37,15 +46,11 @@ function ResultPanel() {
       )}
 
       {/* Output section */}
-      {state.rawOutput && (
-        <div className="flex-shrink-0">
-          <OutputSection />
-        </div>
-      )}
+      {state.rawOutput && <OutputSection />}
 
       {/* ERD link */}
       {state.erdLink && (
-        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-theme-border">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-theme-border">
           <ErdIcon size={20} className="text-brand" />
           <a
             href={state.erdLink}
@@ -61,7 +66,7 @@ function ResultPanel() {
 
       {/* HTML template link */}
       {state.htmlTemplate && (
-        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-theme-border">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-theme-border">
           <button
             onClick={() => state.dispatch({ type: 'TOGGLE_HTML_PREVIEW' })}
             className="text-django-secondary hover:text-django-tertiary underline"
@@ -71,15 +76,11 @@ function ResultPanel() {
         </div>
       )}
 
-      {/* Queries section - fills remaining space */}
-      {state.rawQueries.length > 0 && (
-        <div className="flex-1 min-h-0">
-          <QueriesSection />
-        </div>
-      )}
+      {/* Queries section */}
+      {state.rawQueries.length > 0 && <QueriesSection />}
 
       {/* Returned data tables */}
-      {state.returnedData && <div className="flex-shrink-0"><ReturnedData data={state.returnedData} /></div>}
+      {state.returnedData && <ReturnedData data={state.returnedData} />}
     </div>
   );
 }

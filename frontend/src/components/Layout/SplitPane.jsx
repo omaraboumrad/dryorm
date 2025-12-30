@@ -7,10 +7,10 @@ function SplitPane() {
   const state = useAppState();
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-57px)]">
+    <div className="flex flex-col lg:flex-row h-full overflow-hidden">
       {/* Editor pane */}
       <div
-        className={`lg:w-1/2 h-full lg:border-r border-gray-200 dark:border-gray-700 ${
+        className={`lg:w-1/2 h-full overflow-auto lg:border-r border-gray-200 dark:border-gray-700 ${
           state.showCode ? 'block' : 'hidden lg:block'
         }`}
       >
@@ -19,7 +19,7 @@ function SplitPane() {
 
       {/* Results pane */}
       <div
-        className={`lg:w-1/2 h-full overflow-auto bg-results-bg ${
+        className={`lg:w-1/2 h-full overflow-y-auto overflow-x-hidden bg-results-bg ${
           state.showResult ? 'block' : 'hidden lg:block'
         }`}
       >

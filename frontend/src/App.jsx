@@ -95,13 +95,13 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className={`min-h-screen bg-theme-page ${state.zenMode ? 'zen-mode' : ''}`}>
+    <div className={`h-screen flex flex-col bg-theme-page overflow-hidden ${state.zenMode ? 'zen-mode' : ''}`}>
       {!state.zenMode && <Header />}
 
-      <div className="flex">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {state.showJourneyNav && !state.zenMode && <JourneyNav />}
 
-        <main className="flex-1">
+        <main className="flex-1 min-w-0 overflow-hidden">
           {/* Mobile tabs */}
           <div className="lg:hidden">
             <MobileTabs />
