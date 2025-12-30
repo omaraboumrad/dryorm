@@ -12,6 +12,8 @@ import {
   SunIcon,
   ExpandIcon,
   SpinnerIcon,
+  InfoIcon,
+  GridIcon,
 } from '../icons';
 
 function Header() {
@@ -43,6 +45,24 @@ function Header() {
 
         {/* Right: Action buttons */}
         <div className="flex items-center gap-2">
+          {/* Browse */}
+          <a
+            href="/browse"
+            className="p-2 rounded hover:bg-white/10 transition-colors hidden sm:flex"
+            title="Browse Snippets"
+          >
+            <GridIcon size={20} className="text-white" />
+          </a>
+
+          {/* About */}
+          <a
+            href="/about"
+            className="p-2 rounded hover:bg-white/10 transition-colors hidden sm:flex"
+            title="About"
+          >
+            <InfoIcon size={20} className="text-white" />
+          </a>
+
           {/* Journey toggle */}
           <Button
             variant="header"

@@ -141,6 +141,8 @@ def snippets_api(request):
         return http.HttpResponseNotAllowed(["GET"])
 
     query = request.GET.get("q", "").strip()
+    page = int(request.GET.get("page", 1))
+    per_page = 20
 
     snippets = models.Snippet.objects.filter(private=False).order_by("-created")
 
@@ -148,19 +150,31 @@ def snippets_api(request):
         from django.db.models import Q
         snippets = snippets.filter(Q(name__icontains=query) | Q(code__icontains=query))
 
-    snippets = snippets[:50]  # Limit to 50 results
+    total = snippets.count()
+    total_pages = (total + per_page - 1) // per_page
+    snippets = snippets[(page - 1) * per_page : page * per_page]
+
+    from django.utils.timesince import timesince
 
     return JsonResponse({
         "snippets": [
             {
                 "slug": s.slug,
                 "name": s.name,
-                "code": s.code[:200] if s.code else "",
                 "database": s.database,
                 "orm_version": s.orm_version,
+                "ref_type": s.ref_type,
+                "ref_id": s.ref_id,
+                "sha": s.sha,
+                "created": timesince(s.created),
             }
             for s in snippets
-        ]
+        ],
+        "pagination": {
+            "page": page,
+            "totalPages": total_pages,
+            "total": total,
+        }
     })
 
 
