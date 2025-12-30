@@ -2,6 +2,9 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 
 // Initial state
 const initialState = {
+  // Routing
+  currentPage: 'home', // 'home', 'about', 'browse'
+
   // UI State
   loading: false,
   showSettings: false,
@@ -114,6 +117,7 @@ const actions = {
   SET_CURRENT_JOURNEY: 'SET_CURRENT_JOURNEY',
   LOAD_SNIPPET: 'LOAD_SNIPPET',
   SET_SHOULD_AUTO_RUN: 'SET_SHOULD_AUTO_RUN',
+  SET_PAGE: 'SET_PAGE',
 };
 
 // Reducer
@@ -253,6 +257,9 @@ function appReducer(state, action) {
 
     case actions.SET_SHOULD_AUTO_RUN:
       return { ...state, shouldAutoRun: action.payload };
+
+    case actions.SET_PAGE:
+      return { ...state, currentPage: action.payload };
 
     default:
       return state;

@@ -9,6 +9,8 @@ import RefDialog from './components/Dialogs/RefDialog';
 import ShareDialog from './components/Dialogs/ShareDialog';
 import HtmlPreview from './components/Dialogs/HtmlPreview';
 import FloatingControls from './components/ZenMode/FloatingControls';
+import AboutPage from './components/Pages/AboutPage';
+import BrowsePage from './components/Pages/BrowsePage';
 import { fetchConfig, fetchSnippet } from './lib/api';
 
 function App() {
@@ -28,42 +30,54 @@ function App() {
     loadConfig();
   }, [dispatch]);
 
-  // Check URL for snippet or journey on mount
+  // Check URL for routing on mount
   useEffect(() => {
-    let path = window.location.pathname;
-
-    // Handle /react/ base path - strip it for routing purposes
-    const basePath = '/react';
-    if (path.startsWith(basePath)) {
-      path = path.slice(basePath.length) || '/';
-    }
+    const path = window.location.pathname;
 
     const loadInitialData = async () => {
-      // Check for journey path
-      if (path.startsWith('/j/')) {
-        const slug = path.slice(3);
-        const hash = window.location.hash.slice(1);
-        dispatch({ type: 'SET_CURRENT_JOURNEY', payload: { slug, chapter: hash || null } });
+      // Static pages
+      if (path === '/about') {
+        dispatch({ type: 'SET_PAGE', payload: 'about' });
+        return;
+      }
+      if (path === '/browse') {
+        dispatch({ type: 'SET_PAGE', payload: 'browse' });
         return;
       }
 
-      // Check for snippet (not root, not journey, not empty)
-      if (path !== '/' && path !== '' && !path.startsWith('/j/')) {
-        const slug = path.slice(1).replace(/\/run$/, '');
-        const shouldRun = path.endsWith('/run') || window.location.search.includes('run');
+      // Journey path
+      if (path === '/j/' || path.startsWith('/j/')) {
+        dispatch({ type: 'SET_PAGE', payload: 'home' });
+        const slug = path.slice(3);
+        const hash = window.location.hash.slice(1);
+        if (slug) {
+          dispatch({ type: 'SET_CURRENT_JOURNEY', payload: { slug, chapter: hash || null } });
+        }
+        dispatch({ type: 'TOGGLE_JOURNEY_NAV' });
+        return;
+      }
 
-        // Only try to load if slug looks valid (not empty, not a known route)
-        if (slug && slug !== 'react') {
-          try {
-            const snippet = await fetchSnippet(slug);
-            dispatch({ type: 'LOAD_SNIPPET', payload: snippet });
+      // Home
+      if (path === '/' || path === '') {
+        dispatch({ type: 'SET_PAGE', payload: 'home' });
+        return;
+      }
 
-            if (shouldRun) {
-              dispatch({ type: 'SET_SHOULD_AUTO_RUN', payload: true });
-            }
-          } catch (err) {
-            console.error('Failed to load snippet:', err);
+      // Snippet detail
+      const slug = path.slice(1).replace(/\/run$/, '');
+      const shouldRun = path.endsWith('/run') || window.location.search.includes('run');
+
+      if (slug) {
+        dispatch({ type: 'SET_PAGE', payload: 'home' });
+        try {
+          const snippet = await fetchSnippet(slug);
+          dispatch({ type: 'LOAD_SNIPPET', payload: snippet });
+
+          if (shouldRun) {
+            dispatch({ type: 'SET_SHOULD_AUTO_RUN', payload: true });
           }
+        } catch (err) {
+          console.error('Failed to load snippet:', err);
         }
       }
     };
@@ -94,23 +108,37 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [dispatch]);
 
+  // Render page content based on current page
+  const renderPage = () => {
+    switch (state.currentPage) {
+      case 'about':
+        return <AboutPage />;
+      case 'browse':
+        return <BrowsePage />;
+      default:
+        return (
+          <div className="flex flex-1 min-h-0 overflow-hidden">
+            {state.showJourneyNav && !state.zenMode && <JourneyNav />}
+
+            <main className="flex-1 min-w-0 overflow-hidden">
+              {/* Mobile tabs */}
+              <div className="lg:hidden">
+                <MobileTabs />
+              </div>
+
+              {/* Desktop split pane / Mobile content */}
+              <SplitPane />
+            </main>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className={`h-screen flex flex-col bg-theme-page overflow-hidden ${state.zenMode ? 'zen-mode' : ''}`}>
       {!state.zenMode && <Header />}
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        {state.showJourneyNav && !state.zenMode && <JourneyNav />}
-
-        <main className="flex-1 min-w-0 overflow-hidden">
-          {/* Mobile tabs */}
-          <div className="lg:hidden">
-            <MobileTabs />
-          </div>
-
-          {/* Desktop split pane / Mobile content */}
-          <SplitPane />
-        </main>
-      </div>
+      {renderPage()}
 
       {/* Zen mode floating controls */}
       {state.zenMode && <FloatingControls />}

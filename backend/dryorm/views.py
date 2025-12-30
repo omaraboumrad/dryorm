@@ -4,8 +4,6 @@ import os
 import tomllib
 import re
 from django.conf import settings
-
-from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -18,73 +16,9 @@ from .pr_service import ref_service, RefNotFoundError, RefFetchError, pr_service
 import tasks
 
 
-class SnippetListView(generic.ListView):
-    model = models.Snippet
-    template_name = "snippet_list.html"
-    paginate_by = 20
-
-    def get_queryset(self):
-        q = self.request.GET.get("q")
-        qs_filter = Q(private=False)
-
-        if q:
-            qs_filter &= Q(name__icontains=q) | Q(code__icontains=q)
-
-        return super().get_queryset().filter(qs_filter).order_by("-created")
-
-    def get_template_names(self):
-        if self.request.headers.get("HX-Request") == "true":
-            return ["components/snippets.html"]
-        return [self.template_name]
-
-
-class SnippetDetailView(generic.DetailView):
-    model = models.Snippet
-    template_name = "index.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["databases"] = databases.DATABASES
-        context["orm_versions"] = constants.ORM_VERSIONS
-        context["templates"] = templates.EXECUTOR_TEMPLATES
-        context["first"] = templates.EXECUTOR_TEMPLATES["django"]["basic"]
-        context["journeys"] = {}
-
-        # Pass snippet version info for restoring state
-        snippet = self.object
-        if snippet:
-            context["snippet_orm_version"] = snippet.orm_version
-            context["snippet_ref_type"] = snippet.ref_type
-            context["snippet_ref_id"] = snippet.ref_id
-            context["snippet_sha"] = snippet.sha
-            if snippet.ref_type:
-                context["snippet_ref_info"] = {
-                    "type": snippet.ref_type,
-                    "id": snippet.ref_id,
-                    "sha": snippet.sha,
-                }
-        return context
-
-
-class SnippetHomeView(generic.TemplateView):
-    template_name = "index.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["databases"] = databases.DATABASES
-        context["orm_versions"] = constants.ORM_VERSIONS
-        context["templates"] = templates.EXECUTOR_TEMPLATES
-        context["first"] = templates.EXECUTOR_TEMPLATES["django"]["basic"]
-        # Only load journeys if this is a journey URL
-        if self.request.path.startswith('/j/'):
-            context["journeys"] = load_journeys()
-        else:
-            context["journeys"] = {}
-        return context
-
-
-class AboutView(generic.TemplateView):
-    template_name = "about.html"
+class ReactHomeView(generic.TemplateView):
+    """Serves the React frontend."""
+    template_name = "react.html"
 
 
 def save(request):
@@ -198,6 +132,35 @@ def config_api(request):
         "databases": databases_list,
         "ormVersions": orm_versions_list,
         "templates": templates_grouped,
+    })
+
+
+def snippets_api(request):
+    """API endpoint to list public snippets."""
+    if request.method != "GET":
+        return http.HttpResponseNotAllowed(["GET"])
+
+    query = request.GET.get("q", "").strip()
+
+    snippets = models.Snippet.objects.filter(private=False).order_by("-created")
+
+    if query:
+        from django.db.models import Q
+        snippets = snippets.filter(Q(name__icontains=query) | Q(code__icontains=query))
+
+    snippets = snippets[:50]  # Limit to 50 results
+
+    return JsonResponse({
+        "snippets": [
+            {
+                "slug": s.slug,
+                "name": s.name,
+                "code": s.code[:200] if s.code else "",
+                "database": s.database,
+                "orm_version": s.orm_version,
+            }
+            for s in snippets
+        ]
     })
 
 
@@ -438,16 +401,5 @@ def execute(request):
         )
 
 
-# Define templates as a dictionary
-
-class ReactHomeView(generic.TemplateView):
-    """Serves the React frontend."""
-    template_name = "react.html"
-
-
-# View instances
-home = SnippetHomeView.as_view()
+# View instance
 react_home = ReactHomeView.as_view()
-about = AboutView.as_view()
-detail = SnippetDetailView.as_view()
-list_snippets = SnippetListView.as_view()
