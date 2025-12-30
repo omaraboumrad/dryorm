@@ -32,12 +32,12 @@ export function Collapsible({
         onClick={() => setIsOpen(!isOpen)}
         className={`group w-full flex items-center justify-between text-left ${headerClassName}`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <IconComponent size={16} className={`flex-shrink-0 ${iconClassName}`} />
-          <span>{title}</span>
+          <div className="min-w-0 flex-1">{title}</div>
         </div>
         {rightContent && (
-          <div onClick={(e) => e.stopPropagation()} className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
             {rightContent}
           </div>
         )}

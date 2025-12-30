@@ -49,8 +49,8 @@ function QueryItem({ query, index, isHighlighted }) {
                 L{query.line}
               </button>
             )}
-            <span className="text-xs text-django-primary dark:text-theme-text truncate">
-              {truncateSql(query.sql, 60)}
+            <span className="text-xs text-django-primary dark:text-theme-text truncate font-mono mr-4">
+              {query.sql.replace(/\s+/g, ' ').trim()}
             </span>
           </div>
         }
@@ -77,13 +77,6 @@ function QueryItem({ query, index, isHighlighted }) {
       </Collapsible>
     </div>
   );
-}
-
-function truncateSql(sql, maxLength) {
-  if (!sql) return '';
-  const normalized = sql.replace(/\s+/g, ' ').trim();
-  if (normalized.length <= maxLength) return normalized;
-  return normalized.slice(0, maxLength) + '...';
 }
 
 export default QueryItem;
