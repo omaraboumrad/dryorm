@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { colorizeSql, getQueryType, formatTime } from '../../lib/utils';
-import { QueryTypeBadge } from '../common';
+import { colorizeSql } from '../../lib/utils';
 
 function QueryPopup({ queries, x, y, showTemplated }) {
   const popupRef = useRef(null);
@@ -36,10 +35,8 @@ function QueryPopup({ queries, x, y, showTemplated }) {
 
   if (!queries || queries.length === 0) return null;
 
-  // Group queries by template if showing templated view
-  const displayQueries = showTemplated
-    ? groupByTemplate(queries)
-    : queries;
+  // Group queries by template
+  const templateGroups = groupByTemplate(queries);
 
   return (
     <div
@@ -48,36 +45,38 @@ function QueryPopup({ queries, x, y, showTemplated }) {
       style={{ left: position.left, top: position.top }}
     >
       <div className="space-y-3">
-        {displayQueries.map((query, index) => (
-          <QueryItem key={index} query={query} showTemplated={showTemplated} />
+        {templateGroups.map((group, index) => (
+          <QueryGroup
+            key={index}
+            group={group}
+            showTemplated={showTemplated}
+            isFirst={index === 0}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function QueryItem({ query, showTemplated }) {
-  const sql = showTemplated ? (query.template || query.sql) : query.sql;
-  const type = getQueryType(sql);
+function QueryGroup({ group, showTemplated, isFirst }) {
+  const { template, queries, totalTime, count } = group;
+  const queryToShow = (showTemplated || count > 1) ? template : queries[0].sql;
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-2 text-xs">
-        <QueryTypeBadge type={type} />
-        {query.time !== undefined && (
-          <span className="text-gray-500 dark:text-gray-400">
-            {formatTime(query.time)}
-          </span>
-        )}
-        {query.count && query.count > 1 && (
-          <span className="text-gray-500 dark:text-gray-400">
-            x{query.count}
+    <div className={!isFirst ? 'border-t border-theme-border pt-2' : ''}>
+      <div className="flex items-center justify-between gap-4 mb-1">
+        <span className="text-django-primary dark:text-django-secondary font-bold text-sm">
+          {totalTime.toFixed(3)}s
+        </span>
+        {count > 1 && (
+          <span className="text-red-600 dark:text-red-400 font-bold text-xs">
+            {count} Similar
           </span>
         )}
       </div>
       <pre
-        className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all text-gray-800 dark:text-gray-200"
-        dangerouslySetInnerHTML={{ __html: colorizeSql(sql) }}
+        className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all text-theme-text m-0"
+        dangerouslySetInnerHTML={{ __html: colorizeSql(queryToShow) }}
       />
     </div>
   );
@@ -89,13 +88,18 @@ function groupByTemplate(queries) {
 
   for (const query of queries) {
     const key = query.template || query.sql;
-    if (grouped.has(key)) {
-      const existing = grouped.get(key);
-      existing.count = (existing.count || 1) + 1;
-      existing.time = (existing.time || 0) + (query.time || 0);
-    } else {
-      grouped.set(key, { ...query, count: 1 });
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        template: key,
+        queries: [],
+        totalTime: 0,
+        count: 0,
+      });
     }
+    const group = grouped.get(key);
+    group.queries.push(query);
+    group.totalTime += parseFloat(query.time) || 0;
+    group.count += 1;
   }
 
   return Array.from(grouped.values());

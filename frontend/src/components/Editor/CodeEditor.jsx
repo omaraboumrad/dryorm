@@ -1,10 +1,12 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { EditorView } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { useAppState, useAppDispatch } from '../../context/AppContext';
 import { useExecute } from '../../hooks/useExecute';
 import { createBaseExtensions, createExecuteKeymap } from '../../lib/codemirror/setup';
+import { updateQueryMarkers } from '../../lib/codemirror/queryGutter';
 import VersionLabel from './VersionLabel';
+import QueryPopup from './QueryPopup';
 
 function CodeEditor() {
   const state = useAppState();
@@ -15,11 +17,80 @@ function CodeEditor() {
   const viewRef = useRef(null);
   const darkModeRef = useRef(state.darkMode);
   const executeRef = useRef(execute);
+  const lineToQueryMapRef = useRef(state.lineToQueryMap);
 
-  // Keep executeRef up to date
+  // Hover popup state
+  const [hoverQueries, setHoverQueries] = useState(null);
+  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
+  const [isAltPressed, setIsAltPressed] = useState(false);
+
+  // Keep refs up to date
   useEffect(() => {
     executeRef.current = execute;
   }, [execute]);
+
+  useEffect(() => {
+    lineToQueryMapRef.current = state.lineToQueryMap;
+    // Update query gutter markers when lineToQueryMap changes
+    if (viewRef.current && state.lineToQueryMap) {
+      updateQueryMarkers(viewRef.current, state.lineToQueryMap);
+    }
+  }, [state.lineToQueryMap]);
+
+  // Alt key listener for query popup toggle
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Alt') setIsAltPressed(true);
+    };
+    const handleKeyUp = (e) => {
+      if (e.key === 'Alt') setIsAltPressed(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  // Mouse hover handlers for query popup
+  useEffect(() => {
+    if (!viewRef.current) return;
+
+    const editorElement = viewRef.current.dom;
+
+    const handleMouseMove = (e) => {
+      const pos = viewRef.current.posAtCoords({ x: e.clientX, y: e.clientY });
+      if (pos !== null) {
+        const line = viewRef.current.state.doc.lineAt(pos);
+        const lineNumber = line.number;
+
+        if (lineToQueryMapRef.current && lineToQueryMapRef.current.has(lineNumber)) {
+          const queries = lineToQueryMapRef.current.get(lineNumber);
+          if (queries && queries.length > 0) {
+            setHoverQueries(queries);
+            setHoverPosition({ x: e.pageX, y: e.pageY });
+            return;
+          }
+        }
+      }
+      setHoverQueries(null);
+    };
+
+    const handleMouseLeave = (e) => {
+      if (!editorElement.contains(e.relatedTarget)) {
+        setHoverQueries(null);
+      }
+    };
+
+    editorElement.addEventListener('mousemove', handleMouseMove);
+    editorElement.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      editorElement.removeEventListener('mousemove', handleMouseMove);
+      editorElement.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [state.editorView]);
 
   // Create editor on mount (and recreate when dark mode changes)
   useEffect(() => {
@@ -39,10 +110,25 @@ function CodeEditor() {
         () => executeRef.current(true)
       ),
       ...createBaseExtensions(state.darkMode),
-      // Update state when content changes
+      // Update state when content changes or cursor moves
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           dispatch({ type: 'SET_CODE', payload: update.state.doc.toString() });
+        }
+        // Check for cursor position change
+        if (update.selectionSet) {
+          const pos = update.state.selection.main.head;
+          const line = update.state.doc.lineAt(pos);
+          const lineNumber = line.number;
+          // Use a ref to get the current lineToQueryMap (will be set via effect)
+          if (lineToQueryMapRef.current && lineToQueryMapRef.current.has(lineNumber)) {
+            const queries = lineToQueryMapRef.current.get(lineNumber);
+            if (queries && queries.length > 0) {
+              dispatch({ type: 'SET_HIGHLIGHTED_QUERY', payload: queries[0].index });
+            }
+          } else {
+            dispatch({ type: 'SET_HIGHLIGHTED_QUERY', payload: null });
+          }
         }
       }),
     ];
@@ -92,6 +178,14 @@ function CodeEditor() {
         ref={editorRef}
         className="flex-1 overflow-auto"
       />
+      {hoverQueries && (
+        <QueryPopup
+          queries={hoverQueries}
+          x={hoverPosition.x}
+          y={hoverPosition.y}
+          showTemplated={isAltPressed}
+        />
+      )}
     </div>
   );
 }

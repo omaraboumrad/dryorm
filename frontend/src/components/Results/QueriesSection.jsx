@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useAppState } from '../../context/AppContext';
 import { CopyButton } from '../common';
-import { DbIcon, ChevronDownIcon, ChevronRightIcon } from '../icons';
+import { DbIcon, ChevronDownIcon, ChevronRightIcon, ErdIcon } from '../icons';
 import QueryFilters from './QueryFilters';
 import QueryItem from './QueryItem';
 import { getQueryType } from '../../lib/utils';
@@ -55,7 +55,18 @@ function QueriesSection() {
             </span>
           </span>
         </div>
-        <div onClick={(e) => e.stopPropagation()} className="opacity-0 group-hover:opacity-100 transition-opacity">
+        <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {state.erdLink && (
+            <a
+              href={`https://kroki.io/mermaid/svg/${state.erdLink}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+              title="View ERD diagram"
+            >
+              <ErdIcon size={18} className="text-theme-text" />
+            </a>
+          )}
           <CopyButton
             text={allSql}
             className="hover:bg-gray-200 dark:hover:bg-gray-600"

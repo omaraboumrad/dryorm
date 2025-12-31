@@ -5,6 +5,8 @@ export function Collapsible({
   title,
   children,
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
   className = '',
   headerClassName = '',
   contentClassName = '',
@@ -12,9 +14,19 @@ export function Collapsible({
   icon = 'chevron', // 'chevron' or 'plusminus'
   rightContent,
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
   const contentRef = useRef(null);
-  const [height, setHeight] = useState(defaultOpen ? 'auto' : '0px');
+  const [height, setHeight] = useState(isOpen ? 'auto' : '0px');
+
+  const setIsOpen = (value) => {
+    if (isControlled) {
+      onOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
+  };
 
   useEffect(() => {
     if (contentRef.current) {

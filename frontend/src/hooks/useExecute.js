@@ -46,11 +46,12 @@ export function useExecute() {
         const lineToQueryMap = new Map();
         if (result.queries) {
           result.queries.forEach((query, index) => {
-            if (query.line !== undefined) {
-              if (!lineToQueryMap.has(query.line)) {
-                lineToQueryMap.set(query.line, []);
+            const lineNumber = query.line_number;
+            if (lineNumber !== undefined && lineNumber !== null) {
+              if (!lineToQueryMap.has(lineNumber)) {
+                lineToQueryMap.set(lineNumber, []);
               }
-              lineToQueryMap.get(query.line).push({ ...query, index });
+              lineToQueryMap.get(lineNumber).push({ ...query, index });
             }
           });
         }
@@ -61,7 +62,7 @@ export function useExecute() {
             output: result.output || '',
             queries: result.queries || [],
             returnedData: result.returned_data || null,
-            erdLink: result.erd_link || null,
+            erdLink: result.erd || null,
             htmlTemplate: result.html_template || null,
           },
         });

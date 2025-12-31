@@ -3,7 +3,7 @@ import { useAppState } from '../../context/AppContext';
 import OutputSection from './OutputSection';
 import QueriesSection from './QueriesSection';
 import ReturnedData from './ReturnedData';
-import { ErdIcon, ExternalLinkIcon, SpinnerIcon } from '../icons';
+import { SpinnerIcon } from '../icons';
 
 function ResultPanel() {
   const state = useAppState();
@@ -47,22 +47,6 @@ function ResultPanel() {
 
       {/* Output section */}
       {state.rawOutput && <OutputSection />}
-
-      {/* ERD link */}
-      {state.erdLink && (
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-theme-border">
-          <ErdIcon size={20} className="text-brand" />
-          <a
-            href={state.erdLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-django-secondary hover:text-django-tertiary flex items-center gap-1"
-          >
-            View ERD Diagram
-            <ExternalLinkIcon size={16} />
-          </a>
-        </div>
-      )}
 
       {/* HTML template link */}
       {state.htmlTemplate && (
