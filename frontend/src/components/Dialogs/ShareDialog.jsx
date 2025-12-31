@@ -14,6 +14,10 @@ function ShareDialog() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [savedUrl, setSavedUrl] = useState(null);
+  const [wasUpdated, setWasUpdated] = useState(false);
+
+  // Can update if we own the current snippet
+  const canUpdate = state.isSnippetOwner && state.currentSlug;
 
   const handleClose = () => {
     dispatch({ type: 'TOGGLE_SHARE_DIALOG' });
@@ -23,10 +27,11 @@ function ShareDialog() {
       setIsPrivate(false);
       setError(null);
       setSavedUrl(null);
+      setWasUpdated(false);
     }, 200);
   };
 
-  const handleSave = async (copyUrl = false) => {
+  const handleSave = async (copyUrl = false, isUpdate = false) => {
     setSaving(true);
     setError(null);
 
@@ -46,14 +51,23 @@ function ShareDialog() {
         data.ref_sha = state.currentRefInfo.sha;
       }
 
+      // If updating, include the slug
+      if (isUpdate && state.currentSlug) {
+        data.slug = state.currentSlug;
+      }
+
       const result = await saveSnippet(data);
 
       if (result.slug) {
         const url = `${window.location.origin}/${result.slug}`;
         setSavedUrl(url);
+        setWasUpdated(result.updated || false);
 
         // Update URL
         window.history.pushState({}, '', `/${result.slug}`);
+
+        // Update state with new slug and ownership
+        dispatch({ type: 'SET_SNIPPET_SAVED', payload: { slug: result.slug } });
 
         if (copyUrl) {
           await copyToClipboard(url);
@@ -80,10 +94,12 @@ function ShareDialog() {
             <CheckIcon size={24} className="text-django-secondary" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Saved!
+            {wasUpdated ? 'Updated!' : 'Saved!'}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Your snippet has been saved and is ready to share.
+            {wasUpdated
+              ? 'Your snippet has been updated.'
+              : 'Your snippet has been saved and is ready to share.'}
           </p>
 
           <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
@@ -146,22 +162,45 @@ function ShareDialog() {
             <Button variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => handleSave(false)}
-              disabled={saving || !state.code.trim()}
-              loading={saving}
-            >
-              Save
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => handleSave(true)}
-              disabled={saving || !state.code.trim()}
-              loading={saving}
-            >
-              Save & Copy URL
-            </Button>
+            {canUpdate ? (
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleSave(false, false)}
+                  disabled={saving || !state.code.trim()}
+                  loading={saving}
+                >
+                  Save as New
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => handleSave(false, true)}
+                  disabled={saving || !state.code.trim()}
+                  loading={saving}
+                >
+                  Update
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleSave(false, false)}
+                  disabled={saving || !state.code.trim()}
+                  loading={saving}
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => handleSave(true, false)}
+                  disabled={saving || !state.code.trim()}
+                  loading={saving}
+                >
+                  Save & Copy URL
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

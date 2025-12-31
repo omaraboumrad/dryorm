@@ -32,6 +32,12 @@ def save(request):
     except json.JSONDecodeError:
         return http.HttpResponseBadRequest("Invalid JSON")
 
+    # Ensure session exists for ownership tracking
+    if not request.session.session_key:
+        request.session.create()
+
+    session_key = request.session.session_key
+
     # Get version info - either orm_version or ref_type+ref_id+sha
     orm_version = data.get("orm_version")
     ref_type = data.get("ref_type")
@@ -43,6 +49,30 @@ def save(request):
         django_version = data.get("django_version", "5.2.8")
         orm_version = f"django-{django_version}"
 
+    # Check if this is an update (slug provided)
+    slug = data.get("slug")
+    if slug:
+        try:
+            snippet = models.Snippet.objects.get(slug=slug)
+            # Verify ownership
+            if snippet.session_key != session_key:
+                return JsonResponse({"error": "Not authorized to update this snippet"}, status=403)
+
+            # Update existing snippet
+            snippet.code = data.get("code", snippet.code)
+            snippet.name = data.get("name", snippet.name)
+            snippet.database = data.get("database", snippet.database)
+            snippet.private = data.get("private") is True
+            snippet.orm_version = orm_version
+            snippet.ref_type = ref_type
+            snippet.ref_id = ref_id
+            snippet.sha = sha
+            snippet.save()
+            return JsonResponse({"slug": snippet.slug, "updated": True})
+        except models.Snippet.DoesNotExist:
+            return JsonResponse({"error": "Snippet not found"}, status=404)
+
+    # Create new snippet with session_key
     instance = models.Snippet.objects.create_snippet(
         name=data.get("name"),
         code=data.get("code"),
@@ -52,6 +82,7 @@ def save(request):
         ref_type=ref_type,
         ref_id=ref_id,
         sha=sha,
+        session_key=session_key,
     )
 
     return JsonResponse({"slug": instance.slug})
@@ -195,11 +226,17 @@ def snippet_api(request, slug):
     except models.Snippet.DoesNotExist:
         return JsonResponse({"error": "Snippet not found"}, status=404)
 
+    # Check if current session owns this snippet
+    session_key = request.session.session_key
+    is_owner = bool(snippet.session_key and session_key and snippet.session_key == session_key)
+
     data = {
         "code": snippet.code,
         "database": snippet.database,
         "ormVersion": snippet.orm_version,
         "name": snippet.name,
+        "slug": snippet.slug,
+        "isOwner": is_owner,
     }
 
     # Add ref info if present

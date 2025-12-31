@@ -49,6 +49,10 @@ def run():
   ignoreCache: false,
   currentRefInfo: null,
 
+  // Snippet ownership
+  currentSlug: null,
+  isSnippetOwner: false,
+
   // Config (from API)
   templates: {},
   databases: [],
@@ -116,6 +120,8 @@ const actions = {
   SET_JOURNEYS: 'SET_JOURNEYS',
   SET_CURRENT_JOURNEY: 'SET_CURRENT_JOURNEY',
   LOAD_SNIPPET: 'LOAD_SNIPPET',
+  SET_SNIPPET_SAVED: 'SET_SNIPPET_SAVED',
+  CLEAR_SNIPPET: 'CLEAR_SNIPPET',
   SET_SHOULD_AUTO_RUN: 'SET_SHOULD_AUTO_RUN',
   SET_PAGE: 'SET_PAGE',
 };
@@ -254,6 +260,22 @@ function appReducer(state, action) {
         database: action.payload.database || state.database,
         ormVersion: action.payload.ormVersion || state.ormVersion,
         currentRefInfo: action.payload.refInfo || null,
+        currentSlug: action.payload.slug || null,
+        isSnippetOwner: action.payload.isOwner || false,
+      };
+
+    case actions.SET_SNIPPET_SAVED:
+      return {
+        ...state,
+        currentSlug: action.payload.slug,
+        isSnippetOwner: true,
+      };
+
+    case actions.CLEAR_SNIPPET:
+      return {
+        ...state,
+        currentSlug: null,
+        isSnippetOwner: false,
       };
 
     case actions.SET_SHOULD_AUTO_RUN:

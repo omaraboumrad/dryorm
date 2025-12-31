@@ -16,7 +16,7 @@ def generate_random_string(length=8):
 
 class SnippetManager(models.Manager):
 
-    def create_snippet(self, name, code, database, private, orm_version=None, ref_type=None, ref_id=None, sha=None):
+    def create_snippet(self, name, code, database, private, orm_version=None, ref_type=None, ref_id=None, sha=None, session_key=None):
         if not name:
             name = generate_random_string()
         slug = slugify(name)
@@ -31,6 +31,7 @@ class SnippetManager(models.Manager):
             ref_type=ref_type,
             ref_id=ref_id,
             sha=sha,
+            session_key=session_key,
         )
 
 
@@ -52,6 +53,9 @@ class Snippet(models.Model):
 
     # Keep for backwards compatibility during migration
     django_version = models.CharField(max_length=20, default="5.2.8")
+
+    # Session-based ownership (for allowing updates without auth)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
 
     objects = SnippetManager()
 
