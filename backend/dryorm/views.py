@@ -25,29 +25,35 @@ def save(request):
     if request.method != "POST":
         return http.HttpResponseNotAllowed("nope!")
 
+    # Parse JSON body
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return http.HttpResponseBadRequest("Invalid JSON")
+
     # Get version info - either orm_version or ref_type+ref_id+sha
-    orm_version = request.POST.get("orm_version")
-    ref_type = request.POST.get("ref_type")
-    ref_id = request.POST.get("ref_id")
-    sha = request.POST.get("sha")
+    orm_version = data.get("orm_version")
+    ref_type = data.get("ref_type")
+    ref_id = data.get("ref_id")
+    sha = data.get("sha") or data.get("ref_sha")  # Support both field names
 
     # Backwards compatibility: convert old django_version to new orm_version format
     if not orm_version and not ref_type:
-        django_version = request.POST.get("django_version", "5.2.8")
+        django_version = data.get("django_version", "5.2.8")
         orm_version = f"django-{django_version}"
 
     instance = models.Snippet.objects.create_snippet(
-        name=request.POST.get("name"),
-        code=request.POST.get("code"),
-        database=request.POST.get("database"),
-        private=request.POST.get("private") == "true",
+        name=data.get("name"),
+        code=data.get("code"),
+        database=data.get("database"),
+        private=data.get("private") is True,
         orm_version=orm_version,
         ref_type=ref_type,
         ref_id=ref_id,
         sha=sha,
     )
 
-    return http.HttpResponse(f'"{instance.slug}"')
+    return JsonResponse({"slug": instance.slug})
 
 
 def slugify(text):
