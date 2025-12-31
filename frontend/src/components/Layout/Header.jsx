@@ -39,9 +39,9 @@ function Header() {
       <div className="flex items-center justify-between">
         {/* Left: Logo and title */}
         <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-2 text-white">
+          <Link to="/" className="flex items-center gap-2">
             <DryormIcon size={32} className="text-white" />
-            <span className="font-semibold text-lg">DryORM</span>
+            <span className="font-semibold text-lg text-white hidden sm:inline">DryORM</span>
           </Link>
         </div>
 
@@ -89,7 +89,6 @@ function Header() {
                 size="icon"
                 onClick={() => dispatch({ type: 'TOGGLE_JOURNEY_NAV' })}
                 title="Learning Journeys"
-                className="hidden lg:flex"
               >
                 <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : 'text-white'} />
               </Button>

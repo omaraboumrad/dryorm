@@ -26,6 +26,11 @@ function ChapterItem({ chapter, journeySlug, isCurrent, index }) {
       // Update URL
       const url = `/j/${journeySlug}#${chapterId}`;
       window.history.pushState({}, '', url);
+
+      // Close journey nav on mobile (below lg breakpoint)
+      if (window.innerWidth < 1024) {
+        dispatch({ type: 'TOGGLE_JOURNEY_NAV' });
+      }
     } catch (err) {
       console.error('Failed to load chapter:', err);
     }

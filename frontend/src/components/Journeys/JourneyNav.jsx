@@ -28,36 +28,48 @@ function JourneyNav() {
   };
 
   return (
-    <aside className="w-80 flex-shrink-0 bg-theme-panel border-r border-theme-border h-full overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="h-10 flex items-center justify-between px-3 border-b border-theme-border">
-        <div className="flex items-center gap-2 text-theme-text">
-          <JourneyIcon size={20} className="text-django-secondary" />
-          <span className="font-medium">Learning Journeys</span>
-        </div>
-        <button
-          onClick={handleClose}
-          className="p-1 rounded hover:bg-theme-surface text-theme-text-secondary hover:text-theme-text"
-        >
-          <XIcon size={18} />
-        </button>
-      </div>
+    <>
+      {/* Mobile overlay backdrop */}
+      <div
+        className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        onClick={handleClose}
+      />
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {!state.journeysLoaded ? (
-          <div className="flex items-center justify-center py-12">
-            <SpinnerIcon size={24} className="text-django-secondary" />
+      {/* Journey panel - full screen on mobile, sidebar on desktop */}
+      <aside className="
+        fixed inset-0 z-50 bg-theme-panel flex flex-col
+        lg:relative lg:inset-auto lg:z-auto lg:w-80 lg:flex-shrink-0 lg:border-r lg:border-theme-border lg:h-full
+      ">
+        {/* Header */}
+        <div className="h-12 lg:h-10 flex items-center justify-between px-4 lg:px-3 border-b border-theme-border">
+          <div className="flex items-center gap-2 text-theme-text">
+            <JourneyIcon size={20} className="text-django-secondary" />
+            <span className="font-medium">Learning Journeys</span>
           </div>
-        ) : Object.keys(state.journeys).length === 0 ? (
-          <div className="p-4 text-center text-theme-text-muted">
-            No journeys available
-          </div>
-        ) : (
-          <JourneyList />
-        )}
-      </div>
-    </aside>
+          <button
+            onClick={handleClose}
+            className="p-2 lg:p-1 rounded hover:bg-theme-surface text-theme-text-secondary hover:text-theme-text"
+          >
+            <XIcon size={20} className="lg:w-[18px] lg:h-[18px]" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {!state.journeysLoaded ? (
+            <div className="flex items-center justify-center py-12">
+              <SpinnerIcon size={24} className="text-django-secondary" />
+            </div>
+          ) : Object.keys(state.journeys).length === 0 ? (
+            <div className="p-4 text-center text-theme-text-muted">
+              No journeys available
+            </div>
+          ) : (
+            <JourneyList />
+          )}
+        </div>
+      </aside>
+    </>
   );
 }
 
