@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAppState, useAppDispatch } from '../context/AppContext';
 import { execute as executeApi } from '../lib/api';
 import { isMobile } from '../lib/utils';
@@ -9,6 +9,7 @@ import { isMobile } from '../lib/utils';
 export function useExecute() {
   const state = useAppState();
   const dispatch = useAppDispatch();
+  const executeRef = useRef(null);
 
   const execute = useCallback(async (forceRefresh = false) => {
     const code = state.code.trim();
@@ -103,6 +104,21 @@ export function useExecute() {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, [state.code, state.database, state.ormVersion, state.ignoreCache, state.currentRefInfo, dispatch]);
+
+  // Keep ref updated for event handler
+  executeRef.current = execute;
+
+  // Listen for auto-execute events
+  useEffect(() => {
+    const handleAutoExecute = () => {
+      if (executeRef.current) {
+        executeRef.current(false);
+      }
+    };
+
+    window.addEventListener('dryorm:execute', handleAutoExecute);
+    return () => window.removeEventListener('dryorm:execute', handleAutoExecute);
+  }, []);
 
   return { execute, loading: state.loading };
 }

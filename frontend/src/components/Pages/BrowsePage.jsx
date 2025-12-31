@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { SearchIcon, SpinnerIcon, ChevronRightIcon } from '../icons';
 
 function BrowsePage() {
@@ -141,8 +142,8 @@ function SnippetItem({ snippet }) {
 
   return (
     <li className="border-b border-theme-border">
-      <a
-        href={`/${snippet.slug}/run`}
+      <Link
+        to={`/${snippet.slug}/run`}
         className="flex items-center px-4 py-3 hover:bg-django-secondary/10 dark:hover:bg-django-secondary/5 transition"
       >
         <div className="flex flex-col flex-grow min-w-0">
@@ -158,7 +159,7 @@ function SnippetItem({ snippet }) {
           </div>
         </div>
         <ChevronRightIcon size={16} className="ml-2 text-theme-text-muted" />
-      </a>
+      </Link>
     </li>
   );
 }

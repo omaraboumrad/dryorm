@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.urls import path, re_path
 
 from . import views
@@ -15,12 +14,6 @@ urlpatterns = [
     path("execute", views.execute, name="execute"),
     path("fetch-pr", views.fetch_pr, name="fetch_pr"),
     path("search-refs", views.search_refs, name="search_refs"),
-    # React frontend routes
-    path("", views.react_home, name="index"),
-    path("about", views.react_home, name="about"),
-    path("browse", views.react_home, name="browse"),
-    path("j/", views.react_home, name="journeys"),
-    path("j/<slug:journey_slug>", views.react_home, name="journey"),
-    path("<slug:slug>", views.react_home, name="detail"),
-    path("<slug:slug>/run", views.react_home, name="detail_run"),
+    # React SPA catch-all - serves index.html for all other routes
+    re_path(r"^.*$", views.react_home, name="react_catchall"),
 ]

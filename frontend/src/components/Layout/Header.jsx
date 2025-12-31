@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAppState, useAppDispatch } from '../../context/AppContext';
 import { useExecute } from '../../hooks/useExecute';
 import { useZenMode } from '../../hooks/useZenMode';
@@ -38,10 +39,10 @@ function Header() {
       <div className="flex items-center justify-between">
         {/* Left: Logo and title */}
         <div className="flex items-center gap-3">
-          <a href="/" className="flex items-center gap-2 text-white">
+          <Link to="/" className="flex items-center gap-2 text-white">
             <DryormIcon size={32} className="text-white" />
             <span className="font-semibold text-lg">DryORM</span>
-          </a>
+          </Link>
         </div>
 
         {/* Right: Action buttons */}
@@ -62,22 +63,22 @@ function Header() {
           </Button>
 
           {/* Browse - always visible */}
-          <a
-            href="/browse"
+          <Link
+            to="/browse"
             className="p-2 rounded hover:bg-white/10 transition-colors flex"
             title="Browse Snippets"
           >
             <GridIcon size={20} className="text-white" />
-          </a>
+          </Link>
 
           {/* About - always visible */}
-          <a
-            href="/about"
+          <Link
+            to="/about"
             className="p-2 rounded hover:bg-white/10 transition-colors flex"
             title="About"
           >
             <InfoIcon size={20} className="text-white" />
-          </a>
+          </Link>
 
           {/* Code-related buttons - only on home page */}
           {state.currentPage === 'home' && (
