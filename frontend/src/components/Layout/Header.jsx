@@ -39,52 +39,13 @@ function Header() {
         <div className="flex items-center gap-3">
           <a href="/" className="flex items-center gap-2 text-white">
             <DryormIcon size={32} className="text-white" />
-            <span className="font-semibold text-lg hidden sm:inline">DryORM</span>
+            <span className="font-semibold text-lg">DryORM</span>
           </a>
         </div>
 
         {/* Right: Action buttons */}
         <div className="flex items-center gap-2">
-          {/* Browse */}
-          <a
-            href="/browse"
-            className="p-2 rounded hover:bg-white/10 transition-colors hidden sm:flex"
-            title="Browse Snippets"
-          >
-            <GridIcon size={20} className="text-white" />
-          </a>
-
-          {/* About */}
-          <a
-            href="/about"
-            className="p-2 rounded hover:bg-white/10 transition-colors hidden sm:flex"
-            title="About"
-          >
-            <InfoIcon size={20} className="text-white" />
-          </a>
-
-          {/* Journey toggle */}
-          <Button
-            variant="header"
-            size="icon"
-            onClick={() => dispatch({ type: 'TOGGLE_JOURNEY_NAV' })}
-            title="Learning Journeys"
-            className="hidden lg:flex"
-          >
-            <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : 'text-white'} />
-          </Button>
-
-          {/* Zen mode toggle */}
-          <Button
-            variant="header"
-            size="icon"
-            onClick={toggleZenMode}
-            title="Zen Mode (Cmd+.)"
-          >
-            <ExpandIcon size={20} className="text-white" />
-          </Button>
-
-          {/* Dark mode toggle */}
+          {/* Dark mode toggle - always visible, leftmost */}
           <Button
             variant="header"
             size="icon"
@@ -94,30 +55,74 @@ function Header() {
             {state.darkMode ? <SunIcon size={20} className="text-white" /> : <MoonIcon size={20} className="text-white" />}
           </Button>
 
-          {/* Share button */}
-          <Button
-            variant="header"
-            size="icon"
-            onClick={() => dispatch({ type: 'TOGGLE_SHARE_DIALOG' })}
-            title="Share"
+          {/* Browse - always visible */}
+          <a
+            href="/browse"
+            className="p-2 rounded hover:bg-white/10 transition-colors flex"
+            title="Browse Snippets"
           >
-            <ShareIcon size={20} className="text-white" />
-          </Button>
+            <GridIcon size={20} className="text-white" />
+          </a>
 
-          {/* Run button */}
-          <Button
-            variant="primary"
-            onClick={handleRun}
-            onKeyDown={handleForceRun}
-            disabled={loading}
-            title="Run (Cmd+Enter)"
+          {/* About - always visible */}
+          <a
+            href="/about"
+            className="p-2 rounded hover:bg-white/10 transition-colors flex"
+            title="About"
           >
-            {loading ? (
-              <SpinnerIcon size={18} className="text-white" />
-            ) : (
-              <PlayIcon size={18} className="text-white" />
-            )}
-          </Button>
+            <InfoIcon size={20} className="text-white" />
+          </a>
+
+          {/* Code-related buttons - only on home page */}
+          {state.currentPage === 'home' && (
+            <>
+              {/* Journey toggle */}
+              <Button
+                variant="header"
+                size="icon"
+                onClick={() => dispatch({ type: 'TOGGLE_JOURNEY_NAV' })}
+                title="Learning Journeys"
+                className="hidden lg:flex"
+              >
+                <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : 'text-white'} />
+              </Button>
+
+              {/* Zen mode toggle */}
+              <Button
+                variant="header"
+                size="icon"
+                onClick={toggleZenMode}
+                title="Zen Mode (Cmd+.)"
+              >
+                <ExpandIcon size={20} className="text-white" />
+              </Button>
+
+              {/* Share button */}
+              <Button
+                variant="header"
+                size="icon"
+                onClick={() => dispatch({ type: 'TOGGLE_SHARE_DIALOG' })}
+                title="Share"
+              >
+                <ShareIcon size={20} className="text-white" />
+              </Button>
+
+              {/* Run button */}
+              <Button
+                variant="primary"
+                onClick={handleRun}
+                onKeyDown={handleForceRun}
+                disabled={loading}
+                title="Run (Cmd+Enter)"
+              >
+                {loading ? (
+                  <SpinnerIcon size={18} className="text-white" />
+                ) : (
+                  <PlayIcon size={18} className="text-white" />
+                )}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
