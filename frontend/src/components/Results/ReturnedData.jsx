@@ -12,7 +12,7 @@ function ReturnedData({ data }) {
   if (datasets.length === 0) return null;
 
   return (
-    <div className="space-y-4">
+    <div>
       {datasets.map((dataset, index) => (
         <DataTable key={index} dataset={dataset} />
       ))}
@@ -30,18 +30,18 @@ function DataTable({ dataset }) {
   return (
     <Collapsible
       title={
-        <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+        <span className="flex items-center gap-2 font-bold text-theme-text">
           <GridIcon size={18} />
           {name || 'Data'}
-          <span className="text-sm font-normal text-gray-500">
+          <span className="text-sm font-normal text-theme-text-secondary">
             ({rows.length} row{rows.length !== 1 ? 's' : ''})
           </span>
         </span>
       }
       defaultOpen={true}
-      className="bg-gray-50 dark:bg-gray-800 rounded-lg"
-      headerClassName="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
-      contentClassName="border-t border-gray-200 dark:border-gray-700"
+      className=""
+      headerClassName="h-10 px-3 bg-results-header border-b border-theme-border"
+      contentClassName=""
       rightContent={
         <CopyButton
           text={tsvData}
@@ -51,26 +51,26 @@ function DataTable({ dataset }) {
       }
     >
       <div className="overflow-x-auto custom-scrollbar">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-100 dark:bg-gray-700">
+        <table className="min-w-full divide-y divide-theme-border">
+          <thead className="bg-results-surface">
             <tr>
               {headers.map((header, idx) => (
                 <th
                   key={idx}
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  className="px-3 py-2 text-left text-xs font-medium text-theme-text-secondary uppercase tracking-wider"
                 >
                   {header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-theme-border">
             {rows.map((row, rowIdx) => (
-              <tr key={rowIdx}>
+              <tr key={rowIdx} className="hover:bg-theme-surface">
                 {headers.map((header, colIdx) => (
                   <td
                     key={colIdx}
-                    className="px-3 py-2 text-sm text-gray-800 dark:text-gray-200 whitespace-nowrap"
+                    className="px-3 py-2 text-sm text-theme-text whitespace-nowrap"
                   >
                     {formatCellValue(row[header])}
                   </td>
@@ -109,8 +109,8 @@ function normalizeData(data) {
 
 // Format cell value for display
 function formatCellValue(value) {
-  if (value === null) return <span className="text-gray-400 italic">null</span>;
-  if (value === undefined) return <span className="text-gray-400 italic">undefined</span>;
+  if (value === null) return <span className="text-theme-text-muted italic">null</span>;
+  if (value === undefined) return <span className="text-theme-text-muted italic">undefined</span>;
   if (typeof value === 'boolean') return value ? 'true' : 'false';
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
