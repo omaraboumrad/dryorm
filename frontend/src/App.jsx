@@ -122,6 +122,69 @@ function SnippetRunPage() {
   );
 }
 
+// Journey index page - opens panel and expands first journey
+function JourneyIndexPage() {
+  const dispatch = useAppDispatch();
+  const state = useAppState();
+
+  useEffect(() => {
+    const loadJourneys = async () => {
+      try {
+        const data = await fetchJourneys();
+        const journeys = data.journeys || data;
+        dispatch({ type: 'SET_JOURNEYS', payload: journeys });
+
+        // Set the first journey as current to expand it
+        const journeyKeys = Object.keys(journeys);
+        if (journeyKeys.length > 0) {
+          const firstJourneySlug = journeyKeys[0];
+          const firstJourney = journeys[firstJourneySlug];
+          const firstChapter = firstJourney.chapters?.[0];
+          dispatch({
+            type: 'SET_CURRENT_JOURNEY',
+            payload: {
+              slug: firstJourneySlug,
+              chapter: firstChapter?.slug || firstChapter?.id || null
+            }
+          });
+
+          // Load the first chapter's code
+          if (firstChapter?.slug) {
+            try {
+              const chapterData = await fetchJourneyChapter(firstJourneySlug, firstChapter.slug);
+              if (chapterData.code) {
+                dispatch({ type: 'SET_CODE', payload: chapterData.code });
+              }
+            } catch (err) {
+              console.error('Failed to load first chapter:', err);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load journeys:', err);
+      }
+
+      // Open journey nav
+      if (!state.showJourneyNav) {
+        dispatch({ type: 'TOGGLE_JOURNEY_NAV' });
+      }
+    };
+    loadJourneys();
+  }, [dispatch]);
+
+  return (
+    <div className="flex flex-1 min-h-0 overflow-hidden">
+      {state.showJourneyNav && !state.zenMode && <JourneyNav />}
+      <main className="flex-1 min-w-0 overflow-hidden">
+        <div className="lg:hidden">
+          <MobileTabs />
+        </div>
+        <SplitPane />
+      </main>
+    </div>
+  );
+}
+
 // Journey page
 function JourneyPage() {
   const { slug } = useParams();
@@ -226,6 +289,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/browse" element={<BrowsePage />} />
+        <Route path="/j" element={<JourneyIndexPage />} />
         <Route path="/j/:slug" element={<JourneyPage />} />
         <Route path="/:slug/run" element={<SnippetRunPage />} />
         <Route path="/:slug" element={<SnippetPage />} />
