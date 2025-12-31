@@ -162,6 +162,7 @@ function appReducer(state, action) {
         returnedData: null,
         erdLink: null,
         htmlTemplate: null,
+        showHtmlPreview: false,
         error: null,
       };
 

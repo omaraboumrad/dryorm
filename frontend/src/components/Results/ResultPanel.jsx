@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppState } from '../../context/AppContext';
+import { useAppState, useAppDispatch } from '../../context/AppContext';
 import OutputSection from './OutputSection';
 import QueriesSection from './QueriesSection';
 import ReturnedData from './ReturnedData';
@@ -7,6 +7,7 @@ import { SpinnerIcon } from '../icons';
 
 function ResultPanel() {
   const state = useAppState();
+  const dispatch = useAppDispatch();
 
   // Check if we have any results
   const hasResults = state.rawOutput || state.rawQueries.length > 0 || state.returnedData || state.error;
@@ -52,7 +53,7 @@ function ResultPanel() {
       {state.htmlTemplate && (
         <div className="flex items-center gap-2 px-3 py-2 border-b border-theme-border">
           <button
-            onClick={() => state.dispatch({ type: 'TOGGLE_HTML_PREVIEW' })}
+            onClick={() => dispatch({ type: 'TOGGLE_HTML_PREVIEW' })}
             className="text-django-secondary hover:text-django-tertiary underline"
           >
             Show Template Preview

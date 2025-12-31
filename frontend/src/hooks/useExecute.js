@@ -56,18 +56,32 @@ export function useExecute() {
           });
         }
 
+        // Handle returned data - can be a string (HTML template) or object (data)
+        let returnedData = null;
+        let htmlTemplate = null;
+        if (typeof result.returned === 'string') {
+          htmlTemplate = result.returned;
+        } else if (result.returned) {
+          returnedData = result.returned;
+        }
+
         dispatch({
           type: 'SET_RESULTS',
           payload: {
             output: result.output || '',
             queries: result.queries || [],
-            returnedData: result.returned_data || null,
+            returnedData,
             erdLink: result.erd || null,
-            htmlTemplate: result.html_template || null,
+            htmlTemplate,
           },
         });
 
         dispatch({ type: 'SET_LINE_QUERY_MAP', payload: lineToQueryMap });
+
+        // Auto-open HTML preview dialog when template is returned
+        if (htmlTemplate) {
+          dispatch({ type: 'TOGGLE_HTML_PREVIEW' });
+        }
 
         // Auto-switch to result tab on mobile
         if (isMobile()) {
