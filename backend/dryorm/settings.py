@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_cotton",
     "django_extensions",
     "dryorm",
 ]
@@ -110,9 +109,6 @@ CACHES = {
         "LOCATION": "/app/cache",
     }
 }
-
-COTTON_DIR = "components"
-COTTON_SNAKE_CASED_NAMES = False
 
 import sentry_sdk
 
