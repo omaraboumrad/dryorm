@@ -18,7 +18,7 @@ import tasks
 
 class ReactHomeView(generic.TemplateView):
     """Serves the React frontend."""
-    template_name = "react.html"
+    template_name = "index.html"
 
 
 def save(request):
