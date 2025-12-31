@@ -531,17 +531,17 @@ EXECUTOR_TEMPLATES = {
         "dryorm tabular output": TABULAR_OUTPUT,
         "dryorm features": DRYORM_FEATURES,
     },
-    "sqlalchemy": {
-        "basic": SQLALCHEMY_BASIC,
-        "basic fk": SQLALCHEMY_BASIC_FK,
-        "query": SQLALCHEMY_QUERY,
-    },
-    "prisma": {
-        "basic": PRISMA_BASIC,
-        "basic fk": PRISMA_BASIC_FK,
-        "query": PRISMA_QUERY,
-        "many-to-many": PRISMA_MANY_TO_MANY,
-    }
+    # "sqlalchemy": {
+    #     "basic": SQLALCHEMY_BASIC,
+    #     "basic fk": SQLALCHEMY_BASIC_FK,
+    #     "query": SQLALCHEMY_QUERY,
+    # },
+    # "prisma": {
+    #     "basic": PRISMA_BASIC,
+    #     "basic fk": PRISMA_BASIC_FK,
+    #     "query": PRISMA_QUERY,
+    #     "many-to-many": PRISMA_MANY_TO_MANY,
+    # }
 }
 
 

@@ -157,50 +157,6 @@ services:
         image: dryorm-executor/python-django-postgis-6.0
         command: /bin/true
 
-    # SQLAlchemy Executors
-
-    executor-python-sqlalchemy-postgres-2.0:
-        build:
-            context: ./executors/python-sqlalchemy
-            dockerfile: Dockerfile.multi
-            target: postgres-2.0
-        image: dryorm-executor/python-sqlalchemy-postgres-2.0
-        command: /bin/true
-
-    executor-python-sqlalchemy-mariadb-2.0:
-        build:
-            context: ./executors/python-sqlalchemy
-            dockerfile: Dockerfile.multi
-            target: mariadb-2.0
-        image: dryorm-executor/python-sqlalchemy-mariadb-2.0
-        command: /bin/true
-
-    # Prisma Executors
-
-    executor-nodejs-prisma-postgres-6.3:
-        build:
-            context: ./executors/nodejs-prisma
-            dockerfile: Dockerfile.multi
-            target: postgres-6.3
-        image: dryorm-executor/nodejs-prisma-postgres-6.3
-        command: /bin/true
-
-    executor-nodejs-prisma-mariadb-6.3:
-        build:
-            context: ./executors/nodejs-prisma
-            dockerfile: Dockerfile.multi
-            target: mariadb-6.3
-        image: dryorm-executor/nodejs-prisma-mariadb-6.3
-        command: /bin/true
-
-    executor-nodejs-prisma-sqlite-6.3:
-        build:
-            context: ./executors/nodejs-prisma
-            dockerfile: Dockerfile.multi
-            target: sqlite-6.3
-        image: dryorm-executor/nodejs-prisma-sqlite-6.3
-        command: /bin/true
-
     # Django PR Mode Executors (no Django pre-installed)
 
     executor-python-django-pr-postgres:
@@ -226,3 +182,48 @@ services:
             target: pr-base-postgis
         image: dryorm-executor/python-django-pr-postgis
         command: /bin/true
+
+    # SQLAlchemy Executors
+
+    # executor-python-sqlalchemy-postgres-2.0:
+    #     build:
+    #         context: ./executors/python-sqlalchemy
+    #         dockerfile: Dockerfile.multi
+    #         target: postgres-2.0
+    #     image: dryorm-executor/python-sqlalchemy-postgres-2.0
+    #     command: /bin/true
+
+    # executor-python-sqlalchemy-mariadb-2.0:
+    #     build:
+    #         context: ./executors/python-sqlalchemy
+    #         dockerfile: Dockerfile.multi
+    #         target: mariadb-2.0
+    #     image: dryorm-executor/python-sqlalchemy-mariadb-2.0
+    #     command: /bin/true
+
+    # Prisma Executors
+
+    # executor-nodejs-prisma-postgres-6.3:
+    #     build:
+    #         context: ./executors/nodejs-prisma
+    #         dockerfile: Dockerfile.multi
+    #         target: postgres-6.3
+    #     image: dryorm-executor/nodejs-prisma-postgres-6.3
+    #     command: /bin/true
+
+    # executor-nodejs-prisma-mariadb-6.3:
+    #     build:
+    #         context: ./executors/nodejs-prisma
+    #         dockerfile: Dockerfile.multi
+    #         target: mariadb-6.3
+    #     image: dryorm-executor/nodejs-prisma-mariadb-6.3
+    #     command: /bin/true
+
+    # executor-nodejs-prisma-sqlite-6.3:
+    #     build:
+    #         context: ./executors/nodejs-prisma
+    #         dockerfile: Dockerfile.multi
+    #         target: sqlite-6.3
+    #     image: dryorm-executor/nodejs-prisma-sqlite-6.3
+    #     command: /bin/true
+
