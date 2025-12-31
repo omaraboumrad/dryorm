@@ -195,6 +195,15 @@ export function SunIcon({ className = '', size = 24, ...props }) {
   );
 }
 
+// Monitor/System icon
+export function MonitorIcon({ className = '', size = 24, ...props }) {
+  return (
+    <svg {...defaultProps} width={size} height={size} fill="none" viewBox="0 0 24 24" className={className} {...props}>
+      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 21h8m-4-4v4M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z" />
+    </svg>
+  );
+}
+
 // X/Close icon
 export function XIcon({ className = '', size = 24, ...props }) {
   return (

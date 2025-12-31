@@ -10,6 +10,7 @@ import {
   JourneyIcon,
   MoonIcon,
   SunIcon,
+  MonitorIcon,
   ExpandIcon,
   SpinnerIcon,
   InfoIcon,
@@ -45,14 +46,19 @@ function Header() {
 
         {/* Right: Action buttons */}
         <div className="flex items-center gap-2">
-          {/* Dark mode toggle - always visible, leftmost */}
+          {/* Theme toggle - cycles through system -> light -> dark */}
           <Button
             variant="header"
             size="icon"
-            onClick={() => dispatch({ type: 'TOGGLE_DARK_MODE' })}
-            title={state.darkMode ? 'Light Mode' : 'Dark Mode'}
+            onClick={() => {
+              const nextMode = { system: 'light', light: 'dark', dark: 'system' };
+              dispatch({ type: 'SET_THEME_MODE', payload: nextMode[state.themeMode] });
+            }}
+            title={{ system: 'System Theme', light: 'Light Mode', dark: 'Dark Mode' }[state.themeMode]}
           >
-            {state.darkMode ? <SunIcon size={20} className="text-white" /> : <MoonIcon size={20} className="text-white" />}
+            {state.themeMode === 'system' && <MonitorIcon size={20} className="text-white" />}
+            {state.themeMode === 'light' && <SunIcon size={20} className="text-white" />}
+            {state.themeMode === 'dark' && <MoonIcon size={20} className="text-white" />}
           </Button>
 
           {/* Browse - always visible */}

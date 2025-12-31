@@ -106,14 +106,35 @@ function App() {
     loadInitialData();
   }, [dispatch]);
 
-  // Apply dark mode class
+  // Apply dark mode class based on themeMode
   useEffect(() => {
-    if (state.darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [state.darkMode]);
+    const applyTheme = () => {
+      let isDark;
+      if (state.themeMode === 'system') {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      } else {
+        isDark = state.themeMode === 'dark';
+      }
+
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    applyTheme();
+
+    // Listen for system preference changes when in system mode
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (state.themeMode === 'system') {
+        applyTheme();
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [state.themeMode]);
 
   // Handle popstate for browser navigation
   useEffect(() => {

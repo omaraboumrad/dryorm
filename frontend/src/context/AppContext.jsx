@@ -17,8 +17,8 @@ const initialState = {
   zenMode: false,
   shouldAutoRun: false,
 
-  // Theme
-  darkMode: false,
+  // Theme: 'light', 'dark', or 'system'
+  themeMode: 'system',
 
   // Editor
   code: `from django.db import models
@@ -79,9 +79,9 @@ def run():
 // Load persisted state from localStorage
 function loadPersistedState() {
   try {
-    const darkMode = localStorage.getItem('darkMode') === 'true';
+    const themeMode = localStorage.getItem('themeMode') || 'system';
     const zenMode = localStorage.getItem('zenMode') === 'true';
-    return { darkMode, zenMode };
+    return { themeMode, zenMode };
   } catch {
     return {};
   }
@@ -101,7 +101,7 @@ const actions = {
   TOGGLE_REF_DIALOG: 'TOGGLE_REF_DIALOG',
   TOGGLE_SHARE_DIALOG: 'TOGGLE_SHARE_DIALOG',
   TOGGLE_HTML_PREVIEW: 'TOGGLE_HTML_PREVIEW',
-  TOGGLE_DARK_MODE: 'TOGGLE_DARK_MODE',
+  SET_THEME_MODE: 'SET_THEME_MODE',
   TOGGLE_ZEN_MODE: 'TOGGLE_ZEN_MODE',
   SET_SHOW_CODE: 'SET_SHOW_CODE',
   SET_SHOW_RESULT: 'SET_SHOW_RESULT',
@@ -180,12 +180,12 @@ function appReducer(state, action) {
     case actions.TOGGLE_HTML_PREVIEW:
       return { ...state, showHtmlPreview: !state.showHtmlPreview };
 
-    case actions.TOGGLE_DARK_MODE: {
-      const newDarkMode = !state.darkMode;
+    case actions.SET_THEME_MODE: {
+      const newThemeMode = action.payload;
       try {
-        localStorage.setItem('darkMode', newDarkMode);
+        localStorage.setItem('themeMode', newThemeMode);
       } catch {}
-      return { ...state, darkMode: newDarkMode };
+      return { ...state, themeMode: newThemeMode };
     }
 
     case actions.TOGGLE_ZEN_MODE: {

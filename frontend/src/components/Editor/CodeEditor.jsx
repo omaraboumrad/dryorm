@@ -8,14 +8,37 @@ import { updateQueryMarkers } from '../../lib/codemirror/queryGutter';
 import VersionLabel from './VersionLabel';
 import QueryPopup from './QueryPopup';
 
+// Compute actual dark mode from themeMode
+function getIsDark(themeMode) {
+  if (themeMode === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  return themeMode === 'dark';
+}
+
 function CodeEditor() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const { execute } = useExecute();
 
+  // Compute actual dark mode
+  const [isDark, setIsDark] = useState(() => getIsDark(state.themeMode));
+
+  // Update isDark when themeMode changes or system preference changes
+  useEffect(() => {
+    setIsDark(getIsDark(state.themeMode));
+
+    if (state.themeMode === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = () => setIsDark(mediaQuery.matches);
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+    }
+  }, [state.themeMode]);
+
   const editorRef = useRef(null);
   const viewRef = useRef(null);
-  const darkModeRef = useRef(state.darkMode);
+  const darkModeRef = useRef(isDark);
   const executeRef = useRef(execute);
   const lineToQueryMapRef = useRef(state.lineToQueryMap);
 
@@ -109,7 +132,7 @@ function CodeEditor() {
         () => executeRef.current(false),
         () => executeRef.current(true)
       ),
-      ...createBaseExtensions(state.darkMode),
+      ...createBaseExtensions(isDark),
       // Update state when content changes or cursor moves
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
@@ -144,7 +167,7 @@ function CodeEditor() {
     });
 
     viewRef.current = view;
-    darkModeRef.current = state.darkMode;
+    darkModeRef.current = isDark;
     dispatch({ type: 'SET_EDITOR_VIEW', payload: view });
 
     return () => {
@@ -153,7 +176,7 @@ function CodeEditor() {
         viewRef.current = null;
       }
     };
-  }, [state.darkMode]); // Recreate editor when dark mode changes
+  }, [isDark]); // Recreate editor when dark mode changes
 
   // Update editor content when code changes externally (e.g., loading a snippet)
   useEffect(() => {
