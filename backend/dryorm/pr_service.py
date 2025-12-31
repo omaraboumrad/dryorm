@@ -179,8 +179,8 @@ class RefService:
         state = pr_data["state"]
         author = pr_data["user"]["login"]
 
-        # Fetch the PR ref
-        self._fetch_ref(f"pull/{pr_id}/head:refs/pr/{pr_id}")
+        # Fetch the PR ref (+ forces update even after force-push)
+        self._fetch_ref(f"+pull/{pr_id}/head:refs/pr/{pr_id}")
 
         # Create/get worktree
         worktree_path = self._ensure_worktree("pr", str(pr_id), sha, f"refs/pr/{pr_id}")
@@ -250,9 +250,9 @@ class RefService:
         sha = branch_data["commit"]["sha"]
         author = branch_data["commit"]["author"]["login"] if branch_data["commit"].get("author") else "unknown"
 
-        # Fetch the branch
+        # Fetch the branch (+ forces update even after force-push)
         safe_branch = branch_name.replace("/", "__")
-        self._fetch_ref(f"{branch_name}:refs/heads/{safe_branch}")
+        self._fetch_ref(f"+{branch_name}:refs/heads/{safe_branch}")
 
         # Create/get worktree
         worktree_path = self._ensure_worktree("branch", branch_name, sha, f"refs/heads/{safe_branch}")
