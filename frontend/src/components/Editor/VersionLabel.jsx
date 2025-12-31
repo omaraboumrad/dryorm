@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppState, useAppDispatch } from '../../context/AppContext';
-import { CogIcon, GitHubIcon } from '../icons';
+import { CogIcon, GitHubIcon, CodeIcon } from '../icons';
 
 function VersionLabel() {
   const state = useAppState();
@@ -58,7 +58,16 @@ function VersionLabel() {
   );
 
   return (
-    <div className="h-10 flex items-center justify-end gap-2 px-3 bg-theme-surface border-b border-theme-border">
+    <div className="h-10 flex items-center justify-between px-3 bg-theme-surface border-b border-theme-border">
+      {/* Left: Code title */}
+      <div className="flex items-center gap-2">
+        <span className="flex items-center gap-2 font-bold text-theme-text">
+          <CodeIcon size={18} />
+          Code
+        </span>
+      </div>
+
+      {/* Right: Version info and settings */}
       <div className="flex items-center gap-2 text-sm font-mono text-gray-700 dark:text-gray-300">
         {githubUrl ? (
           <a
