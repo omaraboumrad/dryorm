@@ -21,6 +21,7 @@ class ReactHomeView(generic.TemplateView):
     template_name = "index.html"
 
 
+@csrf_exempt
 def save(request):
     if request.method != "POST":
         return http.HttpResponseNotAllowed("nope!")

@@ -34,14 +34,12 @@ function AboutPage() {
           <h2 className="text-xl font-semibold text-theme-text border-b border-theme-border pb-2 mb-4"># Intro</h2>
           <div className="text-theme-text-secondary space-y-4">
             <p>
-              DryORM allows you to run Django ORM code against supported Databases (with experimental support for SQLAlchemy and Prisma). The technologies used to power this webapp are:
+              DryORM allows you to run Django ORM code against supported Databases. The technologies used to power this webapp are:
             </p>
             <ul className="list-disc list-inside space-y-2">
               <li>
-                <strong className="text-theme-text">ORMs & Query Builders:</strong>{' '}
-                <a className="text-django-secondary hover:underline" href="https://www.djangoproject.com" target="_blank" rel="noopener noreferrer">Django ORM</a> /{' '}
-                <a className="text-django-secondary hover:underline" href="https://www.sqlalchemy.org/" target="_blank" rel="noopener noreferrer">SQLAlchemy</a> (experimental) /{' '}
-                <a className="text-django-secondary hover:underline" href="https://www.prisma.io/" target="_blank" rel="noopener noreferrer">Prisma</a> (experimental)
+                <strong className="text-theme-text">ORM:</strong>{' '}
+                <a className="text-django-secondary hover:underline" href="https://www.djangoproject.com" target="_blank" rel="noopener noreferrer">Django ORM</a>
               </li>
               <li>
                 <strong className="text-theme-text">Frameworks & Libraries:</strong>{' '}
@@ -63,7 +61,6 @@ function AboutPage() {
                 Django's Discord Community
               </a>{' '}
               Staff with a medium to assist users with their ORM questions rather quickly.
-              The implementation is in fact framework-agnostic (as can be seen by the experimental support), however Django will remain the primary purpose for the foreseeable future.
             </p>
             <p>
               Since I'm not forcing anyone to login, there are several safeguards in place. Nevertheless, I urge you not to cause harm. The limitations are as follows:
@@ -72,7 +69,7 @@ function AboutPage() {
               <li>Rate limits</li>
               <li>10 concurrent executions</li>
               <li>10s timeout</li>
-              <li>75MB limit for Django/SQLAlchemy and 150MB for Prisma</li>
+              <li>75MB memory limit</li>
               <li>No network</li>
             </ul>
             <p>Thank you to everyone that has helped test and provide feedback on the project, notably the awesome Django Discord Staff!</p>
@@ -86,6 +83,12 @@ function AboutPage() {
         <section>
           <h2 className="text-xl font-semibold text-theme-text border-b border-t border-theme-border py-2 mb-4"># Changelog</h2>
           <div className="space-y-4">
+            <ChangelogEntry date="December 31st, 2025">
+              <li>UI - complete rewrite from vanilla JS to React</li>
+              <li>UI - adds theme switching (Light / Dark / System preference)</li>
+              <li>Engine - removed experimental support for SQLAlchemy and Prisma</li>
+            </ChangelogEntry>
+
             <ChangelogEntry date="December 12th, 2025">
               <li>Engine - adds support for running Django Branches, Tags and PRs from GitHub <a className="text-django-secondary hover:underline" href="/run-against-pr-20462/run">(Example)</a></li>
             </ChangelogEntry>
@@ -102,11 +105,6 @@ function AboutPage() {
 
             <ChangelogEntry date="November 25th, 2025">
               <li>Engine - templates available for different executors</li>
-            </ChangelogEntry>
-
-            <ChangelogEntry date="November 24th, 2025">
-              <li>Engine - adds support for Prisma <a className="text-django-secondary hover:underline" href="/prisma-example/run">(Example)</a></li>
-              <li>Engine - adds support for SQLAlchemy <a className="text-django-secondary hover:underline" href="/sqlalchemy-example/run">(Example)</a></li>
             </ChangelogEntry>
 
             <ChangelogEntry date="November 11th, 2025">
