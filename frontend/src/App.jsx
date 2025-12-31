@@ -11,7 +11,7 @@ import HtmlPreview from './components/Dialogs/HtmlPreview';
 import FloatingControls from './components/ZenMode/FloatingControls';
 import AboutPage from './components/Pages/AboutPage';
 import BrowsePage from './components/Pages/BrowsePage';
-import { fetchConfig, fetchSnippet } from './lib/api';
+import { fetchConfig, fetchSnippet, fetchJourneys, fetchJourneyChapter } from './lib/api';
 
 function App() {
   const state = useAppState();
@@ -50,9 +50,31 @@ function App() {
         dispatch({ type: 'SET_PAGE', payload: 'home' });
         const slug = path.slice(3);
         const hash = window.location.hash.slice(1);
+
         if (slug) {
           dispatch({ type: 'SET_CURRENT_JOURNEY', payload: { slug, chapter: hash || null } });
+
+          // Load journeys list for the sidebar
+          try {
+            const data = await fetchJourneys();
+            dispatch({ type: 'SET_JOURNEYS', payload: data.journeys || data });
+          } catch (err) {
+            console.error('Failed to load journeys:', err);
+          }
+
+          // If there's a chapter, load its content
+          if (hash) {
+            try {
+              const chapterData = await fetchJourneyChapter(slug, hash);
+              if (chapterData.code) {
+                dispatch({ type: 'SET_CODE', payload: chapterData.code });
+              }
+            } catch (err) {
+              console.error('Failed to load chapter:', err);
+            }
+          }
         }
+
         dispatch({ type: 'TOGGLE_JOURNEY_NAV' });
         return;
       }
@@ -95,12 +117,24 @@ function App() {
 
   // Handle popstate for browser navigation
   useEffect(() => {
-    const handlePopState = () => {
+    const handlePopState = async () => {
       const path = window.location.pathname;
       if (path.startsWith('/j/')) {
         const slug = path.slice(3);
         const hash = window.location.hash.slice(1);
         dispatch({ type: 'SET_CURRENT_JOURNEY', payload: { slug, chapter: hash || null } });
+
+        // Load chapter content if there's a hash
+        if (slug && hash) {
+          try {
+            const chapterData = await fetchJourneyChapter(slug, hash);
+            if (chapterData.code) {
+              dispatch({ type: 'SET_CODE', payload: chapterData.code });
+            }
+          } catch (err) {
+            console.error('Failed to load chapter:', err);
+          }
+        }
       }
     };
 
