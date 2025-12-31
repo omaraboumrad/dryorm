@@ -32,37 +32,48 @@ function QueryFilters() {
     });
   };
 
+  // Short labels for smaller screens
+  const shortLabels = {
+    SELECT: 'SEL',
+    INSERT: 'INS',
+    UPDATE: 'UPD',
+    DELETE: 'DEL',
+    DDL: 'DDL',
+    TCL: 'TCL',
+  };
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
       {FILTER_TYPES.map((type) => (
         <button
           key={type}
           onClick={() => toggleFilter(type)}
-          className={`px-2 py-1 text-xs font-medium rounded transition-colors
+          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-medium rounded transition-colors whitespace-nowrap flex-shrink-0
             ${state.queryFilters[type]
               ? 'bg-django-primary text-white'
               : 'bg-theme-surface/50 text-theme-text-muted hover:bg-theme-surface hover:text-theme-text'
             }`}
         >
-          {type}
+          <span className="sm:hidden">{shortLabels[type]}</span>
+          <span className="hidden sm:inline">{type}</span>
           {typeCounts[type] > 0 && (
-            <span className="ml-1 opacity-70">{typeCounts[type]}</span>
+            <span className="ml-0.5 sm:ml-1 opacity-70">{typeCounts[type]}</span>
           )}
         </button>
       ))}
 
-      <div className="w-px h-5 bg-theme-border mx-1" />
+      <div className="w-px h-4 sm:h-5 bg-theme-border mx-0.5 sm:mx-1 flex-shrink-0" />
 
       <button
         onClick={() => toggleFilter('reverse')}
-        className={`p-1.5 rounded transition-colors
+        className={`p-1 sm:p-1.5 rounded transition-colors flex-shrink-0
           ${state.queryFilters.reverse
             ? 'bg-django-primary text-white'
             : 'bg-theme-surface/50 text-theme-text-muted hover:bg-theme-surface hover:text-theme-text'
           }`}
         title="Reverse order"
       >
-        <ReverseIcon size={16} />
+        <ReverseIcon size={14} className="sm:w-4 sm:h-4" />
       </button>
     </div>
   );
