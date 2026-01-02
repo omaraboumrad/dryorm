@@ -463,6 +463,15 @@ div.cm-cursor {
   background-color: rgba(68, 183, 139, 0.15);
 }
 
+/* Output line highlight in zen mode - subtle amber */
+.cm-output-line-highlight {
+  background-color: rgba(245, 158, 11, 0.08);
+}
+
+.dark .cm-output-line-highlight {
+  background-color: rgba(245, 158, 11, 0.15);
+}
+
 /* Container for query hint elements */
 .cm-zen-query-hint-container {
   display: inline-flex;
@@ -490,6 +499,25 @@ div.cm-cursor {
   background-color: rgba(68, 183, 139, 0.15);
 }
 
+/* Output count badge */
+.cm-zen-output-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-right: 6px;
+  font-size: 11px;
+  line-height: 1;
+  color: #b45309;
+  background-color: rgba(245, 158, 11, 0.15);
+  border-radius: 3px;
+  opacity: 0.8;
+}
+
+.dark .cm-zen-output-hint {
+  color: #fbbf24;
+  background-color: rgba(245, 158, 11, 0.2);
+}
+
 /* Keyboard hint - italic, no background */
 .cm-zen-query-keys {
   margin-left: 8px;
@@ -505,7 +533,7 @@ div.cm-cursor {
 
 /* Zen mode inline query display (shown on Alt press) */
 .cm-zen-inline-queries {
-  display: inline-block;
+  display: block;
   width: fit-content;
   max-width: calc(100% - 60px);
   padding: 8px 12px;
@@ -520,6 +548,25 @@ div.cm-cursor {
 .dark .cm-zen-inline-queries {
   background-color: rgba(68, 183, 139, 0.18);
   border-left-color: rgba(68, 183, 139, 0.5);
+}
+
+/* Zen mode inline outputs container (amber theme) */
+.cm-zen-inline-outputs {
+  display: block;
+  width: fit-content;
+  max-width: calc(100% - 60px);
+  padding: 8px 12px;
+  margin: 4px 0;
+  /* margin-left is set dynamically to match line indentation */
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid rgba(245, 158, 11, 0.5);
+  border-radius: 0 4px 4px 0;
+  font-family: monospace;
+}
+
+.dark .cm-zen-inline-outputs {
+  background-color: rgba(245, 158, 11, 0.18);
+  border-left-color: rgba(245, 158, 11, 0.5);
 }
 
 .cm-zen-query-block {
@@ -550,4 +597,37 @@ div.cm-cursor {
   background: var(--color-bg-surface);
   padding: 1px 6px;
   border-radius: 3px;
+}
+
+/* Output block styling */
+.cm-zen-output-block {
+  position: relative;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid rgba(245, 158, 11, 0.5);
+  border-radius: 0 4px 4px 0;
+}
+
+.cm-zen-output-block:last-child {
+  margin-bottom: 0;
+}
+
+.dark .cm-zen-output-block {
+  background-color: rgba(245, 158, 11, 0.15);
+  border-left-color: rgba(245, 158, 11, 0.4);
+}
+
+.cm-zen-output-text {
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #b45309;
+}
+
+.dark .cm-zen-output-text {
+  color: #fbbf24;
 }

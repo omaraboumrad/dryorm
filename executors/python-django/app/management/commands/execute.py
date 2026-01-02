@@ -1,3 +1,4 @@
+import builtins
 import contextlib
 import io
 import json
@@ -13,6 +14,66 @@ import sqlparse
 from . import mermaid
 
 from app import models
+
+
+class LineAwarePrintCapture:
+    """Captures print statements with their line numbers from user code"""
+
+    def __init__(self):
+        self.outputs = []
+        self.user_code_lines = []
+        self.original_print = builtins.print
+        self.output_buffer = io.StringIO()
+
+    def set_user_code(self, code):
+        """Store user code lines for line number tracking"""
+        self.user_code_lines = code.splitlines()
+
+    def get_user_code_line(self):
+        """Extract line number from user code in the stack trace"""
+        try:
+            stack = inspect.stack()
+            for frame_info in stack:
+                if frame_info.filename == "/app/app/models.py":
+                    line_number = frame_info.lineno
+                    if self.user_code_lines and 1 <= line_number <= len(self.user_code_lines):
+                        return {
+                            "line_number": line_number,
+                            "source_context": self.user_code_lines[line_number - 1].strip(),
+                        }
+        except Exception:
+            pass
+        return {}
+
+    def tracked_print(self, *args, **kwargs):
+        """Replacement print function that tracks line numbers"""
+        line_info = self.get_user_code_line()
+
+        # Capture the output
+        output = io.StringIO()
+        self.original_print(*args, file=output, **{k: v for k, v in kwargs.items() if k != 'file'})
+        output_text = output.getvalue().rstrip('\n')
+
+        # Store with line info
+        self.outputs.append({
+            "line_number": line_info.get("line_number"),
+            "output": output_text,
+        })
+
+        # Also write to the buffer for combined output
+        self.original_print(*args, file=self.output_buffer, **{k: v for k, v in kwargs.items() if k != 'file'})
+
+    def patch(self):
+        """Install the tracked print function"""
+        builtins.print = self.tracked_print
+
+    def restore(self):
+        """Restore the original print function"""
+        builtins.print = self.original_print
+
+    def get_combined_output(self):
+        """Get all output as a single string"""
+        return self.output_buffer.getvalue()
 
 
 def format_ddl(sql):
@@ -197,16 +258,23 @@ class Command(BaseCommand):
         query_logger = LineAwareQueryLogger()
         _global_query_logger = query_logger
 
+        # Initialize line-aware print capture
+        print_capture = LineAwarePrintCapture()
+
         # Read the user code to enable line tracking
         try:
             with open("/app/app/models.py", "r") as f:
                 user_code = f.read()
                 query_logger.set_user_code(user_code)
+                print_capture.set_user_code(user_code)
         except Exception:
             pass  # If we can't read the file, proceed without line tracking
 
         # Patch cursor for line tracking
         query_logger.patch_cursor()
+
+        # Patch print for line tracking
+        print_capture.patch()
 
         # Make _do_not_log available in models namespace
         models._do_not_log = _do_not_log
@@ -215,10 +283,11 @@ class Command(BaseCommand):
             sqlmigrate_queries = collect_ddl()
             connection.queries_log.clear()
             query_logger.queries.clear()  # Clear our custom queries too
+            print_capture.outputs.clear()  # Clear print outputs too
 
-            # Use same StringIO for both stdout and stderr to maintain order
-            out = io.StringIO()
-            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            # Capture stderr separately (print capture handles stdout)
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
                 if hasattr(models, "run"):
                     returned = models.run()
                 else:
@@ -229,8 +298,15 @@ class Command(BaseCommand):
             # Combine Django's queries with our line-aware queries
             all_queries = sqlmigrate_queries + format_sql_queries(query_logger.queries)
 
+            # Combine stdout from print capture with stderr
+            combined_output = print_capture.get_combined_output()
+            stderr_output = err.getvalue()
+            if stderr_output:
+                combined_output += stderr_output
+
             combined = dict(
-                output=out.getvalue(),
+                output=combined_output,
+                outputs=print_capture.outputs,  # Line-aware print outputs
                 erd=erd,
                 queries=all_queries,
                 returned=returned,
@@ -245,5 +321,5 @@ class Command(BaseCommand):
             # Also write to stdout for backward compatibility (can be removed later)
             self.stdout.write(json.dumps(combined, indent=2))
         finally:
-            # Restore original cursor method
-            pass  # The monkey patch will be cleaned up when the process ends
+            # Restore original print function
+            print_capture.restore()

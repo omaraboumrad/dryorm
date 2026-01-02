@@ -78,6 +78,7 @@ def run():
 
   // Editor-Query linking
   lineToQueryMap: new Map(),
+  lineToOutputMap: new Map(),
   highlightedQueryIndex: null,
 };
 
@@ -119,6 +120,7 @@ const actions = {
   CLEAR_CURRENT_REF: 'CLEAR_CURRENT_REF',
   SET_QUERY_FILTER: 'SET_QUERY_FILTER',
   SET_LINE_QUERY_MAP: 'SET_LINE_QUERY_MAP',
+  SET_LINE_OUTPUT_MAP: 'SET_LINE_OUTPUT_MAP',
   SET_HIGHLIGHTED_QUERY: 'SET_HIGHLIGHTED_QUERY',
   SET_JOURNEYS: 'SET_JOURNEYS',
   SET_CURRENT_JOURNEY: 'SET_CURRENT_JOURNEY',
@@ -246,6 +248,9 @@ function appReducer(state, action) {
 
     case actions.SET_LINE_QUERY_MAP:
       return { ...state, lineToQueryMap: action.payload };
+
+    case actions.SET_LINE_OUTPUT_MAP:
+      return { ...state, lineToOutputMap: action.payload };
 
     case actions.SET_HIGHLIGHTED_QUERY:
       return { ...state, highlightedQueryIndex: action.payload };

@@ -11,6 +11,7 @@ import {
   expandZenLine,
   collapseZenLine,
   updateZenQueriesData,
+  updateZenOutputsData,
   toggleAllZenQueries,
   setActiveHintLine
 } from '../../lib/codemirror/inlineResults';
@@ -50,6 +51,7 @@ function CodeEditor() {
   const darkModeRef = useRef(isDark);
   const executeRef = useRef(execute);
   const lineToQueryMapRef = useRef(state.lineToQueryMap);
+  const lineToOutputMapRef = useRef(state.lineToOutputMap);
   const zenModeRef = useRef(state.zenMode);
 
   // Hover popup state
@@ -71,6 +73,10 @@ function CodeEditor() {
   }, [state.lineToQueryMap]);
 
   useEffect(() => {
+    lineToOutputMapRef.current = state.lineToOutputMap;
+  }, [state.lineToOutputMap]);
+
+  useEffect(() => {
     zenModeRef.current = state.zenMode;
   }, [state.zenMode]);
 
@@ -89,12 +95,14 @@ function CodeEditor() {
 
       if (e.key === 'Alt') {
         setIsAltPressed(true);
-        // In zen mode, expand the current line to show queries (only if not Ctrl+Alt)
+        // In zen mode, expand the current line to show queries/outputs (only if not Ctrl+Alt)
         if (!e.ctrlKey && state.zenMode && viewRef.current) {
           const pos = viewRef.current.state.selection.main.head;
           const line = viewRef.current.state.doc.lineAt(pos);
           const lineNumber = line.number;
-          if (lineToQueryMapRef.current && lineToQueryMapRef.current.has(lineNumber)) {
+          const hasQueries = lineToQueryMapRef.current && lineToQueryMapRef.current.has(lineNumber);
+          const hasOutputs = lineToOutputMapRef.current && lineToOutputMapRef.current.has(lineNumber);
+          if (hasQueries || hasOutputs) {
             expandZenLine(viewRef.current, lineNumber);
           }
         }
@@ -270,18 +278,20 @@ function CodeEditor() {
     }
   }, [state.zenMode]);
 
-  // Update query line highlights and queries data in zen mode
+  // Update query line highlights and queries/outputs data in zen mode
   useEffect(() => {
     if (!viewRef.current) return;
 
-    if (state.zenMode && state.lineToQueryMap) {
-      updateQueryLineHighlights(viewRef.current, state.lineToQueryMap);
+    if (state.zenMode && (state.lineToQueryMap || state.lineToOutputMap)) {
+      updateQueryLineHighlights(viewRef.current, state.lineToQueryMap, state.lineToOutputMap);
       updateZenQueriesData(viewRef.current, state.lineToQueryMap);
+      updateZenOutputsData(viewRef.current, state.lineToOutputMap);
     } else {
       clearQueryLineHighlights(viewRef.current);
       updateZenQueriesData(viewRef.current, new Map());
+      updateZenOutputsData(viewRef.current, new Map());
     }
-  }, [state.zenMode, state.lineToQueryMap]);
+  }, [state.zenMode, state.lineToQueryMap, state.lineToOutputMap]);
 
   return (
     <div className={`h-full flex flex-col ${state.zenMode ? 'zen-editor' : ''}`}>

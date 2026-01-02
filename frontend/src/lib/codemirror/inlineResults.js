@@ -82,45 +82,74 @@ const zenActiveHintLineState = StateField.define({
 
 // Widget for zen mode inline query expansion (shows below the line when Alt is pressed)
 class ZenInlineQueryWidget extends WidgetType {
-  constructor(queries, indentChars) {
+  constructor(queries, outputs, indentChars) {
     super();
-    this.queries = queries;
+    this.queries = queries || [];
+    this.outputs = outputs || [];
     this.indentChars = indentChars || 0;
   }
 
   toDOM() {
-    const container = document.createElement('div');
-    container.className = 'cm-zen-inline-queries';
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'block';
+
     // Match the line's indentation plus gutter offset
     const gutterOffset = 10;
-    container.style.marginLeft = `calc(${gutterOffset}px + ${this.indentChars}ch)`;
+    const marginLeft = `calc(${gutterOffset}px + ${this.indentChars}ch)`;
 
-    this.queries.forEach((query) => {
-      const queryBlock = document.createElement('div');
-      queryBlock.className = 'cm-zen-query-block';
+    // Show outputs in their own purple container
+    if (this.outputs.length > 0) {
+      const outputContainer = document.createElement('div');
+      outputContainer.className = 'cm-zen-inline-outputs';
+      outputContainer.style.marginLeft = marginLeft;
 
-      const sql = document.createElement('pre');
-      sql.className = 'cm-zen-query-sql';
-      sql.textContent = query.sql || query;
-      queryBlock.appendChild(sql);
+      this.outputs.forEach((output) => {
+        const text = document.createElement('pre');
+        text.className = 'cm-zen-output-text';
+        text.textContent = output.output || output;
+        outputContainer.appendChild(text);
+      });
 
-      if (query.time) {
-        const time = document.createElement('span');
-        time.className = 'cm-zen-query-time';
-        time.textContent = `${query.time}ms`;
-        queryBlock.appendChild(time);
-      }
+      wrapper.appendChild(outputContainer);
+    }
 
-      container.appendChild(queryBlock);
-    });
+    // Show queries in green container
+    if (this.queries.length > 0) {
+      const queryContainer = document.createElement('div');
+      queryContainer.className = 'cm-zen-inline-queries';
+      queryContainer.style.marginLeft = marginLeft;
 
-    return container;
+      this.queries.forEach((query) => {
+        const queryBlock = document.createElement('div');
+        queryBlock.className = 'cm-zen-query-block';
+
+        const sql = document.createElement('pre');
+        sql.className = 'cm-zen-query-sql';
+        sql.textContent = query.sql || query;
+        queryBlock.appendChild(sql);
+
+        if (query.time) {
+          const time = document.createElement('span');
+          time.className = 'cm-zen-query-time';
+          time.textContent = `${query.time}ms`;
+          queryBlock.appendChild(time);
+        }
+
+        queryContainer.appendChild(queryBlock);
+      });
+
+      wrapper.appendChild(queryContainer);
+    }
+
+    return wrapper;
   }
 
   eq(other) {
     return this.indentChars === other.indentChars &&
            this.queries.length === other.queries.length &&
-           this.queries.every((q, i) => q.sql === other.queries[i].sql);
+           this.outputs.length === other.outputs.length &&
+           this.queries.every((q, i) => q.sql === other.queries[i].sql) &&
+           this.outputs.every((o, i) => o.output === other.outputs[i].output);
   }
 }
 
@@ -361,12 +390,15 @@ export function clearInlineResults(view) {
 
 // Line highlight decoration for lines with queries
 const queryLineHighlight = Decoration.line({ class: 'cm-query-line-highlight' });
+// Line highlight decoration for lines with outputs (purple)
+const outputLineHighlight = Decoration.line({ class: 'cm-output-line-highlight' });
 
-// Hint widget shown at end of query lines
+// Hint widget shown at end of lines with queries or outputs
 class ZenQueryHintWidget extends WidgetType {
-  constructor(count, isActive) {
+  constructor(queryCount, outputCount, isActive) {
     super();
-    this.count = count;
+    this.queryCount = queryCount || 0;
+    this.outputCount = outputCount || 0;
     this.isActive = isActive;
   }
 
@@ -374,10 +406,21 @@ class ZenQueryHintWidget extends WidgetType {
     const container = document.createElement('span');
     container.className = 'cm-zen-query-hint-container';
 
-    const badge = document.createElement('span');
-    badge.className = 'cm-zen-query-hint';
-    badge.textContent = this.count === 1 ? '1 query' : `${this.count} queries`;
-    container.appendChild(badge);
+    // Show output badge if there are outputs
+    if (this.outputCount > 0) {
+      const outputBadge = document.createElement('span');
+      outputBadge.className = 'cm-zen-output-hint';
+      outputBadge.textContent = this.outputCount === 1 ? '1 output' : `${this.outputCount} outputs`;
+      container.appendChild(outputBadge);
+    }
+
+    // Show query badge if there are queries
+    if (this.queryCount > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'cm-zen-query-hint';
+      badge.textContent = this.queryCount === 1 ? '1 query' : `${this.queryCount} queries`;
+      container.appendChild(badge);
+    }
 
     if (this.isActive) {
       const keys = document.createElement('span');
@@ -390,7 +433,9 @@ class ZenQueryHintWidget extends WidgetType {
   }
 
   eq(other) {
-    return this.count === other.count && this.isActive === other.isActive;
+    return this.queryCount === other.queryCount &&
+           this.outputCount === other.outputCount &&
+           this.isActive === other.isActive;
   }
 }
 
@@ -398,7 +443,7 @@ class ZenQueryHintWidget extends WidgetType {
 // Stores the data needed to rebuild decorations
 const queryLineHighlightsDataField = StateField.define({
   create() {
-    return { lineNumbers: new Set(), queryCounts: new Map() };
+    return { lineNumbers: new Set(), queryCounts: new Map(), outputCounts: new Map() };
   },
   update(data, tr) {
     for (const effect of tr.effects) {
@@ -441,14 +486,16 @@ const queryLineHighlightsField = StateField.define({
       try {
         if (lineNum >= 1 && lineNum <= tr.state.doc.lines) {
           const line = tr.state.doc.line(lineNum);
-          // Add line background
-          decos.push(queryLineHighlight.range(line.from));
+          const queryCount = data.queryCounts?.get(lineNum) || 0;
+          const outputCount = data.outputCounts?.get(lineNum) || 0;
+          // Use purple highlight for lines with outputs, green for query-only lines
+          const highlight = outputCount > 0 ? outputLineHighlight : queryLineHighlight;
+          decos.push(highlight.range(line.from));
           // Add hint widget at end of line
-          const count = data.queryCounts?.get(lineNum) || 1;
           const isActive = lineNum === activeHintLine;
           decos.push(
             Decoration.widget({
-              widget: new ZenQueryHintWidget(count, isActive),
+              widget: new ZenQueryHintWidget(queryCount, outputCount, isActive),
               side: 1000, // high value to ensure it stays at end of line content
             }).range(line.to)
           );
@@ -470,18 +517,32 @@ const queryLineHighlightsField = StateField.define({
  * Update query line highlights in the editor (for zen mode)
  * @param {EditorView} view - The CodeMirror editor view
  * @param {Map} lineToQueryMap - Map of line numbers to query arrays
+ * @param {Map} lineToOutputMap - Map of line numbers to output arrays
  */
-export function updateQueryLineHighlights(view, lineToQueryMap) {
+export function updateQueryLineHighlights(view, lineToQueryMap, lineToOutputMap) {
   if (!view) return;
-  const lineNumbers = lineToQueryMap ? new Set(lineToQueryMap.keys()) : new Set();
+
+  // Combine line numbers from both maps
+  const lineNumbers = new Set();
   const queryCounts = new Map();
+  const outputCounts = new Map();
+
   if (lineToQueryMap) {
     for (const [line, queries] of lineToQueryMap.entries()) {
+      lineNumbers.add(line);
       queryCounts.set(line, queries.length);
     }
   }
+
+  if (lineToOutputMap) {
+    for (const [line, outputs] of lineToOutputMap.entries()) {
+      lineNumbers.add(line);
+      outputCounts.set(line, outputs.length);
+    }
+  }
+
   view.dispatch({
-    effects: setQueryLineHighlights.of({ lineNumbers, queryCounts }),
+    effects: setQueryLineHighlights.of({ lineNumbers, queryCounts, outputCounts }),
   });
 }
 
@@ -491,7 +552,7 @@ export function updateQueryLineHighlights(view, lineToQueryMap) {
 export function clearQueryLineHighlights(view) {
   if (!view) return;
   view.dispatch({
-    effects: setQueryLineHighlights.of({ lineNumbers: new Set(), queryCounts: new Map() }),
+    effects: setQueryLineHighlights.of({ lineNumbers: new Set(), queryCounts: new Map(), outputCounts: new Map() }),
   });
 }
 
@@ -504,11 +565,12 @@ const zenInlineDecorationsField = StateField.define({
     const expandedLine = tr.state.field(zenExpandedLineState);
     const showAllQueries = tr.state.field(zenShowAllQueriesState);
     const queriesData = tr.state.field(zenQueriesDataField);
+    const outputsData = tr.state.field(zenOutputsDataField);
 
     // Check if we need to rebuild
     let needsRebuild = false;
     for (const effect of tr.effects) {
-      if (effect.is(setZenExpandedLine) || effect.is(setQueryLineHighlights) || effect.is(setZenShowAllQueries)) {
+      if (effect.is(setZenExpandedLine) || effect.is(setQueryLineHighlights) || effect.is(setZenShowAllQueries) || effect.is(setZenOutputsData)) {
         needsRebuild = true;
         break;
       }
@@ -520,10 +582,15 @@ const zenInlineDecorationsField = StateField.define({
 
     const widgets = [];
 
-    // Show all queries if Ctrl+Alt toggled
+    // Collect all line numbers that have queries or outputs
+    const allLineNums = new Set([...queriesData.keys(), ...outputsData.keys()]);
+
+    // Show all queries/outputs if Ctrl+Alt toggled
     if (showAllQueries) {
-      for (const [lineNum, queries] of queriesData.entries()) {
-        if (queries && queries.length > 0) {
+      for (const lineNum of allLineNums) {
+        const queries = queriesData.get(lineNum) || [];
+        const outputs = outputsData.get(lineNum) || [];
+        if (queries.length > 0 || outputs.length > 0) {
           try {
             if (lineNum >= 1 && lineNum <= tr.state.doc.lines) {
               const line = tr.state.doc.line(lineNum);
@@ -534,7 +601,7 @@ const zenInlineDecorationsField = StateField.define({
               const pos = nextLineStart <= tr.state.doc.length ? nextLineStart : line.to;
               widgets.push(
                 Decoration.widget({
-                  widget: new ZenInlineQueryWidget(queries, indent),
+                  widget: new ZenInlineQueryWidget(queries, outputs, indent),
                   block: true,
                   side: -1, // Appear above this position (i.e., after previous line)
                 }).range(pos)
@@ -547,8 +614,9 @@ const zenInlineDecorationsField = StateField.define({
       }
     } else if (expandedLine !== null) {
       // Show single expanded line (Alt key)
-      const queries = queriesData.get(expandedLine);
-      if (queries && queries.length > 0) {
+      const queries = queriesData.get(expandedLine) || [];
+      const outputs = outputsData.get(expandedLine) || [];
+      if (queries.length > 0 || outputs.length > 0) {
         try {
           if (expandedLine >= 1 && expandedLine <= tr.state.doc.lines) {
             const line = tr.state.doc.line(expandedLine);
@@ -558,7 +626,7 @@ const zenInlineDecorationsField = StateField.define({
             const pos = nextLineStart <= tr.state.doc.length ? nextLineStart : line.to;
             widgets.push(
               Decoration.widget({
-                widget: new ZenInlineQueryWidget(queries, indent),
+                widget: new ZenInlineQueryWidget(queries, outputs, indent),
                 block: true,
                 side: -1, // Appear above this position (i.e., after previous line)
               }).range(pos)
@@ -584,6 +652,7 @@ const zenInlineDecorationsField = StateField.define({
 
 // Store queries data for zen mode (line number -> queries)
 export const setZenQueriesData = StateEffect.define();
+export const setZenOutputsData = StateEffect.define();
 
 const zenQueriesDataField = StateField.define({
   create() {
@@ -592,6 +661,20 @@ const zenQueriesDataField = StateField.define({
   update(data, tr) {
     for (const effect of tr.effects) {
       if (effect.is(setZenQueriesData)) {
+        return effect.value;
+      }
+    }
+    return data;
+  },
+});
+
+const zenOutputsDataField = StateField.define({
+  create() {
+    return new Map();
+  },
+  update(data, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(setZenOutputsData)) {
         return effect.value;
       }
     }
@@ -659,6 +742,16 @@ export function updateZenQueriesData(view, lineToQueryMap) {
 }
 
 /**
+ * Update zen mode outputs data
+ */
+export function updateZenOutputsData(view, lineToOutputMap) {
+  if (!view) return;
+  view.dispatch({
+    effects: setZenOutputsData.of(lineToOutputMap || new Map()),
+  });
+}
+
+/**
  * Get inline results extensions for Zen mode
  */
 export function getInlineResultsExtensions() {
@@ -672,6 +765,7 @@ export function getInlineResultsExtensions() {
     zenExpandedLineState,
     zenShowAllQueriesState,
     zenQueriesDataField,
+    zenOutputsDataField,
     zenInlineDecorationsField,
   ];
 }

@@ -57,6 +57,20 @@ export function useExecute() {
           });
         }
 
+        // Build line to output map
+        const lineToOutputMap = new Map();
+        if (result.outputs) {
+          result.outputs.forEach((output, index) => {
+            const lineNumber = output.line_number;
+            if (lineNumber !== undefined && lineNumber !== null) {
+              if (!lineToOutputMap.has(lineNumber)) {
+                lineToOutputMap.set(lineNumber, []);
+              }
+              lineToOutputMap.get(lineNumber).push({ ...output, index });
+            }
+          });
+        }
+
         // Handle returned data - can be a string (HTML template) or object (data)
         let returnedData = null;
         let htmlTemplate = null;
@@ -78,6 +92,7 @@ export function useExecute() {
         });
 
         dispatch({ type: 'SET_LINE_QUERY_MAP', payload: lineToQueryMap });
+        dispatch({ type: 'SET_LINE_OUTPUT_MAP', payload: lineToOutputMap });
 
         // Auto-open HTML preview dialog when template is returned
         if (htmlTemplate) {
