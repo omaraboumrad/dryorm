@@ -82,10 +82,11 @@ const zenActiveHintLineState = StateField.define({
 
 // Widget for zen mode inline query expansion (shows below the line when Alt is pressed)
 class ZenInlineQueryWidget extends WidgetType {
-  constructor(queries, outputs, indentChars) {
+  constructor(queries, outputs, errors, indentChars) {
     super();
     this.queries = queries || [];
     this.outputs = outputs || [];
+    this.errors = errors || [];
     this.indentChars = indentChars || 0;
   }
 
@@ -97,7 +98,23 @@ class ZenInlineQueryWidget extends WidgetType {
     const gutterOffset = 10;
     const marginLeft = `calc(${gutterOffset}px + ${this.indentChars}ch)`;
 
-    // Show outputs in their own purple container
+    // Show errors first (most important)
+    if (this.errors.length > 0) {
+      const errorContainer = document.createElement('div');
+      errorContainer.className = 'cm-zen-inline-errors';
+      errorContainer.style.marginLeft = marginLeft;
+
+      this.errors.forEach((err) => {
+        const text = document.createElement('pre');
+        text.className = 'cm-zen-error-text';
+        text.textContent = err.error || err;
+        errorContainer.appendChild(text);
+      });
+
+      wrapper.appendChild(errorContainer);
+    }
+
+    // Show outputs in their own amber container
     if (this.outputs.length > 0) {
       const outputContainer = document.createElement('div');
       outputContainer.className = 'cm-zen-inline-outputs';
@@ -148,8 +165,10 @@ class ZenInlineQueryWidget extends WidgetType {
     return this.indentChars === other.indentChars &&
            this.queries.length === other.queries.length &&
            this.outputs.length === other.outputs.length &&
+           this.errors.length === other.errors.length &&
            this.queries.every((q, i) => q.sql === other.queries[i].sql) &&
-           this.outputs.every((o, i) => o.output === other.outputs[i].output);
+           this.outputs.every((o, i) => o.output === other.outputs[i].output) &&
+           this.errors.every((e, i) => e.error === other.errors[i].error);
   }
 }
 
@@ -390,21 +409,32 @@ export function clearInlineResults(view) {
 
 // Line highlight decoration for lines with queries
 const queryLineHighlight = Decoration.line({ class: 'cm-query-line-highlight' });
-// Line highlight decoration for lines with outputs (purple)
+// Line highlight decoration for lines with outputs (amber)
 const outputLineHighlight = Decoration.line({ class: 'cm-output-line-highlight' });
+// Line highlight decoration for lines with errors (red)
+const errorLineHighlight = Decoration.line({ class: 'cm-error-line-highlight' });
 
-// Hint widget shown at end of lines with queries or outputs
+// Hint widget shown at end of lines with queries, outputs, or errors
 class ZenQueryHintWidget extends WidgetType {
-  constructor(queryCount, outputCount, isActive) {
+  constructor(queryCount, outputCount, errorCount, isActive) {
     super();
     this.queryCount = queryCount || 0;
     this.outputCount = outputCount || 0;
+    this.errorCount = errorCount || 0;
     this.isActive = isActive;
   }
 
   toDOM() {
     const container = document.createElement('span');
     container.className = 'cm-zen-query-hint-container';
+
+    // Show error badge first if there are errors (most important)
+    if (this.errorCount > 0) {
+      const errorBadge = document.createElement('span');
+      errorBadge.className = 'cm-zen-error-hint';
+      errorBadge.textContent = 'error';
+      container.appendChild(errorBadge);
+    }
 
     // Show output badge if there are outputs
     if (this.outputCount > 0) {
@@ -435,6 +465,7 @@ class ZenQueryHintWidget extends WidgetType {
   eq(other) {
     return this.queryCount === other.queryCount &&
            this.outputCount === other.outputCount &&
+           this.errorCount === other.errorCount &&
            this.isActive === other.isActive;
   }
 }
@@ -443,7 +474,7 @@ class ZenQueryHintWidget extends WidgetType {
 // Stores the data needed to rebuild decorations
 const queryLineHighlightsDataField = StateField.define({
   create() {
-    return { lineNumbers: new Set(), queryCounts: new Map(), outputCounts: new Map() };
+    return { lineNumbers: new Set(), queryCounts: new Map(), outputCounts: new Map(), errorCounts: new Map() };
   },
   update(data, tr) {
     for (const effect of tr.effects) {
@@ -488,14 +519,20 @@ const queryLineHighlightsField = StateField.define({
           const line = tr.state.doc.line(lineNum);
           const queryCount = data.queryCounts?.get(lineNum) || 0;
           const outputCount = data.outputCounts?.get(lineNum) || 0;
-          // Use purple highlight for lines with outputs, green for query-only lines
-          const highlight = outputCount > 0 ? outputLineHighlight : queryLineHighlight;
+          const errorCount = data.errorCounts?.get(lineNum) || 0;
+          // Use red for errors, amber for outputs, green for query-only lines
+          let highlight = queryLineHighlight;
+          if (errorCount > 0) {
+            highlight = errorLineHighlight;
+          } else if (outputCount > 0) {
+            highlight = outputLineHighlight;
+          }
           decos.push(highlight.range(line.from));
           // Add hint widget at end of line
           const isActive = lineNum === activeHintLine;
           decos.push(
             Decoration.widget({
-              widget: new ZenQueryHintWidget(queryCount, outputCount, isActive),
+              widget: new ZenQueryHintWidget(queryCount, outputCount, errorCount, isActive),
               side: 1000, // high value to ensure it stays at end of line content
             }).range(line.to)
           );
@@ -518,14 +555,16 @@ const queryLineHighlightsField = StateField.define({
  * @param {EditorView} view - The CodeMirror editor view
  * @param {Map} lineToQueryMap - Map of line numbers to query arrays
  * @param {Map} lineToOutputMap - Map of line numbers to output arrays
+ * @param {Map} lineToErrorMap - Map of line numbers to error arrays
  */
-export function updateQueryLineHighlights(view, lineToQueryMap, lineToOutputMap) {
+export function updateQueryLineHighlights(view, lineToQueryMap, lineToOutputMap, lineToErrorMap) {
   if (!view) return;
 
-  // Combine line numbers from both maps
+  // Combine line numbers from all maps
   const lineNumbers = new Set();
   const queryCounts = new Map();
   const outputCounts = new Map();
+  const errorCounts = new Map();
 
   if (lineToQueryMap) {
     for (const [line, queries] of lineToQueryMap.entries()) {
@@ -541,8 +580,15 @@ export function updateQueryLineHighlights(view, lineToQueryMap, lineToOutputMap)
     }
   }
 
+  if (lineToErrorMap) {
+    for (const [line, errors] of lineToErrorMap.entries()) {
+      lineNumbers.add(line);
+      errorCounts.set(line, errors.length);
+    }
+  }
+
   view.dispatch({
-    effects: setQueryLineHighlights.of({ lineNumbers, queryCounts, outputCounts }),
+    effects: setQueryLineHighlights.of({ lineNumbers, queryCounts, outputCounts, errorCounts }),
   });
 }
 
@@ -552,7 +598,7 @@ export function updateQueryLineHighlights(view, lineToQueryMap, lineToOutputMap)
 export function clearQueryLineHighlights(view) {
   if (!view) return;
   view.dispatch({
-    effects: setQueryLineHighlights.of({ lineNumbers: new Set(), queryCounts: new Map(), outputCounts: new Map() }),
+    effects: setQueryLineHighlights.of({ lineNumbers: new Set(), queryCounts: new Map(), outputCounts: new Map(), errorCounts: new Map() }),
   });
 }
 
@@ -566,11 +612,12 @@ const zenInlineDecorationsField = StateField.define({
     const showAllQueries = tr.state.field(zenShowAllQueriesState);
     const queriesData = tr.state.field(zenQueriesDataField);
     const outputsData = tr.state.field(zenOutputsDataField);
+    const errorsData = tr.state.field(zenErrorsDataField);
 
     // Check if we need to rebuild
     let needsRebuild = false;
     for (const effect of tr.effects) {
-      if (effect.is(setZenExpandedLine) || effect.is(setQueryLineHighlights) || effect.is(setZenShowAllQueries) || effect.is(setZenOutputsData)) {
+      if (effect.is(setZenExpandedLine) || effect.is(setQueryLineHighlights) || effect.is(setZenShowAllQueries) || effect.is(setZenOutputsData) || effect.is(setZenErrorsData)) {
         needsRebuild = true;
         break;
       }
@@ -582,15 +629,16 @@ const zenInlineDecorationsField = StateField.define({
 
     const widgets = [];
 
-    // Collect all line numbers that have queries or outputs
-    const allLineNums = new Set([...queriesData.keys(), ...outputsData.keys()]);
+    // Collect all line numbers that have queries, outputs, or errors
+    const allLineNums = new Set([...queriesData.keys(), ...outputsData.keys(), ...errorsData.keys()]);
 
-    // Show all queries/outputs if Ctrl+Alt toggled
+    // Show all queries/outputs/errors if Ctrl+Alt toggled
     if (showAllQueries) {
       for (const lineNum of allLineNums) {
         const queries = queriesData.get(lineNum) || [];
         const outputs = outputsData.get(lineNum) || [];
-        if (queries.length > 0 || outputs.length > 0) {
+        const errors = errorsData.get(lineNum) || [];
+        if (queries.length > 0 || outputs.length > 0 || errors.length > 0) {
           try {
             if (lineNum >= 1 && lineNum <= tr.state.doc.lines) {
               const line = tr.state.doc.line(lineNum);
@@ -601,7 +649,7 @@ const zenInlineDecorationsField = StateField.define({
               const pos = nextLineStart <= tr.state.doc.length ? nextLineStart : line.to;
               widgets.push(
                 Decoration.widget({
-                  widget: new ZenInlineQueryWidget(queries, outputs, indent),
+                  widget: new ZenInlineQueryWidget(queries, outputs, errors, indent),
                   block: true,
                   side: -1, // Appear above this position (i.e., after previous line)
                 }).range(pos)
@@ -616,7 +664,8 @@ const zenInlineDecorationsField = StateField.define({
       // Show single expanded line (Alt key)
       const queries = queriesData.get(expandedLine) || [];
       const outputs = outputsData.get(expandedLine) || [];
-      if (queries.length > 0 || outputs.length > 0) {
+      const errors = errorsData.get(expandedLine) || [];
+      if (queries.length > 0 || outputs.length > 0 || errors.length > 0) {
         try {
           if (expandedLine >= 1 && expandedLine <= tr.state.doc.lines) {
             const line = tr.state.doc.line(expandedLine);
@@ -626,7 +675,7 @@ const zenInlineDecorationsField = StateField.define({
             const pos = nextLineStart <= tr.state.doc.length ? nextLineStart : line.to;
             widgets.push(
               Decoration.widget({
-                widget: new ZenInlineQueryWidget(queries, outputs, indent),
+                widget: new ZenInlineQueryWidget(queries, outputs, errors, indent),
                 block: true,
                 side: -1, // Appear above this position (i.e., after previous line)
               }).range(pos)
@@ -653,6 +702,7 @@ const zenInlineDecorationsField = StateField.define({
 // Store queries data for zen mode (line number -> queries)
 export const setZenQueriesData = StateEffect.define();
 export const setZenOutputsData = StateEffect.define();
+export const setZenErrorsData = StateEffect.define();
 
 const zenQueriesDataField = StateField.define({
   create() {
@@ -675,6 +725,20 @@ const zenOutputsDataField = StateField.define({
   update(data, tr) {
     for (const effect of tr.effects) {
       if (effect.is(setZenOutputsData)) {
+        return effect.value;
+      }
+    }
+    return data;
+  },
+});
+
+const zenErrorsDataField = StateField.define({
+  create() {
+    return new Map();
+  },
+  update(data, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(setZenErrorsData)) {
         return effect.value;
       }
     }
@@ -752,6 +816,16 @@ export function updateZenOutputsData(view, lineToOutputMap) {
 }
 
 /**
+ * Update zen mode errors data
+ */
+export function updateZenErrorsData(view, lineToErrorMap) {
+  if (!view) return;
+  view.dispatch({
+    effects: setZenErrorsData.of(lineToErrorMap || new Map()),
+  });
+}
+
+/**
  * Get inline results extensions for Zen mode
  */
 export function getInlineResultsExtensions() {
@@ -766,6 +840,7 @@ export function getInlineResultsExtensions() {
     zenShowAllQueriesState,
     zenQueriesDataField,
     zenOutputsDataField,
+    zenErrorsDataField,
     zenInlineDecorationsField,
   ];
 }

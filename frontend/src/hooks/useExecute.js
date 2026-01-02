@@ -4,6 +4,28 @@ import { execute as executeApi } from '../lib/api';
 import { isMobile } from '../lib/utils';
 
 /**
+ * Parse Python traceback to extract line number from user code
+ * Returns { lineNumber: number | null, message: string }
+ */
+function parseErrorLineNumber(errorMessage) {
+  if (!errorMessage) return { lineNumber: null, message: errorMessage };
+
+  // Match patterns like:
+  // File "/app/app/models.py", line 15
+  // File "<string>", line 10
+  const lineMatch = errorMessage.match(/File\s+["'](?:\/app\/app\/models\.py|<string>)["'],\s+line\s+(\d+)/);
+
+  if (lineMatch) {
+    return {
+      lineNumber: parseInt(lineMatch[1], 10),
+      message: errorMessage,
+    };
+  }
+
+  return { lineNumber: null, message: errorMessage };
+}
+
+/**
  * Hook for executing code
  */
 export function useExecute() {
@@ -105,15 +127,35 @@ export function useExecute() {
         }
       } else if (response.error) {
         // Handle error responses (job-code-error, job-internal-error, etc.)
+        const errorText = response.error || 'An error occurred';
+        const { lineNumber, message } = parseErrorLineNumber(errorText);
+
+        // Build line to error map if we found a line number
+        const lineToErrorMap = new Map();
+        if (lineNumber !== null) {
+          lineToErrorMap.set(lineNumber, [{ error: message, line_number: lineNumber }]);
+        }
+
+        dispatch({ type: 'SET_LINE_ERROR_MAP', payload: lineToErrorMap });
         dispatch({
           type: 'SET_ERROR',
-          payload: response.error || 'An error occurred',
+          payload: errorText,
         });
       }
     } catch (err) {
+      const errorText = err.message || 'Failed to execute code';
+      const { lineNumber, message } = parseErrorLineNumber(errorText);
+
+      // Build line to error map if we found a line number
+      const lineToErrorMap = new Map();
+      if (lineNumber !== null) {
+        lineToErrorMap.set(lineNumber, [{ error: message, line_number: lineNumber }]);
+      }
+
+      dispatch({ type: 'SET_LINE_ERROR_MAP', payload: lineToErrorMap });
       dispatch({
         type: 'SET_ERROR',
-        payload: err.message || 'Failed to execute code',
+        payload: errorText,
       });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });

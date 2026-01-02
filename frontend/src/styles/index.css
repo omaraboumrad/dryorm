@@ -472,6 +472,15 @@ div.cm-cursor {
   background-color: rgba(245, 158, 11, 0.15);
 }
 
+/* Error line highlight in zen mode - subtle red */
+.cm-error-line-highlight {
+  background-color: rgba(239, 68, 68, 0.12);
+}
+
+.dark .cm-error-line-highlight {
+  background-color: rgba(239, 68, 68, 0.18);
+}
+
 /* Container for query hint elements */
 .cm-zen-query-hint-container {
   display: inline-flex;
@@ -516,6 +525,25 @@ div.cm-cursor {
 .dark .cm-zen-output-hint {
   color: #fbbf24;
   background-color: rgba(245, 158, 11, 0.2);
+}
+
+/* Error count badge */
+.cm-zen-error-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-right: 6px;
+  font-size: 11px;
+  line-height: 1;
+  color: #dc2626;
+  background-color: rgba(239, 68, 68, 0.15);
+  border-radius: 3px;
+  opacity: 0.9;
+}
+
+.dark .cm-zen-error-hint {
+  color: #fca5a5;
+  background-color: rgba(239, 68, 68, 0.2);
 }
 
 /* Keyboard hint - italic, no background */
@@ -567,6 +595,127 @@ div.cm-cursor {
 .dark .cm-zen-inline-outputs {
   background-color: rgba(245, 158, 11, 0.18);
   border-left-color: rgba(245, 158, 11, 0.5);
+}
+
+/* Zen mode inline errors container (red theme) */
+.cm-zen-inline-errors {
+  display: block;
+  width: fit-content;
+  max-width: calc(100% - 60px);
+  padding: 8px 12px;
+  margin: 4px 0;
+  /* margin-left is set dynamically to match line indentation */
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid rgba(239, 68, 68, 0.6);
+  border-radius: 0 4px 4px 0;
+  font-family: monospace;
+}
+
+.dark .cm-zen-inline-errors {
+  background-color: rgba(239, 68, 68, 0.18);
+  border-left-color: rgba(239, 68, 68, 0.5);
+}
+
+.cm-zen-error-text {
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #dc2626;
+}
+
+.dark .cm-zen-error-text {
+  color: #fca5a5;
+}
+
+/* Slim error modal for zen mode */
+.zen-error-modal {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: 600px;
+  width: 90%;
+  padding: 12px 16px;
+  background-color: rgba(254, 242, 242, 0.98);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-left: 4px solid #dc2626;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-family: monospace;
+  animation: error-slide-up 0.2s ease-out;
+}
+
+.dark .zen-error-modal {
+  background-color: rgba(50, 20, 20, 0.98);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+@keyframes error-slide-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.zen-error-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.zen-error-modal-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dark .zen-error-modal-title {
+  color: #fca5a5;
+}
+
+.zen-error-modal-close {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.zen-error-modal-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+.dark .zen-error-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #d1d5db;
+}
+
+.zen-error-modal-content {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #991b1b;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dark .zen-error-modal-content {
+  color: #fecaca;
 }
 
 .cm-zen-query-block {

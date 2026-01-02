@@ -79,6 +79,7 @@ def run():
   // Editor-Query linking
   lineToQueryMap: new Map(),
   lineToOutputMap: new Map(),
+  lineToErrorMap: new Map(),
   highlightedQueryIndex: null,
 };
 
@@ -121,6 +122,7 @@ const actions = {
   SET_QUERY_FILTER: 'SET_QUERY_FILTER',
   SET_LINE_QUERY_MAP: 'SET_LINE_QUERY_MAP',
   SET_LINE_OUTPUT_MAP: 'SET_LINE_OUTPUT_MAP',
+  SET_LINE_ERROR_MAP: 'SET_LINE_ERROR_MAP',
   SET_HIGHLIGHTED_QUERY: 'SET_HIGHLIGHTED_QUERY',
   SET_JOURNEYS: 'SET_JOURNEYS',
   SET_CURRENT_JOURNEY: 'SET_CURRENT_JOURNEY',
@@ -175,6 +177,7 @@ function appReducer(state, action) {
         htmlTemplate: null,
         showHtmlPreview: false,
         error: null,
+        lineToErrorMap: new Map(),
       };
 
     case actions.TOGGLE_SETTINGS:
@@ -251,6 +254,9 @@ function appReducer(state, action) {
 
     case actions.SET_LINE_OUTPUT_MAP:
       return { ...state, lineToOutputMap: action.payload };
+
+    case actions.SET_LINE_ERROR_MAP:
+      return { ...state, lineToErrorMap: action.payload };
 
     case actions.SET_HIGHLIGHTED_QUERY:
       return { ...state, highlightedQueryIndex: action.payload };

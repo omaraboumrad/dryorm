@@ -12,6 +12,7 @@ import {
   collapseZenLine,
   updateZenQueriesData,
   updateZenOutputsData,
+  updateZenErrorsData,
   toggleAllZenQueries,
   setActiveHintLine
 } from '../../lib/codemirror/inlineResults';
@@ -52,12 +53,14 @@ function CodeEditor() {
   const executeRef = useRef(execute);
   const lineToQueryMapRef = useRef(state.lineToQueryMap);
   const lineToOutputMapRef = useRef(state.lineToOutputMap);
+  const lineToErrorMapRef = useRef(state.lineToErrorMap);
   const zenModeRef = useRef(state.zenMode);
 
   // Hover popup state
   const [hoverQueries, setHoverQueries] = useState(null);
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
   const [isAltPressed, setIsAltPressed] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   // Keep refs up to date
   useEffect(() => {
@@ -77,8 +80,21 @@ function CodeEditor() {
   }, [state.lineToOutputMap]);
 
   useEffect(() => {
+    lineToErrorMapRef.current = state.lineToErrorMap;
+  }, [state.lineToErrorMap]);
+
+  useEffect(() => {
     zenModeRef.current = state.zenMode;
   }, [state.zenMode]);
+
+  // Show error modal in zen mode when there's an error with no line number
+  useEffect(() => {
+    if (state.zenMode && state.error && (!state.lineToErrorMap || state.lineToErrorMap.size === 0)) {
+      setShowErrorModal(true);
+    } else {
+      setShowErrorModal(false);
+    }
+  }, [state.zenMode, state.error, state.lineToErrorMap]);
 
   // Alt key listener for query popup toggle / zen mode inline expansion
   // Ctrl+Alt toggles all queries (either key first)
@@ -95,14 +111,15 @@ function CodeEditor() {
 
       if (e.key === 'Alt') {
         setIsAltPressed(true);
-        // In zen mode, expand the current line to show queries/outputs (only if not Ctrl+Alt)
+        // In zen mode, expand the current line to show queries/outputs/errors (only if not Ctrl+Alt)
         if (!e.ctrlKey && state.zenMode && viewRef.current) {
           const pos = viewRef.current.state.selection.main.head;
           const line = viewRef.current.state.doc.lineAt(pos);
           const lineNumber = line.number;
           const hasQueries = lineToQueryMapRef.current && lineToQueryMapRef.current.has(lineNumber);
           const hasOutputs = lineToOutputMapRef.current && lineToOutputMapRef.current.has(lineNumber);
-          if (hasQueries || hasOutputs) {
+          const hasErrors = lineToErrorMapRef.current && lineToErrorMapRef.current.has(lineNumber);
+          if (hasQueries || hasOutputs || hasErrors) {
             expandZenLine(viewRef.current, lineNumber);
           }
         }
@@ -278,20 +295,30 @@ function CodeEditor() {
     }
   }, [state.zenMode]);
 
-  // Update query line highlights and queries/outputs data in zen mode
+  // Update query line highlights and queries/outputs/errors data in zen mode
   useEffect(() => {
     if (!viewRef.current) return;
 
-    if (state.zenMode && (state.lineToQueryMap || state.lineToOutputMap)) {
-      updateQueryLineHighlights(viewRef.current, state.lineToQueryMap, state.lineToOutputMap);
+    if (state.zenMode && (state.lineToQueryMap || state.lineToOutputMap || state.lineToErrorMap)) {
+      updateQueryLineHighlights(viewRef.current, state.lineToQueryMap, state.lineToOutputMap, state.lineToErrorMap);
       updateZenQueriesData(viewRef.current, state.lineToQueryMap);
       updateZenOutputsData(viewRef.current, state.lineToOutputMap);
+      updateZenErrorsData(viewRef.current, state.lineToErrorMap);
+
+      // Auto-expand the first error line if there are errors
+      if (state.lineToErrorMap && state.lineToErrorMap.size > 0) {
+        const firstErrorLine = state.lineToErrorMap.keys().next().value;
+        if (firstErrorLine) {
+          expandZenLine(viewRef.current, firstErrorLine);
+        }
+      }
     } else {
       clearQueryLineHighlights(viewRef.current);
       updateZenQueriesData(viewRef.current, new Map());
       updateZenOutputsData(viewRef.current, new Map());
+      updateZenErrorsData(viewRef.current, new Map());
     }
-  }, [state.zenMode, state.lineToQueryMap, state.lineToOutputMap]);
+  }, [state.zenMode, state.lineToQueryMap, state.lineToOutputMap, state.lineToErrorMap]);
 
   return (
     <div className={`h-full flex flex-col ${state.zenMode ? 'zen-editor' : ''}`}>
@@ -308,6 +335,22 @@ function CodeEditor() {
           y={hoverPosition.y}
           showTemplated={isAltPressed}
         />
+      )}
+      {/* Error modal for zen mode when error has no line number */}
+      {state.zenMode && showErrorModal && state.error && (
+        <div className="zen-error-modal">
+          <div className="zen-error-modal-header">
+            <span className="zen-error-modal-title">Error</span>
+            <button
+              className="zen-error-modal-close"
+              onClick={() => setShowErrorModal(false)}
+              aria-label="Close error"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="zen-error-modal-content">{state.error}</div>
+        </div>
       )}
     </div>
   );
