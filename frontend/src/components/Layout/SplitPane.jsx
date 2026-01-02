@@ -6,11 +6,13 @@ import ResultPanel from '../Results/ResultPanel';
 function SplitPane() {
   const state = useAppState();
 
-  // Zen mode: editor only, full width
+  // Zen mode: editor only, centered
   if (state.zenMode) {
     return (
-      <div className="h-full overflow-hidden">
-        <CodeEditor />
+      <div className="h-full overflow-hidden flex justify-center">
+        <div className="zen-editor-container">
+          <CodeEditor />
+        </div>
       </div>
     );
   }

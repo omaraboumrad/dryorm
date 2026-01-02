@@ -103,9 +103,9 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: 10px;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
   color: var(--django-green);
   cursor: pointer;
 }
@@ -219,10 +219,19 @@ html, body {
 /* Zen mode styles */
 .zen-mode {
   overflow: hidden;
+  background-color: var(--color-editor-bg);
 }
 
 .zen-mode .zen-editor {
   height: 100vh;
+}
+
+/* Centered editor container in zen mode */
+.zen-editor-container {
+  width: 80%;
+  max-width: 1200px;
+  min-width: 400px;
+  height: 100%;
 }
 
 /* Larger font in zen mode editor */
@@ -231,13 +240,28 @@ html, body {
   line-height: 1.6;
 }
 
+/* Hide line numbers and fold gutter in zen mode, but keep query gutter */
+.zen-editor .cm-lineNumbers,
+.zen-editor .cm-foldGutter {
+  display: none !important;
+}
+
+/* Make gutter background match editor in zen mode */
 .zen-editor .cm-gutters {
-  font-size: 16px;
+  background-color: var(--color-editor-bg) !important;
+  border-right: none !important;
 }
 
 @media (min-width: 1024px) {
   .zen-editor .cm-editor {
     font-size: 20px;
+  }
+}
+
+/* On smaller screens, use full width */
+@media (max-width: 768px) {
+  .zen-editor-container {
+    width: 100%;
   }
 }
 
@@ -436,7 +460,7 @@ div.cm-cursor {
 }
 
 .dark .cm-query-line-highlight {
-  background-color: rgba(68, 183, 139, 0.06);
+  background-color: rgba(68, 183, 139, 0.15);
 }
 
 /* Container for query hint elements */
@@ -494,8 +518,8 @@ div.cm-cursor {
 }
 
 .dark .cm-zen-inline-queries {
-  background-color: rgba(68, 183, 139, 0.08);
-  border-left-color: rgba(68, 183, 139, 0.4);
+  background-color: rgba(68, 183, 139, 0.18);
+  border-left-color: rgba(68, 183, 139, 0.5);
 }
 
 .cm-zen-query-block {
