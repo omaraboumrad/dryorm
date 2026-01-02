@@ -99,6 +99,12 @@ html, body {
   padding: 0 8px 0 5px;
 }
 
+/* Query gutter - always reserve space */
+.cm-query-gutter {
+  min-width: 24px;
+  width: 24px;
+}
+
 .query-gutter-marker {
   display: flex;
   align-items: center;
@@ -232,11 +238,6 @@ html, body {
   line-height: 1.6;
 }
 
-/* Hide fold gutter in zen mode, but keep line numbers and query gutter */
-.zen-editor .cm-foldGutter {
-  display: none !important;
-}
-
 /* Make gutter background match editor in zen mode */
 .zen-editor .cm-gutters {
   background-color: var(--color-editor-bg) !important;
@@ -272,16 +273,37 @@ html, body {
 /* Floating controls in zen mode */
 .floating-controls {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
   z-index: 50;
   display: flex;
+  flex-direction: column;
   gap: 12px;
   align-items: center;
 }
 
+.floating-controls-btn {
+  @apply text-white rounded-full shadow-lg backdrop-blur-sm transition-all;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(75, 85, 99, 0.9);
+}
+
+.floating-controls-btn:hover {
+  background-color: rgba(107, 114, 128, 1);
+  transform: scale(1.05);
+}
+
 .floating-run-btn {
-  @apply text-white rounded-full p-4 shadow-lg transition-all;
+  @apply text-white rounded-full shadow-lg transition-all;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--django-green);
   opacity: 0.8;
 }

@@ -1,6 +1,6 @@
 import { keymap, highlightActiveLine, lineNumbers, highlightActiveLineGutter, EditorView } from '@codemirror/view';
 import { EditorState, Prec } from '@codemirror/state';
-import { indentOnInput, bracketMatching, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
+import { indentOnInput, bracketMatching, indentUnit } from '@codemirror/language';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
 import { vim } from '@replit/codemirror-vim';
@@ -39,9 +39,6 @@ export function createBaseExtensions(isDark = false, editorMode = 'default') {
     // History (undo/redo)
     history(),
 
-    // Code folding
-    foldGutter(),
-
     // Bracket matching
     bracketMatching(),
 
@@ -59,7 +56,6 @@ export function createBaseExtensions(isDark = false, editorMode = 'default') {
     keymap.of([
       ...defaultKeymap,
       ...historyKeymap,
-      ...foldKeymap,
       indentWithTab,
     ]),
 
