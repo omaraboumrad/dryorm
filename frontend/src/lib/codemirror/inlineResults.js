@@ -452,12 +452,11 @@ class ZenQueryHintWidget extends WidgetType {
       container.appendChild(badge);
     }
 
-    if (this.isActive) {
-      const keys = document.createElement('span');
-      keys.className = 'cm-zen-query-keys';
-      keys.textContent = 'Alt | Ctrl+Alt all';
-      container.appendChild(keys);
-    }
+    const keys = document.createElement('span');
+    keys.className = 'cm-zen-query-keys';
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    keys.textContent = isMac ? '⌥ | ⌃⌥' : 'Alt | Ctrl+Alt';
+    container.appendChild(keys);
 
     return container;
   }

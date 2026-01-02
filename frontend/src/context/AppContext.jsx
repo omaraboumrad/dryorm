@@ -177,6 +177,8 @@ function appReducer(state, action) {
         htmlTemplate: null,
         showHtmlPreview: false,
         error: null,
+        lineToQueryMap: new Map(),
+        lineToOutputMap: new Map(),
         lineToErrorMap: new Map(),
       };
 

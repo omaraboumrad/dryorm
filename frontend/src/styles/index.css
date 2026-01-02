@@ -226,22 +226,13 @@ html, body {
   height: 100vh;
 }
 
-/* Centered editor container in zen mode */
-.zen-editor-container {
-  width: 80%;
-  max-width: 1200px;
-  min-width: 400px;
-  height: 100%;
-}
-
 /* Larger font in zen mode editor */
 .zen-editor .cm-editor {
   font-size: 18px;
   line-height: 1.6;
 }
 
-/* Hide line numbers and fold gutter in zen mode, but keep query gutter */
-.zen-editor .cm-lineNumbers,
+/* Hide fold gutter in zen mode, but keep line numbers and query gutter */
 .zen-editor .cm-foldGutter {
   display: none !important;
 }
@@ -255,13 +246,6 @@ html, body {
 @media (min-width: 1024px) {
   .zen-editor .cm-editor {
     font-size: 20px;
-  }
-}
-
-/* On smaller screens, use full width */
-@media (max-width: 768px) {
-  .zen-editor-container {
-    width: 100%;
   }
 }
 

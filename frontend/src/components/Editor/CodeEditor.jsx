@@ -223,6 +223,16 @@ function CodeEditor() {
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
           dispatch({ type: 'SET_CODE', payload: update.state.doc.toString() });
+          // Clear stale inline results on any edit
+          dispatch({ type: 'SET_LINE_TO_QUERY_MAP', payload: new Map() });
+          dispatch({ type: 'SET_LINE_TO_OUTPUT_MAP', payload: new Map() });
+          dispatch({ type: 'SET_LINE_TO_ERROR_MAP', payload: new Map() });
+          // Also clear CodeMirror state directly
+          clearQueryLineHighlights(update.view);
+          updateZenQueriesData(update.view, new Map());
+          updateZenOutputsData(update.view, new Map());
+          updateZenErrorsData(update.view, new Map());
+          updateQueryMarkers(update.view, new Map());
         }
         // Check for cursor position change
         if (update.selectionSet) {
@@ -299,7 +309,11 @@ function CodeEditor() {
   useEffect(() => {
     if (!viewRef.current) return;
 
-    if (state.zenMode && (state.lineToQueryMap || state.lineToOutputMap || state.lineToErrorMap)) {
+    const hasData = (state.lineToQueryMap?.size > 0) ||
+                    (state.lineToOutputMap?.size > 0) ||
+                    (state.lineToErrorMap?.size > 0);
+
+    if (state.zenMode && hasData) {
       updateQueryLineHighlights(viewRef.current, state.lineToQueryMap, state.lineToOutputMap, state.lineToErrorMap);
       updateZenQueriesData(viewRef.current, state.lineToQueryMap);
       updateZenOutputsData(viewRef.current, state.lineToOutputMap);
