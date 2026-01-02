@@ -1,6 +1,6 @@
 import { keymap, highlightActiveLine, lineNumbers, highlightActiveLineGutter, EditorView } from '@codemirror/view';
 import { EditorState, Prec } from '@codemirror/state';
-import { indentOnInput, bracketMatching, foldGutter, foldKeymap } from '@codemirror/language';
+import { indentOnInput, bracketMatching, foldGutter, foldKeymap, indentUnit } from '@codemirror/language';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
 import { vim } from '@replit/codemirror-vim';
@@ -63,8 +63,9 @@ export function createBaseExtensions(isDark = false, editorMode = 'default') {
       indentWithTab,
     ]),
 
-    // Tab size
+    // Tab size and indent unit (4 spaces for Python)
     EditorState.tabSize.of(4),
+    Prec.highest(indentUnit.of("    ")),
   ];
 
   // Add vim mode if selected
