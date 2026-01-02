@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAppState, useAppDispatch } from '../../context/AppContext';
 import { useExecute } from '../../hooks/useExecute';
 import { useZenMode } from '../../hooks/useZenMode';
@@ -23,6 +23,12 @@ function Header() {
   const dispatch = useAppDispatch();
   const { execute, loading } = useExecute();
   const { toggleZenMode } = useZenMode();
+  const location = useLocation();
+
+  // Check if we're on an editor page (home, snippet, or journey)
+  const isEditorPage = location.pathname === '/' ||
+    location.pathname.startsWith('/j') ||
+    (location.pathname !== '/about' && location.pathname !== '/browse' && location.pathname.length > 1);
 
   const handleRun = () => {
     execute(false);
@@ -80,8 +86,8 @@ function Header() {
             <InfoIcon size={20} className="text-white" />
           </Link>
 
-          {/* Code-related buttons - only on home page */}
-          {state.currentPage === 'home' && (
+          {/* Code-related buttons - only on editor pages */}
+          {isEditorPage && (
             <>
               {/* Journey toggle */}
               <Button
@@ -93,12 +99,13 @@ function Header() {
                 <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : 'text-white'} />
               </Button>
 
-              {/* Zen mode toggle */}
+              {/* Zen mode toggle - hidden on small screens */}
               <Button
                 variant="header"
                 size="icon"
                 onClick={toggleZenMode}
                 title="Zen Mode (Cmd+.)"
+                className="hidden lg:inline-flex"
               >
                 <ExpandIcon size={20} className="text-white" />
               </Button>

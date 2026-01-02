@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppState, useAppDispatch } from '../../context/AppContext';
 import { useExecute } from '../../hooks/useExecute';
 import { useZenMode } from '../../hooks/useZenMode';
-import { PlayIcon, SpinnerIcon, CompressIcon, CogIcon } from '../icons';
+import { PlayIcon, SpinnerIcon, CompressIcon, CogIcon, ShareIcon } from '../icons';
 
 function FloatingControls() {
   const state = useAppState();
@@ -44,12 +44,14 @@ function FloatingControls() {
         </button>
       </div>
 
-      {/* Query count badge */}
-      {state.rawQueries.length > 0 && (
-        <div className="bg-gray-800/80 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
-          {state.rawQueries.length} {state.rawQueries.length === 1 ? 'query' : 'queries'}
-        </div>
-      )}
+      {/* Share button */}
+      <button
+        onClick={() => dispatch({ type: 'TOGGLE_SHARE_DIALOG' })}
+        className="bg-gray-800/80 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg backdrop-blur-sm transition-all hover:scale-105"
+        title="Share"
+      >
+        <ShareIcon size={20} />
+      </button>
 
       {/* Exit zen mode button */}
       <button
