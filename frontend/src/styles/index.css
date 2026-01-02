@@ -225,6 +225,22 @@ html, body {
   height: 100vh;
 }
 
+/* Larger font in zen mode editor */
+.zen-editor .cm-editor {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.zen-editor .cm-gutters {
+  font-size: 16px;
+}
+
+@media (min-width: 1024px) {
+  .zen-editor .cm-editor {
+    font-size: 20px;
+  }
+}
+
 .zen-fade-enter {
   opacity: 0;
   transform: translateY(-10px);
@@ -368,6 +384,43 @@ html, body {
   border-left-color: #44b78b;
 }
 
+/* Vim mode cursor (block caret) - comprehensive selectors */
+/* Target cursor layer and cursor elements */
+.cm-cursorLayer .cm-cursor {
+  background: rgba(68, 183, 139, 0.8) !important;
+}
+
+.cm-editor.cm-focused .cm-cursorLayer .cm-cursor {
+  background: rgba(68, 183, 139, 0.8) !important;
+}
+
+/* Fat cursor specific (vim normal mode) */
+.cm-editor.cm-fat-cursor .cm-cursorLayer .cm-cursor,
+.cm-editor.cm-fat-cursor.cm-focused .cm-cursorLayer .cm-cursor,
+.cm-editor .cm-cursorLayer.cm-vimCursorLayer .cm-cursor {
+  background: rgba(68, 183, 139, 0.8) !important;
+  border: none !important;
+}
+
+/* Fallback selectors */
+.cm-fat-cursor .cm-cursor,
+.cm-vimCursorLayer .cm-cursor,
+div.cm-cursor {
+  background: rgba(68, 183, 139, 0.8) !important;
+}
+
+/* Dark mode variants */
+.dark .cm-cursorLayer .cm-cursor,
+.dark .cm-editor.cm-focused .cm-cursorLayer .cm-cursor,
+.dark .cm-editor.cm-fat-cursor .cm-cursorLayer .cm-cursor,
+.dark .cm-editor.cm-fat-cursor.cm-focused .cm-cursorLayer .cm-cursor,
+.dark .cm-editor .cm-cursorLayer.cm-vimCursorLayer .cm-cursor,
+.dark .cm-fat-cursor .cm-cursor,
+.dark .cm-vimCursorLayer .cm-cursor,
+.dark div.cm-cursor {
+  background: rgba(68, 183, 139, 0.7) !important;
+}
+
 /* Line highlight for query navigation */
 .cm-line-highlight {
   background-color: rgba(68, 183, 139, 0.15);
@@ -375,4 +428,102 @@ html, body {
 
 .dark .cm-line-highlight {
   background-color: rgba(68, 183, 139, 0.1);
+}
+
+/* Query line highlight in zen mode - subtle Django green */
+.cm-query-line-highlight {
+  background-color: rgba(68, 183, 139, 0.08);
+}
+
+.dark .cm-query-line-highlight {
+  background-color: rgba(68, 183, 139, 0.06);
+}
+
+/* Container for query hint elements */
+.cm-zen-query-hint-container {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 16px;
+  font-family: system-ui, sans-serif;
+}
+
+/* Query count badge */
+.cm-zen-query-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 1;
+  color: #0c4b33;
+  background-color: rgba(68, 183, 139, 0.2);
+  border-radius: 3px;
+  opacity: 0.8;
+}
+
+.dark .cm-zen-query-hint {
+  color: #6ee7b7;
+  background-color: rgba(68, 183, 139, 0.15);
+}
+
+/* Keyboard hint - italic, no background */
+.cm-zen-query-keys {
+  margin-left: 8px;
+  font-size: 11px;
+  font-style: italic;
+  color: #6b7280;
+  opacity: 0.8;
+}
+
+.dark .cm-zen-query-keys {
+  color: #9ca3af;
+}
+
+/* Zen mode inline query display (shown on Alt press) */
+.cm-zen-inline-queries {
+  display: inline-block;
+  width: fit-content;
+  max-width: calc(100% - 60px);
+  padding: 8px 12px;
+  margin: 4px 0;
+  /* margin-left is set dynamically to match line indentation */
+  background-color: rgba(68, 183, 139, 0.1);
+  border-left: 3px solid rgba(68, 183, 139, 0.5);
+  border-radius: 0 4px 4px 0;
+  font-family: monospace;
+}
+
+.dark .cm-zen-inline-queries {
+  background-color: rgba(68, 183, 139, 0.08);
+  border-left-color: rgba(68, 183, 139, 0.4);
+}
+
+.cm-zen-query-block {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.cm-zen-query-block:last-child {
+  margin-bottom: 0;
+}
+
+.cm-zen-query-sql {
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text-primary);
+}
+
+.cm-zen-query-time {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-surface);
+  padding: 1px 6px;
+  border-radius: 3px;
 }

@@ -27,18 +27,12 @@ export function useZenMode() {
         toggleZenMode();
         return;
       }
-
-      // Escape to exit zen mode (only if in zen mode)
-      if (e.key === 'Escape' && state.zenMode) {
-        e.preventDefault();
-        exitZenMode();
-        return;
-      }
+      // Note: Escape does NOT exit zen mode to preserve vim keybindings
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.zenMode, toggleZenMode, exitZenMode]);
+  }, [toggleZenMode]);
 
   return {
     zenMode: state.zenMode,

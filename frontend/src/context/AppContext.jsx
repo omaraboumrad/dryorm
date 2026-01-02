@@ -48,6 +48,7 @@ def run():
   ormVersion: 'django-5.2',
   ignoreCache: false,
   currentRefInfo: null,
+  editorMode: 'default', // 'default' or 'vim'
 
   // Snippet ownership
   currentSlug: null,
@@ -85,7 +86,8 @@ function loadPersistedState() {
   try {
     const themeMode = localStorage.getItem('themeMode') || 'system';
     const zenMode = localStorage.getItem('zenMode') === 'true';
-    return { themeMode, zenMode };
+    const editorMode = localStorage.getItem('editorMode') || 'default';
+    return { themeMode, zenMode, editorMode };
   } catch {
     return {};
   }
@@ -112,6 +114,7 @@ const actions = {
   SET_DATABASE: 'SET_DATABASE',
   SET_ORM_VERSION: 'SET_ORM_VERSION',
   SET_IGNORE_CACHE: 'SET_IGNORE_CACHE',
+  SET_EDITOR_MODE: 'SET_EDITOR_MODE',
   SET_CURRENT_REF: 'SET_CURRENT_REF',
   CLEAR_CURRENT_REF: 'CLEAR_CURRENT_REF',
   SET_QUERY_FILTER: 'SET_QUERY_FILTER',
@@ -217,6 +220,14 @@ function appReducer(state, action) {
 
     case actions.SET_IGNORE_CACHE:
       return { ...state, ignoreCache: action.payload };
+
+    case actions.SET_EDITOR_MODE: {
+      const newEditorMode = action.payload;
+      try {
+        localStorage.setItem('editorMode', newEditorMode);
+      } catch {}
+      return { ...state, editorMode: newEditorMode };
+    }
 
     case actions.SET_CURRENT_REF:
       return { ...state, currentRefInfo: action.payload };

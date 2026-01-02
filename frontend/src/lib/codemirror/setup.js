@@ -1,16 +1,30 @@
-import { keymap, highlightActiveLine, lineNumbers, highlightActiveLineGutter } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
+import { keymap, highlightActiveLine, lineNumbers, highlightActiveLineGutter, EditorView } from '@codemirror/view';
+import { EditorState, Prec } from '@codemirror/state';
 import { indentOnInput, bracketMatching, foldGutter, foldKeymap } from '@codemirror/language';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
+import { vim } from '@replit/codemirror-vim';
 import { getTheme, getHighlighting } from './theme';
 import { getQueryGutterExtensions } from './queryGutter';
+import { getInlineResultsExtensions } from './inlineResults';
+
+// Override vim's pink fat cursor with Django green
+// Must use Prec.highest to override the vim extension's built-in styling
+const vimCursorOverride = Prec.highest(EditorView.theme({
+  ".cm-fat-cursor": {
+    background: "rgba(110, 231, 183, 0.6) !important",
+  },
+  "&:not(.cm-focused) .cm-fat-cursor": {
+    background: "none !important",
+    outline: "solid 1px rgba(110, 231, 183, 0.7) !important",
+  },
+}));
 
 /**
  * Create base extensions for the editor
  */
-export function createBaseExtensions(isDark = false) {
-  return [
+export function createBaseExtensions(isDark = false, editorMode = 'default') {
+  const extensions = [
     // Line numbers and active line highlighting
     lineNumbers(),
     highlightActiveLineGutter(),
@@ -18,6 +32,9 @@ export function createBaseExtensions(isDark = false) {
 
     // Query line gutter markers
     ...getQueryGutterExtensions(),
+
+    // Inline results and line highlights (for zen mode)
+    ...getInlineResultsExtensions(),
 
     // History (undo/redo)
     history(),
@@ -49,6 +66,15 @@ export function createBaseExtensions(isDark = false) {
     // Tab size
     EditorState.tabSize.of(4),
   ];
+
+  // Add vim mode if selected
+  if (editorMode === 'vim') {
+    extensions.unshift(vim());
+    // Add cursor color override after vim to ensure it takes precedence
+    extensions.push(vimCursorOverride);
+  }
+
+  return extensions;
 }
 
 /**

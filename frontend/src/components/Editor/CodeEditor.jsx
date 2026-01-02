@@ -5,6 +5,15 @@ import { useAppState, useAppDispatch } from '../../context/AppContext';
 import { useExecute } from '../../hooks/useExecute';
 import { createBaseExtensions, createExecuteKeymap } from '../../lib/codemirror/setup';
 import { updateQueryMarkers } from '../../lib/codemirror/queryGutter';
+import {
+  updateQueryLineHighlights,
+  clearQueryLineHighlights,
+  expandZenLine,
+  collapseZenLine,
+  updateZenQueriesData,
+  toggleAllZenQueries,
+  setActiveHintLine
+} from '../../lib/codemirror/inlineResults';
 import VersionLabel from './VersionLabel';
 import QueryPopup from './QueryPopup';
 
@@ -41,6 +50,7 @@ function CodeEditor() {
   const darkModeRef = useRef(isDark);
   const executeRef = useRef(execute);
   const lineToQueryMapRef = useRef(state.lineToQueryMap);
+  const zenModeRef = useRef(state.zenMode);
 
   // Hover popup state
   const [hoverQueries, setHoverQueries] = useState(null);
@@ -60,13 +70,49 @@ function CodeEditor() {
     }
   }, [state.lineToQueryMap]);
 
-  // Alt key listener for query popup toggle
+  useEffect(() => {
+    zenModeRef.current = state.zenMode;
+  }, [state.zenMode]);
+
+  // Alt key listener for query popup toggle / zen mode inline expansion
+  // Ctrl+Alt toggles all queries (either key first)
+  const ctrlAltToggledRef = useRef(false);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Alt') setIsAltPressed(true);
+      // Ctrl+Alt combination toggles all queries (works regardless of key order)
+      if (e.ctrlKey && e.altKey && state.zenMode && viewRef.current && !ctrlAltToggledRef.current) {
+        ctrlAltToggledRef.current = true;
+        toggleAllZenQueries(viewRef.current);
+        return;
+      }
+
+      if (e.key === 'Alt') {
+        setIsAltPressed(true);
+        // In zen mode, expand the current line to show queries (only if not Ctrl+Alt)
+        if (!e.ctrlKey && state.zenMode && viewRef.current) {
+          const pos = viewRef.current.state.selection.main.head;
+          const line = viewRef.current.state.doc.lineAt(pos);
+          const lineNumber = line.number;
+          if (lineToQueryMapRef.current && lineToQueryMapRef.current.has(lineNumber)) {
+            expandZenLine(viewRef.current, lineNumber);
+          }
+        }
+      }
     };
     const handleKeyUp = (e) => {
-      if (e.key === 'Alt') setIsAltPressed(false);
+      // Reset Ctrl+Alt toggle guard when either key is released
+      if (e.key === 'Control' || e.key === 'Alt') {
+        ctrlAltToggledRef.current = false;
+      }
+
+      if (e.key === 'Alt') {
+        setIsAltPressed(false);
+        // In zen mode, collapse the expanded line
+        if (state.zenMode && viewRef.current) {
+          collapseZenLine(viewRef.current);
+        }
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
@@ -74,9 +120,9 @@ function CodeEditor() {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [state.zenMode]);
 
-  // Mouse hover handlers for query popup
+  // Mouse hover handlers for query popup and zen mode hint
   useEffect(() => {
     if (!viewRef.current) return;
 
@@ -93,6 +139,10 @@ function CodeEditor() {
           if (queries && queries.length > 0) {
             setHoverQueries(queries);
             setHoverPosition({ x: e.pageX, y: e.pageY });
+            // In zen mode, set active hint line on hover
+            if (zenModeRef.current) {
+              setActiveHintLine(viewRef.current, lineNumber);
+            }
             return;
           }
         }
@@ -103,6 +153,17 @@ function CodeEditor() {
     const handleMouseLeave = (e) => {
       if (!editorElement.contains(e.relatedTarget)) {
         setHoverQueries(null);
+        // Reset to cursor line on mouse leave
+        if (zenModeRef.current && viewRef.current) {
+          const pos = viewRef.current.state.selection.main.head;
+          const line = viewRef.current.state.doc.lineAt(pos);
+          const lineNumber = line.number;
+          if (lineToQueryMapRef.current && lineToQueryMapRef.current.has(lineNumber)) {
+            setActiveHintLine(viewRef.current, lineNumber);
+          } else {
+            setActiveHintLine(viewRef.current, null);
+          }
+        }
       }
     };
 
@@ -132,7 +193,7 @@ function CodeEditor() {
         () => executeRef.current(false),
         () => executeRef.current(true)
       ),
-      ...createBaseExtensions(isDark),
+      ...createBaseExtensions(isDark, state.editorMode),
       // Update state when content changes or cursor moves
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
@@ -149,8 +210,16 @@ function CodeEditor() {
             if (queries && queries.length > 0) {
               dispatch({ type: 'SET_HIGHLIGHTED_QUERY', payload: queries[0].index });
             }
+            // In zen mode, set this as the active hint line
+            if (zenModeRef.current) {
+              setActiveHintLine(update.view, lineNumber);
+            }
           } else {
             dispatch({ type: 'SET_HIGHLIGHTED_QUERY', payload: null });
+            // Clear active hint if not on a query line
+            if (zenModeRef.current) {
+              setActiveHintLine(update.view, null);
+            }
           }
         }
       }),
@@ -176,7 +245,7 @@ function CodeEditor() {
         viewRef.current = null;
       }
     };
-  }, [isDark]); // Recreate editor when dark mode changes
+  }, [isDark, state.editorMode]); // Recreate editor when dark mode or editor mode changes
 
   // Update editor content when code changes externally (e.g., loading a snippet)
   useEffect(() => {
@@ -194,14 +263,35 @@ function CodeEditor() {
     }
   }, [state.code]);
 
+  // Focus editor when entering zen mode
+  useEffect(() => {
+    if (state.zenMode && viewRef.current) {
+      viewRef.current.focus();
+    }
+  }, [state.zenMode]);
+
+  // Update query line highlights and queries data in zen mode
+  useEffect(() => {
+    if (!viewRef.current) return;
+
+    if (state.zenMode && state.lineToQueryMap) {
+      updateQueryLineHighlights(viewRef.current, state.lineToQueryMap);
+      updateZenQueriesData(viewRef.current, state.lineToQueryMap);
+    } else {
+      clearQueryLineHighlights(viewRef.current);
+      updateZenQueriesData(viewRef.current, new Map());
+    }
+  }, [state.zenMode, state.lineToQueryMap]);
+
   return (
-    <div className="h-full flex flex-col">
-      <VersionLabel />
+    <div className={`h-full flex flex-col ${state.zenMode ? 'zen-editor' : ''}`}>
+      {!state.zenMode && <VersionLabel />}
       <div
         ref={editorRef}
         className="flex-1 overflow-auto"
       />
-      {hoverQueries && (
+      {/* Query popup on hover (not in zen mode - use Alt inline expansion instead) */}
+      {!state.zenMode && hoverQueries && (
         <QueryPopup
           queries={hoverQueries}
           x={hoverPosition.x}

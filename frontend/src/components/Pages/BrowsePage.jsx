@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { SearchIcon, SpinnerIcon, ChevronRightIcon } from '../icons';
 
@@ -8,33 +8,45 @@ function BrowsePage() {
   const [search, setSearch] = useState('');
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const abortRef = useRef(null);
 
-  const fetchSnippets = useCallback(async (page = 1) => {
+  const fetchSnippets = async (query, page = 1) => {
+    // Abort previous request
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    abortRef.current = new AbortController();
+
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (search) params.set('q', search);
+      if (query) params.set('q', query);
       params.set('page', page);
-      const response = await fetch(`/api/snippets?${params}`);
+      const response = await fetch(`/api/snippets?${params}`, {
+        signal: abortRef.current.signal
+      });
       if (!response.ok) throw new Error('Failed to fetch snippets');
       const data = await response.json();
       setSnippets(data.snippets || []);
       setPagination(data.pagination || { page: 1, totalPages: 1, total: 0 });
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      if (err.name !== 'AbortError') {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  };
 
   useEffect(() => {
-    const debounce = setTimeout(() => fetchSnippets(1), 300);
+    const debounce = setTimeout(() => fetchSnippets(search, 1), 300);
     return () => clearTimeout(debounce);
-  }, [search, fetchSnippets]);
+  }, [search]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
-      fetchSnippets(newPage);
+      fetchSnippets(search, newPage);
     }
   };
 
@@ -42,10 +54,13 @@ function BrowsePage() {
     <div className="h-full flex flex-col overflow-hidden bg-theme-page">
       {/* Search Header */}
       <div className="flex items-center px-4 py-3 bg-theme-surface border-b border-theme-border">
-        {loading && (
-          <SpinnerIcon size={20} className="text-django-secondary mr-3 flex-shrink-0" />
-        )}
-        <SearchIcon size={20} className={`${loading ? 'hidden' : ''} text-theme-text-muted mr-3 flex-shrink-0`} />
+        <div className="w-5 h-5 mr-3 flex-shrink-0 flex items-center justify-center">
+          {loading ? (
+            <SpinnerIcon size={20} className="text-django-secondary" />
+          ) : (
+            <SearchIcon size={20} className="text-theme-text-muted" />
+          )}
+        </div>
         <input
           type="text"
           value={search}

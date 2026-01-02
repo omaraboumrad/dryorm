@@ -22,9 +22,11 @@ function HomePage() {
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && !state.zenMode && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
-        <div className="lg:hidden">
-          <MobileTabs />
-        </div>
+        {!state.zenMode && (
+          <div className="lg:hidden">
+            <MobileTabs />
+          </div>
+        )}
         <SplitPane />
       </main>
     </div>
@@ -69,9 +71,11 @@ function SnippetPage() {
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && !state.zenMode && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
-        <div className="lg:hidden">
-          <MobileTabs />
-        </div>
+        {!state.zenMode && (
+          <div className="lg:hidden">
+            <MobileTabs />
+          </div>
+        )}
         <SplitPane />
       </main>
     </div>
@@ -113,9 +117,11 @@ function SnippetRunPage() {
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && !state.zenMode && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
-        <div className="lg:hidden">
-          <MobileTabs />
-        </div>
+        {!state.zenMode && (
+          <div className="lg:hidden">
+            <MobileTabs />
+          </div>
+        )}
         <SplitPane />
       </main>
     </div>
@@ -176,9 +182,11 @@ function JourneyIndexPage() {
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && !state.zenMode && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
-        <div className="lg:hidden">
-          <MobileTabs />
-        </div>
+        {!state.zenMode && (
+          <div className="lg:hidden">
+            <MobileTabs />
+          </div>
+        )}
         <SplitPane />
       </main>
     </div>
@@ -226,9 +234,11 @@ function JourneyPage() {
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && !state.zenMode && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
-        <div className="lg:hidden">
-          <MobileTabs />
-        </div>
+        {!state.zenMode && (
+          <div className="lg:hidden">
+            <MobileTabs />
+          </div>
+        )}
         <SplitPane />
       </main>
     </div>
@@ -295,7 +305,7 @@ function App() {
         <Route path="/:slug" element={<SnippetPage />} />
       </Routes>
 
-      {/* Zen mode floating controls */}
+      {/* Zen mode controls */}
       {state.zenMode && <FloatingControls />}
 
       {/* Modals */}

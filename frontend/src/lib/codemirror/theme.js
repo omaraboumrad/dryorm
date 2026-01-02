@@ -22,6 +22,18 @@ export const lightTheme = EditorView.theme({
   '.cm-cursor, .cm-dropCursor': {
     borderLeftColor: djangoGreen,
   },
+  // Vim fat cursor (block cursor)
+  '&.cm-focused .cm-fat-cursor .cm-cursor': {
+    background: 'rgba(68, 183, 139, 0.7) !important',
+    borderColor: 'transparent !important',
+  },
+  '.cm-fat-cursor .cm-cursor': {
+    background: 'rgba(68, 183, 139, 0.5) !important',
+    borderColor: 'transparent !important',
+  },
+  '&.cm-focused .cm-cursor.cm-cursor-primary': {
+    background: 'rgba(68, 183, 139, 0.7)',
+  },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
     backgroundColor: 'rgba(68, 183, 139, 0.2)',
   },
@@ -53,6 +65,18 @@ export const darkTheme = EditorView.theme({
   },
   '.cm-cursor, .cm-dropCursor': {
     borderLeftColor: djangoGreen,
+  },
+  // Vim fat cursor (block cursor)
+  '&.cm-focused .cm-fat-cursor .cm-cursor': {
+    background: 'rgba(68, 183, 139, 0.7) !important',
+    borderColor: 'transparent !important',
+  },
+  '.cm-fat-cursor .cm-cursor': {
+    background: 'rgba(68, 183, 139, 0.5) !important',
+    borderColor: 'transparent !important',
+  },
+  '&.cm-focused .cm-cursor.cm-cursor-primary': {
+    background: 'rgba(68, 183, 139, 0.7)',
   },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
     backgroundColor: 'rgba(68, 183, 139, 0.3)',

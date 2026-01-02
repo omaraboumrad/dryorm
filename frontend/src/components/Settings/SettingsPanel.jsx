@@ -103,6 +103,22 @@ function SettingsPanel() {
           </div>
         )}
 
+        {/* Editor mode selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Editor Mode
+          </label>
+          <Select
+            value={state.editorMode}
+            onChange={(value) => dispatch({ type: 'SET_EDITOR_MODE', payload: value })}
+            options={[
+              { value: 'default', label: 'Default' },
+              { value: 'vim', label: 'Vim' },
+            ]}
+            placeholder="Select editor mode..."
+          />
+        </div>
+
         {/* No-cache checkbox */}
         <div>
           <Checkbox

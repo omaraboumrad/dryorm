@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useAppState, useAppDispatch } from '../../context/AppContext';
+import { useAppState } from '../../context/AppContext';
 import { XIcon } from '../icons';
 import OutputSection from '../Results/OutputSection';
 import QueriesSection from '../Results/QueriesSection';
 
 function SlidePanel() {
   const state = useAppState();
-  const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
 
   // Auto-open when results come in
@@ -26,29 +25,26 @@ function SlidePanel() {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop - transparent, just for click-to-close */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-35"
+          className="fixed inset-0 z-35"
           onClick={handleClose}
         />
       )}
 
       {/* Panel */}
       <div className={`slide-panel ${isOpen ? 'open' : ''} z-40`}>
-        {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-          <h2 className="font-medium text-gray-900 dark:text-white">Results</h2>
-          <button
-            onClick={handleClose}
-            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
-          >
-            <XIcon size={18} />
-          </button>
-        </div>
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-3 right-3 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 z-10"
+        >
+          <XIcon size={18} />
+        </button>
 
         {/* Content */}
-        <div className="p-4 space-y-4">
+        <div className="space-y-4">
           {/* Error display */}
           {state.error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">

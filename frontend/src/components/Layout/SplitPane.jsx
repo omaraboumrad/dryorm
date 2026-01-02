@@ -6,6 +6,15 @@ import ResultPanel from '../Results/ResultPanel';
 function SplitPane() {
   const state = useAppState();
 
+  // Zen mode: editor only, full width
+  if (state.zenMode) {
+    return (
+      <div className="h-full overflow-hidden">
+        <CodeEditor />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col lg:flex-row h-full overflow-hidden">
       {/* Editor pane */}

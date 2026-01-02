@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAppState } from '../../context/AppContext';
 import FloatingControls from './FloatingControls';
-import SlidePanel from './SlidePanel';
 
 function ZenModeWrapper({ children }) {
   const state = useAppState();
@@ -20,8 +19,7 @@ function ZenModeWrapper({ children }) {
       {/* Floating controls */}
       <FloatingControls />
 
-      {/* Slide panel for results */}
-      <SlidePanel />
+      {/* Results shown inline via Alt key - no slide panel needed */}
     </div>
   );
 }
