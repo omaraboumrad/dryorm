@@ -12,7 +12,7 @@ from . import models
 from . import templates
 from . import constants
 from . import databases
-from .pr_service import ref_service, RefNotFoundError, RefFetchError, pr_service, PRNotFoundError, PRFetchError
+from .github_service import ref_service, RefNotFoundError, RefFetchError
 import tasks
 
 
