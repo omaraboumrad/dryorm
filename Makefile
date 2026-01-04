@@ -40,6 +40,21 @@ clean: frontend-clean ## Clean all build artifacts
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	@echo "$(GREEN)✓ Cleanup complete$(NC)"
 
+# ==================== Testing ====================
+
+test: ## Run backend tests in Docker
+	@echo "$(BLUE)Running backend tests...$(NC)"
+	docker compose exec backend pytest dryorm/tests/ -v
+	@echo "$(GREEN)✓ Tests complete$(NC)"
+
+test-quick: ## Run backend tests (no verbose output)
+	docker compose exec backend pytest dryorm/tests/
+
+test-cov: ## Run tests with coverage report
+	@echo "$(BLUE)Running tests with coverage...$(NC)"
+	docker compose exec backend pytest dryorm/tests/ --cov=dryorm --cov-report=term-missing
+	@echo "$(GREEN)✓ Coverage report complete$(NC)"
+
 # ==================== Docker ====================
 
 build-executors: ## Build all executor images using multi-stage Dockerfile
@@ -51,4 +66,4 @@ build-executors: ## Build all executor images using multi-stage Dockerfile
 .PHONY: frontend-install frontend-build frontend-watch frontend-clean
 .PHONY: up down restart logs logs-backend logs-worker ps build-docker build-executors
 .PHONY: shell dbshell makemigrations migrate createsuperuser collectstatic
-.PHONY: dev dev-watch setup clean clean-all test test-coverage check requirements
+.PHONY: dev dev-watch setup clean clean-all test test-quick test-cov check requirements
