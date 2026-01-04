@@ -40,8 +40,13 @@ function BrowsePage() {
   };
 
   useEffect(() => {
-    const debounce = setTimeout(() => fetchSnippets(search, 1), 300);
-    return () => clearTimeout(debounce);
+    // Fetch immediately when search is empty, debounce when typing
+    if (search === '') {
+      fetchSnippets('', 1);
+      return;
+    }
+    const timer = setTimeout(() => fetchSnippets(search, 1), 300);
+    return () => clearTimeout(timer);
   }, [search]);
 
   const handlePageChange = (newPage) => {
