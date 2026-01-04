@@ -13,7 +13,7 @@ from . import templates
 from . import constants
 from . import databases
 from .github_service import ref_service, RefNotFoundError, RefFetchError
-import tasks
+from . import tasks
 
 
 class ReactHomeView(generic.TemplateView):
