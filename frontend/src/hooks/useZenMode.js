@@ -18,6 +18,10 @@ export function useZenMode() {
     }
   }, [state.zenMode, dispatch]);
 
+  const toggleJourneyNav = useCallback(() => {
+    dispatch({ type: 'TOGGLE_JOURNEY_NAV' });
+  }, [dispatch]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -27,12 +31,18 @@ export function useZenMode() {
         toggleZenMode();
         return;
       }
+      // Cmd+j or Ctrl+j to toggle journey sidebar
+      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+        e.preventDefault();
+        toggleJourneyNav();
+        return;
+      }
       // Note: Escape does NOT exit zen mode to preserve vim keybindings
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleZenMode]);
+  }, [toggleZenMode, toggleJourneyNav]);
 
   return {
     zenMode: state.zenMode,

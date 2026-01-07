@@ -250,6 +250,24 @@ html, body {
   }
 }
 
+/* Larger font in zen mode journey panel */
+.zen-mode aside {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.zen-mode aside button,
+.zen-mode aside span {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+@media (min-width: 1024px) {
+  .zen-mode aside {
+    font-size: 20px;
+  }
+}
+
 .zen-fade-enter {
   opacity: 0;
   transform: translateY(-10px);
@@ -284,8 +302,8 @@ html, body {
 
 .floating-controls-btn {
   @apply text-white rounded-full shadow-lg backdrop-blur-sm transition-all;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -299,8 +317,8 @@ html, body {
 
 .floating-run-btn {
   @apply text-white rounded-full shadow-lg transition-all;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;

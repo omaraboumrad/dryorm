@@ -94,7 +94,7 @@ function Header() {
                 variant="header"
                 size="icon"
                 onClick={() => dispatch({ type: 'TOGGLE_JOURNEY_NAV' })}
-                title="Learning Journeys"
+                title="Learning Journeys (Cmd+j)"
               >
                 <JourneyIcon size={20} className={state.showJourneyNav ? 'text-django-secondary' : 'text-white'} />
               </Button>

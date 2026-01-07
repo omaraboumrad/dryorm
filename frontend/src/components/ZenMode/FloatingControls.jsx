@@ -14,7 +14,7 @@ function FloatingControls() {
     <div className="floating-controls">
       {/* Logo at top */}
       <div className="floating-controls-btn">
-        <DryormIcon size={20} className="text-white" />
+        <DryormIcon size={24} className="text-white" />
       </div>
 
       {/* Run button */}
@@ -25,9 +25,9 @@ function FloatingControls() {
         title="Run (Cmd+Enter)"
       >
         {loading ? (
-          <SpinnerIcon size={20} />
+          <SpinnerIcon size={24} />
         ) : (
-          <PlayIcon size={20} />
+          <PlayIcon size={24} />
         )}
       </button>
 
@@ -37,7 +37,7 @@ function FloatingControls() {
         className="floating-controls-btn"
         title="Settings"
       >
-        <CogIcon size={20} />
+        <CogIcon size={24} />
       </button>
 
       {/* Share button */}
@@ -46,7 +46,7 @@ function FloatingControls() {
         className="floating-controls-btn"
         title="Share"
       >
-        <ShareIcon size={20} />
+        <ShareIcon size={24} />
       </button>
 
       {/* Exit zen mode button */}
@@ -55,7 +55,7 @@ function FloatingControls() {
         className="floating-controls-btn"
         title="Exit Zen Mode (Cmd+.)"
       >
-        <CompressIcon size={20} />
+        <CompressIcon size={24} />
       </button>
     </div>
   );

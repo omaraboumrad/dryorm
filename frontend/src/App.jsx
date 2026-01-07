@@ -20,7 +20,7 @@ function HomePage() {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      {state.showJourneyNav && !state.zenMode && <JourneyNav />}
+      {state.showJourneyNav && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
         {!state.zenMode && (
           <div className="lg:hidden">
@@ -69,7 +69,7 @@ function SnippetPage() {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      {state.showJourneyNav && !state.zenMode && <JourneyNav />}
+      {state.showJourneyNav && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
         {!state.zenMode && (
           <div className="lg:hidden">
@@ -115,7 +115,7 @@ function SnippetRunPage() {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      {state.showJourneyNav && !state.zenMode && <JourneyNav />}
+      {state.showJourneyNav && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
         {!state.zenMode && (
           <div className="lg:hidden">
@@ -180,7 +180,7 @@ function JourneyIndexPage() {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      {state.showJourneyNav && !state.zenMode && <JourneyNav />}
+      {state.showJourneyNav && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
         {!state.zenMode && (
           <div className="lg:hidden">
@@ -232,7 +232,7 @@ function JourneyPage() {
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      {state.showJourneyNav && !state.zenMode && <JourneyNav />}
+      {state.showJourneyNav && <JourneyNav />}
       <main className="flex-1 min-w-0 overflow-hidden">
         {!state.zenMode && (
           <div className="lg:hidden">
