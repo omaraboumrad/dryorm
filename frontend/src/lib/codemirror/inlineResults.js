@@ -1,6 +1,51 @@
 import { StateField, StateEffect } from '@codemirror/state';
 import { Decoration, WidgetType, EditorView } from '@codemirror/view';
 
+// Simple SQL syntax highlighter
+function highlightSQL(sql) {
+  const keywords = /\b(SELECT|FROM|WHERE|AND|OR|NOT|IN|IS|NULL|AS|ON|JOIN|LEFT|RIGHT|INNER|OUTER|FULL|CROSS|NATURAL|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|UNION|ALL|DISTINCT|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|ALTER|DROP|TABLE|INDEX|VIEW|IF|EXISTS|PRIMARY|KEY|FOREIGN|REFERENCES|UNIQUE|CHECK|DEFAULT|CONSTRAINT|CASCADE|BEGIN|COMMIT|ROLLBACK|TRANSACTION|LIKE|BETWEEN|CASE|WHEN|THEN|ELSE|END|ASC|DESC|NULLS|FIRST|LAST|TRUE|FALSE|COUNT|SUM|AVG|MIN|MAX|COALESCE|CAST|SAVEPOINT|WITH|RETURNING)\b/gi;
+  const strings = /('[^']*'|"[^"]*")/g;
+  const numbers = /\b(\d+\.?\d*)\b/g;
+  const params = /(%s|\$\d+|\?|:\w+)/g;
+
+  // Replace in order: strings first (to avoid highlighting keywords inside strings)
+  let result = sql;
+  const stringPlaceholders = [];
+
+  // Protect strings first
+  result = result.replace(strings, (match) => {
+    const idx = stringPlaceholders.length;
+    stringPlaceholders.push(`<span class="sql-string">${escapeHtml(match)}</span>`);
+    return `__STRING_${idx}__`;
+  });
+
+  // Escape HTML in the rest
+  result = escapeHtml(result);
+
+  // Highlight keywords
+  result = result.replace(keywords, '<span class="sql-keyword">$1</span>');
+
+  // Highlight numbers
+  result = result.replace(numbers, '<span class="sql-number">$1</span>');
+
+  // Highlight params
+  result = result.replace(params, '<span class="sql-param">$1</span>');
+
+  // Restore strings
+  stringPlaceholders.forEach((str, idx) => {
+    result = result.replace(`__STRING_${idx}__`, str);
+  });
+
+  return result;
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 // Effects for updating inline results
 export const setInlineQueries = StateEffect.define();
 export const setInlineOutput = StateEffect.define();
@@ -142,7 +187,7 @@ class ZenInlineQueryWidget extends WidgetType {
 
         const sql = document.createElement('pre');
         sql.className = 'cm-zen-query-sql';
-        sql.textContent = query.sql || query;
+        sql.innerHTML = highlightSQL(query.sql || query);
         queryBlock.appendChild(sql);
 
         if (query.time) {
@@ -224,7 +269,7 @@ class InlineQueryWidget extends WidgetType {
 
         const sql = document.createElement('pre');
         sql.className = 'cm-inline-query-sql';
-        sql.textContent = query.sql || query;
+        sql.innerHTML = highlightSQL(query.sql || query);
         queryBlock.appendChild(sql);
 
         if (query.time) {

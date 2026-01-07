@@ -761,6 +761,48 @@ div.cm-cursor {
   color: var(--color-text-primary);
 }
 
+/* SQL syntax highlighting */
+.cm-zen-query-sql .sql-keyword,
+.cm-inline-query-sql .sql-keyword {
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+.cm-zen-query-sql .sql-string,
+.cm-inline-query-sql .sql-string {
+  color: #059669;
+}
+
+.cm-zen-query-sql .sql-number,
+.cm-inline-query-sql .sql-number {
+  color: #d97706;
+}
+
+.cm-zen-query-sql .sql-param,
+.cm-inline-query-sql .sql-param {
+  color: #dc2626;
+}
+
+.dark .cm-zen-query-sql .sql-keyword,
+.dark .cm-inline-query-sql .sql-keyword {
+  color: #a78bfa;
+}
+
+.dark .cm-zen-query-sql .sql-string,
+.dark .cm-inline-query-sql .sql-string {
+  color: #6ee7b7;
+}
+
+.dark .cm-zen-query-sql .sql-number,
+.dark .cm-inline-query-sql .sql-number {
+  color: #fbbf24;
+}
+
+.dark .cm-zen-query-sql .sql-param,
+.dark .cm-inline-query-sql .sql-param {
+  color: #f87171;
+}
+
 .cm-zen-query-time {
   position: absolute;
   top: 0;
