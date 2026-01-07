@@ -424,8 +424,19 @@ html, body {
   background-color: var(--color-border-light);
 }
 
-.dark .cm-selectionBackground {
-  background-color: rgba(68, 183, 139, 0.3) !important;
+/* Selection background (regular and vim visual mode) */
+.cm-selectionBackground,
+.cm-editor .cm-selectionBackground,
+.cm-editor.cm-focused .cm-selectionBackground,
+.cm-content ::selection {
+  background-color: rgba(68, 183, 139, 0.25) !important;
+}
+
+.dark .cm-selectionBackground,
+.dark .cm-editor .cm-selectionBackground,
+.dark .cm-editor.cm-focused .cm-selectionBackground,
+.dark .cm-content ::selection {
+  background-color: rgba(68, 183, 139, 0.35) !important;
 }
 
 .dark .cm-cursor {

@@ -1,4 +1,4 @@
-import { keymap, highlightActiveLine, lineNumbers, highlightActiveLineGutter, EditorView } from '@codemirror/view';
+import { keymap, highlightActiveLine, lineNumbers, highlightActiveLineGutter, drawSelection, EditorView } from '@codemirror/view';
 import { EditorState, Prec } from '@codemirror/state';
 import { indentOnInput, bracketMatching, indentUnit } from '@codemirror/language';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
@@ -8,7 +8,7 @@ import { getTheme, getHighlighting } from './theme';
 import { getQueryGutterExtensions } from './queryGutter';
 import { getInlineResultsExtensions } from './inlineResults';
 
-// Override vim's pink fat cursor with Django green
+// Override vim's pink fat cursor and selection with Django green
 // Must use Prec.highest to override the vim extension's built-in styling
 const vimCursorOverride = Prec.highest(EditorView.theme({
   ".cm-fat-cursor": {
@@ -17,6 +17,19 @@ const vimCursorOverride = Prec.highest(EditorView.theme({
   "&:not(.cm-focused) .cm-fat-cursor": {
     background: "none !important",
     outline: "solid 1px rgba(110, 231, 183, 0.7) !important",
+  },
+  // Vim visual mode selection
+  ".cm-selectionBackground": {
+    background: "rgba(68, 183, 139, 0.3) !important",
+  },
+  "&.cm-focused .cm-selectionBackground": {
+    background: "rgba(68, 183, 139, 0.3) !important",
+  },
+  "& .cm-line ::selection": {
+    backgroundColor: "rgba(68, 183, 139, 0.3) !important",
+  },
+  "& .cm-line::selection": {
+    backgroundColor: "rgba(68, 183, 139, 0.3) !important",
   },
 }));
 
@@ -29,6 +42,9 @@ export function createBaseExtensions(isDark = false, editorMode = 'default') {
     lineNumbers(),
     highlightActiveLineGutter(),
     highlightActiveLine(),
+
+    // Selection rendering (required for vim visual mode)
+    drawSelection(),
 
     // Query line gutter markers
     ...getQueryGutterExtensions(),
