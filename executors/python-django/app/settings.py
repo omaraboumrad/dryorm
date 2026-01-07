@@ -12,11 +12,12 @@ ALLOWED_HOSTS = ["testserver"]
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.postgres",
     "app.apps.BaseAppConfig",
 ]
 
-# Conditionally add GeoDjango support
+# Conditionally add PostgreSQL/GeoDjango support
+if env("DB_TYPE") in ("postgres", "postgis"):
+    INSTALLED_APPS.insert(2, "django.contrib.postgres")
 if env("DB_TYPE") == "postgis":
     INSTALLED_APPS.insert(0, "django.contrib.gis")
 
