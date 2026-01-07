@@ -17,6 +17,12 @@ import { fetchConfig, fetchSnippet, fetchJourneys, fetchJourneyChapter } from '.
 // Home page component (editor)
 function HomePage() {
   const state = useAppState();
+  const dispatch = useAppDispatch();
+
+  // Focus editor on initial load
+  useEffect(() => {
+    dispatch({ type: 'FOCUS_EDITOR', payload: true });
+  }, [dispatch]);
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -52,6 +58,7 @@ function SnippetPage() {
         if (shouldRun) {
           dispatch({ type: 'SET_SHOULD_AUTO_RUN', payload: true });
         }
+        dispatch({ type: 'FOCUS_EDITOR', payload: true });
       } catch (err) {
         console.error('Failed to load snippet:', err);
       }
@@ -97,6 +104,7 @@ function SnippetRunPage() {
         dispatch({ type: 'LOAD_SNIPPET', payload: snippet });
         snippetLoadedRef.current = true;
         dispatch({ type: 'SET_SHOULD_AUTO_RUN', payload: true });
+        dispatch({ type: 'FOCUS_EDITOR', payload: true });
       } catch (err) {
         console.error('Failed to load snippet:', err);
       }
@@ -160,6 +168,7 @@ function JourneyIndexPage() {
               const chapterData = await fetchJourneyChapter(firstJourneySlug, firstChapter.slug);
               if (chapterData.code) {
                 dispatch({ type: 'SET_CODE', payload: chapterData.code });
+                dispatch({ type: 'FOCUS_EDITOR', payload: true });
               }
             } catch (err) {
               console.error('Failed to load first chapter:', err);
@@ -216,6 +225,7 @@ function JourneyPage() {
           const chapterData = await fetchJourneyChapter(slug, hash);
           if (chapterData.code) {
             dispatch({ type: 'SET_CODE', payload: chapterData.code });
+            dispatch({ type: 'FOCUS_EDITOR', payload: true });
           }
         } catch (err) {
           console.error('Failed to load chapter:', err);

@@ -16,6 +16,7 @@ const initialState = {
   showHtmlPreview: false,
   zenMode: false,
   shouldAutoRun: false,
+  shouldFocusEditor: false,
 
   // Theme: 'light', 'dark', or 'system'
   themeMode: 'system',
@@ -131,6 +132,7 @@ const actions = {
   CLEAR_SNIPPET: 'CLEAR_SNIPPET',
   SET_SHOULD_AUTO_RUN: 'SET_SHOULD_AUTO_RUN',
   SET_PAGE: 'SET_PAGE',
+  FOCUS_EDITOR: 'FOCUS_EDITOR',
 };
 
 // Reducer
@@ -307,6 +309,9 @@ function appReducer(state, action) {
 
     case actions.SET_PAGE:
       return { ...state, currentPage: action.payload };
+
+    case actions.FOCUS_EDITOR:
+      return { ...state, shouldFocusEditor: action.payload };
 
     default:
       return state;

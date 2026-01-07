@@ -305,6 +305,17 @@ function CodeEditor() {
     }
   }, [state.zenMode]);
 
+  // Focus editor when requested via state
+  useEffect(() => {
+    if (state.shouldFocusEditor && viewRef.current) {
+      // Small delay to ensure content is updated first
+      setTimeout(() => {
+        viewRef.current?.focus();
+        dispatch({ type: 'FOCUS_EDITOR', payload: false });
+      }, 50);
+    }
+  }, [state.shouldFocusEditor, dispatch]);
+
   // Update query line highlights and queries/outputs/errors data in zen mode
   useEffect(() => {
     if (!viewRef.current) return;

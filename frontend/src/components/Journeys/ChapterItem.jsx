@@ -31,6 +31,9 @@ function ChapterItem({ chapter, journeySlug, isCurrent, index }) {
       if (window.innerWidth < 1024) {
         dispatch({ type: 'TOGGLE_JOURNEY_NAV' });
       }
+
+      // Focus the editor
+      dispatch({ type: 'FOCUS_EDITOR', payload: true });
     } catch (err) {
       console.error('Failed to load chapter:', err);
     }
