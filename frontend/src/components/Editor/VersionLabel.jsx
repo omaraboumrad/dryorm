@@ -37,7 +37,7 @@ function VersionLabel() {
   } else {
     // Get ORM version label (verbose version)
     const ormVersion = state.ormVersions?.find((v) => (v.value || v) === state.ormVersion);
-    versionLabel = ormVersion?.label || 'Django 5.2.8';
+    versionLabel = ormVersion?.label || 'Django 6.0';
   }
 
   // Get database label (verbose version)

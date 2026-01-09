@@ -157,7 +157,7 @@ function SnippetItem({ snippet }) {
         return <span className="text-purple-600 dark:text-purple-400">{snippet.ref_id}</span>;
       }
     }
-    return <span>{snippet.orm_version || 'django-5.2'}</span>;
+    return <span>{snippet.orm_version || 'django-6.0'}</span>;
   };
 
   return (
