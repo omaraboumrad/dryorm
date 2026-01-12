@@ -298,9 +298,9 @@ function CodeEditor() {
     }
   }, [state.code]);
 
-  // Focus editor when entering zen mode
+  // Focus editor when entering or exiting zen mode
   useEffect(() => {
-    if (state.zenMode && viewRef.current) {
+    if (viewRef.current) {
       viewRef.current.focus();
     }
   }, [state.zenMode]);
