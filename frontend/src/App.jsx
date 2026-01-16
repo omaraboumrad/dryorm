@@ -27,13 +27,15 @@ function HomePage() {
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && <JourneyNav />}
-      <main className="flex-1 min-w-0 overflow-hidden">
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
         {!state.zenMode && (
-          <div className="lg:hidden">
+          <div className="lg:hidden flex-shrink-0">
             <MobileTabs />
           </div>
         )}
-        <SplitPane />
+        <div className="flex-1 min-h-0">
+          <SplitPane />
+        </div>
       </main>
     </div>
   );
@@ -77,13 +79,15 @@ function SnippetPage() {
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && <JourneyNav />}
-      <main className="flex-1 min-w-0 overflow-hidden">
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
         {!state.zenMode && (
-          <div className="lg:hidden">
+          <div className="lg:hidden flex-shrink-0">
             <MobileTabs />
           </div>
         )}
-        <SplitPane />
+        <div className="flex-1 min-h-0">
+          <SplitPane />
+        </div>
       </main>
     </div>
   );
@@ -124,13 +128,15 @@ function SnippetRunPage() {
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && <JourneyNav />}
-      <main className="flex-1 min-w-0 overflow-hidden">
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
         {!state.zenMode && (
-          <div className="lg:hidden">
+          <div className="lg:hidden flex-shrink-0">
             <MobileTabs />
           </div>
         )}
-        <SplitPane />
+        <div className="flex-1 min-h-0">
+          <SplitPane />
+        </div>
       </main>
     </div>
   );
@@ -190,13 +196,15 @@ function JourneyIndexPage() {
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && <JourneyNav />}
-      <main className="flex-1 min-w-0 overflow-hidden">
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
         {!state.zenMode && (
-          <div className="lg:hidden">
+          <div className="lg:hidden flex-shrink-0">
             <MobileTabs />
           </div>
         )}
-        <SplitPane />
+        <div className="flex-1 min-h-0">
+          <SplitPane />
+        </div>
       </main>
     </div>
   );
@@ -243,13 +251,15 @@ function JourneyPage() {
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
       {state.showJourneyNav && <JourneyNav />}
-      <main className="flex-1 min-w-0 overflow-hidden">
+      <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
         {!state.zenMode && (
-          <div className="lg:hidden">
+          <div className="lg:hidden flex-shrink-0">
             <MobileTabs />
           </div>
         )}
-        <SplitPane />
+        <div className="flex-1 min-h-0">
+          <SplitPane />
+        </div>
       </main>
     </div>
   );
