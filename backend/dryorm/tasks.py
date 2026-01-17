@@ -104,25 +104,35 @@ def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.
             exit_status = container.wait()
 
             # Read result from file using get_archive (works on stopped containers)
+            result = b''
             try:
                 stream, stat = container.get_archive('/tmp/result.json')
-
-                # Read the tar stream
                 file_obj = io.BytesIO()
                 for chunk in stream:
                     file_obj.write(chunk)
                 file_obj.seek(0)
-
-                # Extract the JSON file from tar
                 with tarfile.open(fileobj=file_obj) as tar:
                     member = tar.getmember('result.json')
                     f = tar.extractfile(member)
                     result = f.read()
-                    print("Successfully read from /tmp/result.json using get_archive")
             except Exception as e:
-                # If file extraction fails, fall back to logs
-                print(f"File extraction failed with exception: {e}, falling back to logs")
-                result = container.logs(stdout=True, stderr=True)
+                pass  # result.json doesn't exist
+
+            # If result.json is empty or doesn't exist, and exit code is non-zero, try error.log
+            if not result and exit_status['StatusCode'] != 0:
+                try:
+                    stream, stat = container.get_archive('/tmp/error.log')
+                    file_obj = io.BytesIO()
+                    for chunk in stream:
+                        file_obj.write(chunk)
+                    file_obj.seek(0)
+                    with tarfile.open(fileobj=file_obj) as tar:
+                        member = tar.getmember('error.log')
+                        f = tar.extractfile(member)
+                        result = f.read()
+                except Exception as e2:
+                    # If error.log also fails, fall back to container logs
+                    result = container.logs(stdout=True, stderr=True)
 
             # Remove container
             container.remove()
@@ -333,25 +343,35 @@ def run_django_ref_sync(code, database, ignore_cache=False, ref_type=None, ref_i
             exit_status = container.wait(timeout=120)  # Higher timeout for pip install
 
             # Read result from file using get_archive (works on stopped containers)
+            result = b''
             try:
                 stream, stat = container.get_archive('/tmp/result.json')
-
-                # Read the tar stream
                 file_obj = io.BytesIO()
                 for chunk in stream:
                     file_obj.write(chunk)
                 file_obj.seek(0)
-
-                # Extract the JSON file from tar
                 with tarfile.open(fileobj=file_obj) as tar:
                     member = tar.getmember('result.json')
                     f = tar.extractfile(member)
                     result = f.read()
-                    print("Successfully read from /tmp/result.json using get_archive (ref mode)")
             except Exception as e:
-                # If file extraction fails, fall back to logs
-                print(f"File extraction failed with exception: {e}, falling back to logs")
-                result = container.logs(stdout=True, stderr=True)
+                pass  # result.json doesn't exist
+
+            # If result.json is empty or doesn't exist, and exit code is non-zero, try error.log
+            if not result and exit_status['StatusCode'] != 0:
+                try:
+                    stream, stat = container.get_archive('/tmp/error.log')
+                    file_obj = io.BytesIO()
+                    for chunk in stream:
+                        file_obj.write(chunk)
+                    file_obj.seek(0)
+                    with tarfile.open(fileobj=file_obj) as tar:
+                        member = tar.getmember('error.log')
+                        f = tar.extractfile(member)
+                        result = f.read()
+                except Exception as e2:
+                    # If error.log also fails, fall back to container logs
+                    result = container.logs(stdout=True, stderr=True)
 
             # Remove container
             container.remove()
