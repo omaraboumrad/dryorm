@@ -73,6 +73,7 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.dryorm.rule=Host(`dryorm.xterm.info`)"
             - "traefik.http.routers.dryorm.tls.certresolver=xterm-info"
+            - "traefik.http.services.dryorm.loadbalancer.server.port=80"
 
     redis:
         image: redis:7.4-alpine
