@@ -350,7 +350,7 @@ function CodeEditor() {
       {!state.zenMode && <VersionLabel />}
       <div
         ref={editorRef}
-        className="flex-1 overflow-auto"
+        className="flex-1 overflow-hidden"
       />
       {/* Query popup on hover (not in zen mode - use Alt inline expansion instead) */}
       {!state.zenMode && hoverQueries && (
