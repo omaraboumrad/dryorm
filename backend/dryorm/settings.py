@@ -10,12 +10,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = BASE_DIR / PROJECT
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG") == "True"
-ALLOWED_HOSTS = ["localhost", "webserver", "dryorm.d.xterm.info", "dryorm.xterm.info"]
+ALLOWED_HOSTS = ["localhost", "webserver", "dryorm.d.xterm.info", "dryorm.xterm.info", "dryorm.dev"]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8060",
     "http://webserver:8060",
     "http://dryorm.d.xterm.info",
     "https://dryorm.xterm.info",
+    "https://dryorm.dev"
 ]
 
 
