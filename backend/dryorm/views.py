@@ -1,6 +1,7 @@
 from django.views import generic
 from django import http
 import os
+import hashlib
 import tomllib
 import re
 from django.conf import settings
@@ -8,12 +9,41 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+import event_monitoring
+
 from . import models
 from . import templates
 from . import constants
 from . import databases
 from .github_service import ref_service, RefNotFoundError, RefFetchError
 from . import tasks
+
+
+# Map dryorm's internal job-* result events to dashboard event names.
+EXECUTION_EVENTS = {
+    constants.JOB_DONE_EVENT: "snippet_executed",
+    constants.JOB_CODE_ERROR_EVENT: "snippet_failed",
+    constants.JOB_TIMEOUT_EVENT: "worker_timeout",
+    constants.JOB_OOM_KILLED_EVENT: "worker_oom",
+    constants.JOB_OVERLOADED: "system_overloaded",
+    constants.JOB_NETWORK_DISABLED_EVENT: "network_blocked",
+    constants.JOB_IMAGE_NOT_FOUND_ERROR_EVENT: "executor_missing",
+    constants.JOB_INTERNAL_ERROR_EVENT: "execution_error",
+}
+
+
+def _emit_execution(code, database, result, **extra):
+    """Report one code execution to the monitoring dashboard (opt-in, best-effort)."""
+    job_event = result.get("event")
+    payload = {"database": database, "job_event": job_event, **extra}
+    if result.get("error"):
+        payload["error"] = str(result["error"])[:500]
+    event_monitoring.emit(
+        EXECUTION_EVENTS.get(job_event, "execution_error"),
+        entity_type="execution",
+        entity_id=hashlib.md5((code or "").encode("utf-8")).hexdigest()[:12],
+        payload=payload,
+    )
 
 
 class ReactHomeView(generic.TemplateView):
@@ -68,6 +98,14 @@ def save(request):
             snippet.ref_id = ref_id
             snippet.sha = sha
             snippet.save()
+            event_monitoring.emit(
+                "snippet_updated",
+                entity_type="snippet",
+                entity_id=snippet.pk,
+                actor_id=session_key,
+                url=request.build_absolute_uri(f"/{snippet.slug}"),
+                payload={"name": snippet.name, "database": snippet.database},
+            )
             return JsonResponse({"slug": snippet.slug, "updated": True})
         except models.Snippet.DoesNotExist:
             return JsonResponse({"error": "Snippet not found"}, status=404)
@@ -83,6 +121,20 @@ def save(request):
         ref_id=ref_id,
         sha=sha,
         session_key=session_key,
+    )
+
+    event_monitoring.emit(
+        "snippet_created",
+        entity_type="snippet",
+        entity_id=instance.pk,
+        actor_id=session_key,
+        url=request.build_absolute_uri(f"/{instance.slug}"),
+        payload={
+            "name": instance.name,
+            "database": instance.database,
+            "orm_version": orm_version,
+            "private": data.get("private") is True,
+        },
     )
 
     return JsonResponse({"slug": instance.slug})
@@ -385,6 +437,8 @@ def execute(request):
     if request.method != "POST":
         return http.HttpResponseNotAllowed(["POST"])
 
+    code = None
+    database = "sqlite"
     try:
         payload = json.loads(request.body)
         code = payload.get("code")
@@ -445,6 +499,8 @@ def execute(request):
         else:
             result = tasks.run_django_sync(code, database, ignore_cache, orm_version)
 
+        _emit_execution(code, database, result, orm_version=orm_version,
+                        ref_type=ref_type, ref_id=ref_id)
         return JsonResponse(result)
 
     except json.JSONDecodeError:
@@ -453,6 +509,8 @@ def execute(request):
             status=400
         )
     except Exception as e:
+        _emit_execution(code, database,
+                        {"event": constants.JOB_INTERNAL_ERROR_EVENT, "error": str(e)})
         return JsonResponse(
             {"event": constants.JOB_INTERNAL_ERROR_EVENT, "error": str(e)},
             status=500

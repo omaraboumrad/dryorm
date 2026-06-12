@@ -88,6 +88,12 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
         environment:
             - HOST_PR_CACHE_PATH=${PWD}/pr_cache
+            # Emit business events to the monitoring dashboard. events-redis is the
+            # monitor stack's Redis, aliased on the shared external `web` network
+            # (the `default` network here). Separate from dryorm's own `redis`.
+            - MONITORING_ENABLED=1
+            - MONITORING_APP=dryorm
+            - MONITORING_REDIS_URL=redis://events-redis:6379/0
         depends_on:
             - database
             - database_postgres

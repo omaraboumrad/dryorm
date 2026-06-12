@@ -8,6 +8,7 @@ django-extensions==4.1
 sentry-sdk[django]>=2.25.1
 redis
 httpx==0.28.1
+event-monitoring>=0.1.0
 
 # Testing
 pytest==8.3.4
