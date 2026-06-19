@@ -4,7 +4,7 @@
 # ============= Base Images =============
 
 # PostgreSQL Base - Builder
-FROM python:3.12-slim-bullseye AS builder-postgres
+FROM python:3.12-slim-bookworm AS builder-postgres
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir psycopg2-binary==2.9.10
 
 # PostgreSQL Base - Runtime
-FROM python:3.12-slim-bullseye AS base-postgres
+FROM python:3.12-slim-bookworm AS base-postgres
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y \
     postgresql-client \
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder-postgres /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
 # MariaDB Base - Builder
-FROM python:3.12-slim-bullseye AS builder-mariadb
+FROM python:3.12-slim-bookworm AS builder-mariadb
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
@@ -30,16 +30,16 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir mysqlclient==2.2.7
 
 # MariaDB Base - Runtime
-FROM python:3.12-slim-bullseye AS base-mariadb
+FROM python:3.12-slim-bookworm AS base-mariadb
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y \
-    mariadb-client \
-    libmariadb3 \
+    default-mysql-client \
+    default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder-mariadb /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
 # PostGIS Base - Builder
-FROM python:3.12-slim-bullseye AS builder-postgis
+FROM python:3.12-slim-bookworm AS builder-postgis
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
@@ -49,13 +49,14 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir psycopg2-binary==2.9.10
 
 # PostGIS Base - Runtime
-FROM python:3.12-slim-bullseye AS base-postgis
+FROM python:3.12-slim-bookworm AS base-postgis
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     libpq5 \
-    gdal-bin \
-    libgdal28 \
+    libgdal32 \
+    libgeos-c1v5 \
+    libproj25 \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder-postgis /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
@@ -154,7 +155,7 @@ CMD ["./run.sh"]
 # ============= PR Base Images (No Django pre-installed) =============
 # These images have all dependencies except Django.
 # Django is installed at runtime from a mounted PR source directory.
-# Uses Bookworm for newer SQLite (3.40+) required by newer Django.
+# All stages (stable + PR) run Bookworm for newer SQLite (3.40+).
 
 # PostgreSQL PR Base - Builder (Bookworm)
 FROM python:3.12-slim-bookworm AS pr-builder-postgres
