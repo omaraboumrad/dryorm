@@ -32,16 +32,17 @@ EXECUTION_EVENTS = {
 }
 
 
-def _emit_execution(code, database, result, **extra):
+def _emit_execution(code, database, result, url=None, **extra):
     """Report one code execution to the monitoring dashboard (opt-in, best-effort)."""
     job_event = result.get("event")
-    payload = {"database": database, "job_event": job_event, **extra}
+    payload = {"database": database, "job_event": job_event, "code": code, **extra}
     if result.get("error"):
-        payload["error"] = str(result["error"])[:500]
+        payload["error"] = str(result["error"])
     event_monitoring.emit(
         EXECUTION_EVENTS.get(job_event, "execution_error"),
         entity_type="execution",
         entity_id=hashlib.md5((code or "").encode("utf-8")).hexdigest()[:12],
+        url=url,
         payload=payload,
     )
 
@@ -439,6 +440,7 @@ def execute(request):
 
     code = None
     database = "sqlite"
+    source_url = request.headers.get("Referer")
     try:
         payload = json.loads(request.body)
         code = payload.get("code")
@@ -499,7 +501,7 @@ def execute(request):
         else:
             result = tasks.run_django_sync(code, database, ignore_cache, orm_version)
 
-        _emit_execution(code, database, result, orm_version=orm_version,
+        _emit_execution(code, database, result, url=source_url, orm_version=orm_version,
                         ref_type=ref_type, ref_id=ref_id)
         return JsonResponse(result)
 
@@ -510,7 +512,8 @@ def execute(request):
         )
     except Exception as e:
         _emit_execution(code, database,
-                        {"event": constants.JOB_INTERNAL_ERROR_EVENT, "error": str(e)})
+                        {"event": constants.JOB_INTERNAL_ERROR_EVENT, "error": str(e)},
+                        url=source_url)
         return JsonResponse(
             {"event": constants.JOB_INTERNAL_ERROR_EVENT, "error": str(e)},
             status=500
