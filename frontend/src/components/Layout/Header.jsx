@@ -25,10 +25,13 @@ function Header() {
   const { toggleZenMode } = useZenMode();
   const location = useLocation();
 
+  // Static pages that render their own content instead of the editor
+  const staticPages = ['/about', '/browse', '/privacy'];
+
   // Check if we're on an editor page (home, snippet, or journey)
   const isEditorPage = location.pathname === '/' ||
     location.pathname.startsWith('/j') ||
-    (location.pathname !== '/about' && location.pathname !== '/browse' && location.pathname.length > 1);
+    (!staticPages.includes(location.pathname) && location.pathname.length > 1);
 
   const handleRun = () => {
     execute(false);

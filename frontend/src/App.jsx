@@ -12,6 +12,7 @@ import HtmlPreview from './components/Dialogs/HtmlPreview';
 import FloatingControls from './components/ZenMode/FloatingControls';
 import AboutPage from './components/Pages/AboutPage';
 import BrowsePage from './components/Pages/BrowsePage';
+import PrivacyPage from './components/Pages/PrivacyPage';
 import { fetchConfig, fetchSnippet, fetchJourneys, fetchJourneyChapter } from './lib/api';
 
 // Home page component (editor)
@@ -319,6 +320,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/browse" element={<BrowsePage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/j" element={<JourneyIndexPage />} />
         <Route path="/j/:slug" element={<JourneyPage />} />
         <Route path="/:slug/run" element={<SnippetRunPage />} />

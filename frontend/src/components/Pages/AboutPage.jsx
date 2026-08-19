@@ -26,6 +26,11 @@ function AboutPage() {
                 Django Software Foundation
               </a>.
             </p>
+            <p>
+              See the{' '}
+              <a className="text-django-secondary hover:underline" href="/privacy">privacy page</a>{' '}
+              for what data DryORM stores.
+            </p>
           </div>
         </section>
 
