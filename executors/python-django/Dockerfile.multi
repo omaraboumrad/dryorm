@@ -182,37 +182,37 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
 COPY . /app/
 CMD ["./run.sh"]
 
-# ============= PR Base Images (No Django pre-installed) =============
+# ============= Ref Base Images (No Django pre-installed) =============
 # These images have all dependencies except Django.
-# Django is installed at runtime from a mounted PR source directory.
+# Django is installed at runtime from a mounted ref source (PR/branch/tag) directory.
 # All stages (stable + PR) run Bookworm for newer SQLite (3.40+).
 
-# PostgreSQL PR Base - Builder (Bookworm)
-FROM python:3.12-slim-bookworm AS pr-builder-postgres
+# PostgreSQL Ref Base - Builder (Bookworm)
+FROM python:3.12-slim-bookworm AS ref-builder-postgres
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir psycopg2-binary==2.9.10
 
-# PostgreSQL + PR Base
-FROM python:3.12-slim-bookworm AS pr-base-postgres
+# PostgreSQL + Ref Base
+FROM python:3.12-slim-bookworm AS ref-base-postgres
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=pr-builder-postgres /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=ref-builder-postgres /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 WORKDIR /app/
-COPY requirements-pr-base.txt /tmp/requirements.txt
+COPY requirements-ref-base.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm -f /tmp/requirements.txt \
     && pip cache purge
 COPY . /app/
-CMD ["./run-pr.sh"]
+CMD ["./run-ref.sh"]
 
-# MariaDB PR Base - Builder (Bookworm)
-FROM python:3.12-slim-bookworm AS pr-builder-mariadb
+# MariaDB Ref Base - Builder (Bookworm)
+FROM python:3.12-slim-bookworm AS ref-builder-mariadb
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
@@ -220,32 +220,32 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir mysqlclient==2.2.7
 
-# MariaDB + PR Base
-FROM python:3.12-slim-bookworm AS pr-base-mariadb
+# MariaDB + Ref Base
+FROM python:3.12-slim-bookworm AS ref-base-mariadb
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y \
     default-mysql-client \
     default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=pr-builder-mariadb /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=ref-builder-mariadb /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 WORKDIR /app/
-COPY requirements-pr-base.txt /tmp/requirements.txt
+COPY requirements-ref-base.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm -f /tmp/requirements.txt \
     && pip cache purge
 COPY . /app/
-CMD ["./run-pr.sh"]
+CMD ["./run-ref.sh"]
 
-# PostGIS PR Base - Builder (Bookworm)
-FROM python:3.12-slim-bookworm AS pr-builder-postgis
+# PostGIS Ref Base - Builder (Bookworm)
+FROM python:3.12-slim-bookworm AS ref-builder-postgis
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir psycopg2-binary==2.9.10
 
-# PostGIS + PR Base
-FROM python:3.12-slim-bookworm AS pr-base-postgis
+# PostGIS + Ref Base
+FROM python:3.12-slim-bookworm AS ref-base-postgis
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get install -y \
     postgresql-client \
@@ -254,11 +254,11 @@ RUN apt-get update && apt-get install -y \
     libgeos-c1v5 \
     libproj25 \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=pr-builder-postgis /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=ref-builder-postgis /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 WORKDIR /app/
-COPY requirements-pr-base.txt /tmp/requirements.txt
+COPY requirements-ref-base.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm -f /tmp/requirements.txt \
     && pip cache purge
 COPY . /app/
-CMD ["./run-pr.sh"]
+CMD ["./run-ref.sh"]

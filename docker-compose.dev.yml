@@ -180,26 +180,26 @@ services:
 
     # Django PR Mode Executors (no Django pre-installed)
 
-    executor-python-django-pr-postgres:
+    executor-python-django-ref-postgres:
         build:
             context: ./executors/python-django
             dockerfile: Dockerfile.multi
-            target: pr-base-postgres
-        image: dryorm-executor/python-django-pr-postgres
+            target: ref-base-postgres
+        image: dryorm-executor/python-django-ref-postgres
         command: /bin/true
 
-    executor-python-django-pr-mariadb:
+    executor-python-django-ref-mariadb:
         build:
             context: ./executors/python-django
             dockerfile: Dockerfile.multi
-            target: pr-base-mariadb
-        image: dryorm-executor/python-django-pr-mariadb
+            target: ref-base-mariadb
+        image: dryorm-executor/python-django-ref-mariadb
         command: /bin/true
 
-    executor-python-django-pr-postgis:
+    executor-python-django-ref-postgis:
         build:
             context: ./executors/python-django
             dockerfile: Dockerfile.multi
-            target: pr-base-postgis
-        image: dryorm-executor/python-django-pr-postgis
+            target: ref-base-postgis
+        image: dryorm-executor/python-django-ref-postgis
         command: /bin/true

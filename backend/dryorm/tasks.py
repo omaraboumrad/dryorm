@@ -262,7 +262,7 @@ def run_django_ref_sync(code, database, ignore_cache=False, ref_type=None, ref_i
     redis_client = redis.Redis("redis")
     key = hashlib.md5(code.encode("utf-8")).hexdigest()
 
-    executor = constants.get_pr_executor(database)
+    executor = constants.get_ref_executor(database)
     selected_db = DATABASES.get(database, DATABASES["sqlite"])
     cache_key = f"{ref_type}-{ref_id}-{ref_sha}-{database}-{key}"
     print(f"[DEBUG] Result cache_key = {cache_key}")
@@ -320,7 +320,7 @@ def run_django_ref_sync(code, database, ignore_cache=False, ref_type=None, ref_i
 
             # Mount the ref source directory into the container (use host path for Docker)
             volumes = {
-                ref_host_path: {"bind": "/django-pr", "mode": "ro"}
+                ref_host_path: {"bind": "/django-ref", "mode": "ro"}
             }
 
             container = client.containers.create(
@@ -492,7 +492,3 @@ def run_django_ref_sync(code, database, ignore_cache=False, ref_type=None, ref_i
             if unique_name and selected_db.needs_setup:
                 selected_db.teardown(unique_name)
 
-
-# Backwards compatibility alias
-def run_django_pr_sync(code, database, ignore_cache=False, pr_id=None, pr_sha=None, pr_host_path=None):
-    return run_django_ref_sync(code, database, ignore_cache, "pr", str(pr_id), pr_sha, pr_host_path)

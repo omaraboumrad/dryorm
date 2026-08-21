@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Add Django PR source to Python path
-export PYTHONPATH=/django-pr:$PYTHONPATH
+# Add mounted Django ref source (PR/branch/tag) to Python path
+export PYTHONPATH=/django-ref:$PYTHONPATH
 
 # Redirect all stderr to error.log for the entire script
 exec 2>/tmp/error.log

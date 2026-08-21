@@ -195,42 +195,42 @@ EXECUTORS = {
 }
 
 
-# PR mode executors - Django is installed at runtime from mounted PR source
-PR_EXECUTORS = {
+# Ref mode executors - Django is installed at runtime from mounted ref source (PR/branch/tag)
+REF_EXECUTORS = {
     "postgres": Executor(
-        image="dryorm-executor/python-django-pr-postgres",
-        key="python/django/pr/postgres",
-        verbose="Python - Django PR - PostgreSQL",
+        image="dryorm-executor/python-django-ref-postgres",
+        key="python/django/ref/postgres",
+        verbose="Python - Django Ref - PostgreSQL",
         memory="150m",  # Higher memory for pip install at runtime
         max_containers=5,
-        django_version="pr",
+        django_version="ref",
         database="postgres",
     ),
     "mariadb": Executor(
-        image="dryorm-executor/python-django-pr-mariadb",
-        key="python/django/pr/mariadb",
-        verbose="Python - Django PR - MariaDB",
+        image="dryorm-executor/python-django-ref-mariadb",
+        key="python/django/ref/mariadb",
+        verbose="Python - Django Ref - MariaDB",
         memory="150m",
         max_containers=5,
-        django_version="pr",
+        django_version="ref",
         database="mariadb",
     ),
     "sqlite": Executor(
-        image="dryorm-executor/python-django-pr-postgres",  # Use postgres base for sqlite
-        key="python/django/pr/sqlite",
-        verbose="Python - Django PR - SQLite",
+        image="dryorm-executor/python-django-ref-postgres",  # Use postgres base for sqlite
+        key="python/django/ref/sqlite",
+        verbose="Python - Django Ref - SQLite",
         memory="150m",
         max_containers=5,
-        django_version="pr",
+        django_version="ref",
         database="sqlite",
     ),
     "postgis": Executor(
-        image="dryorm-executor/python-django-pr-postgis",
-        key="python/django/pr/postgis",
-        verbose="Python - Django PR - PostGIS",
+        image="dryorm-executor/python-django-ref-postgis",
+        key="python/django/ref/postgis",
+        verbose="Python - Django Ref - PostGIS",
         memory="150m",
         max_containers=5,
-        django_version="pr",
+        django_version="ref",
         database="postgis",
     ),
 }
@@ -252,6 +252,6 @@ def get_executor(database: str, orm_version: str) -> Executor:
     return EXECUTORS.get(key, EXECUTORS[("sqlite", "django-6.1")])
 
 
-def get_pr_executor(database: str) -> Executor:
-    """Get the PR mode executor for the given database."""
-    return PR_EXECUTORS.get(database, PR_EXECUTORS["postgres"])
+def get_ref_executor(database: str) -> Executor:
+    """Get the ref mode executor for the given database."""
+    return REF_EXECUTORS.get(database, REF_EXECUTORS["postgres"])
