@@ -160,7 +160,7 @@ No. This is a personal project. The theme is inspired by Django's official websi
 
 **Does it support other ORMs?**
 
-The architecture is ORM-agnostic. You will find existing executors for **SQLAlchemy** and **PrismaJS** in the repository, but they are disabled in production.
+The architecture is ORM-agnostic — executors are self-contained and swappable. Only the Django executor ships today; SQLAlchemy and Prisma executors existed previously but have been removed.
 
 ## Attributions
 

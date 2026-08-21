@@ -44,7 +44,7 @@ class Snippet(models.Model):
     database = models.CharField(max_length=50, default="sqlite")
 
     # Version info - either orm_version OR (ref_type + ref_id + sha) should be set
-    orm_version = models.CharField(max_length=50, null=True, blank=True)  # e.g., "django-5.2.8", "sqlalchemy-2.0"
+    orm_version = models.CharField(max_length=50, null=True, blank=True)  # e.g., "django-6.1"
     ref_type = models.CharField(max_length=10, null=True, blank=True)  # "pr", "branch", or "tag"
     ref_id = models.CharField(max_length=100, null=True, blank=True)  # PR number, branch name, or tag name
     sha = models.CharField(max_length=40, null=True, blank=True)  # Git commit SHA to pin to specific version
