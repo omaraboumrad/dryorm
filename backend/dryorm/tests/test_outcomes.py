@@ -73,6 +73,7 @@ class TestImageNotFound:
         reply = run_django_sync(TRIVIAL, "sqlite", ignore_cache=True)
         assert reply["event"] == constants.JOB_IMAGE_NOT_FOUND_ERROR_EVENT
 
+    @pytest.mark.serial
     def test_releases_the_slot_after_a_missing_image(self, monkeypatch):
         from dryorm import tasks
 

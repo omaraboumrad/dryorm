@@ -28,7 +28,7 @@ class OverloadedError(Exception):
     pass
 
 
-def run_django_sync(code, database, ignore_cache=False, orm_version="django-5.2.8"):
+def run_django_sync(code, database, ignore_cache=False, orm_version="django-6.1"):
     """Synchronous version for HTTP request/response cycle."""
     client = docker.from_env()
     redis_client = redis.Redis("redis")

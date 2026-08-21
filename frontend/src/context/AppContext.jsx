@@ -46,7 +46,7 @@ def run():
 
   // Settings
   database: 'sqlite',
-  ormVersion: 'django-6.0',
+  ormVersion: 'django-6.1',
   ignoreCache: false,
   currentRefInfo: null,
   editorMode: 'default', // 'default' or 'vim'

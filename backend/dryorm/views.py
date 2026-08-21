@@ -77,7 +77,7 @@ def save(request):
 
     # Backwards compatibility: convert old django_version to new orm_version format
     if not orm_version and not ref_type:
-        django_version = data.get("django_version", "5.2.8")
+        django_version = data.get("django_version", "6.1")
         orm_version = f"django-{django_version}"
 
     # Check if this is an update (slug provided)
@@ -445,7 +445,7 @@ def execute(request):
         payload = json.loads(request.body)
         code = payload.get("code")
         database = payload.get("database", "sqlite")
-        orm_version = payload.get("orm_version", "django-5.2.8")
+        orm_version = payload.get("orm_version", "django-6.1")
         ignore_cache = payload.get("ignore_cache", False)
 
         # Ref mode (PR, branch, or tag)

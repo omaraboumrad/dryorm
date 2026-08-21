@@ -6,7 +6,7 @@ import pytest
 from dryorm import constants
 from dryorm.tasks import run_django_sync
 
-DEFAULT_ORM_VERSION = "django-5.2.8"
+DEFAULT_ORM_VERSION = "django-6.1"
 
 
 def execute(code, database="sqlite", orm_version=DEFAULT_ORM_VERSION):

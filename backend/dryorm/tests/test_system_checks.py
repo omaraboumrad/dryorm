@@ -31,14 +31,15 @@ class TestCheckErrorsAbortTheRun:
         assert reply["event"] == constants.JOB_CODE_ERROR_EVENT
         assert "fields.E304" in reply["error"]
 
-    def test_decimal_field_missing_its_arguments(self, run_raw):
+    def test_decimal_field_missing_its_arguments_on_django_6_0(self, run_raw):
         reply = run_raw(
             """
             from django.db import models
 
             class Product(models.Model):
                 price = models.DecimalField()
-            """
+            """,
+            orm_version="django-6.0",
         )
         assert reply["event"] == constants.JOB_CODE_ERROR_EVENT
         assert "fields.E130" in reply["error"]
@@ -89,6 +90,21 @@ class TestChecksThatShouldNotAbort:
 
             class Post(models.Model):
                 tags = models.ManyToManyField(Tag, null=True)
+
+            def run():
+                return {"ok": True}
+            """
+        )
+        assert result["returned"] == {"ok": True}
+
+    def test_decimal_field_arguments_are_optional_on_django_6_1(self, run):
+        # 6.0 rejects this with fields.E130/E132; 6.1 accepts it.
+        result = run(
+            """
+            from django.db import models
+
+            class Product(models.Model):
+                price = models.DecimalField()
 
             def run():
                 return {"ok": True}
