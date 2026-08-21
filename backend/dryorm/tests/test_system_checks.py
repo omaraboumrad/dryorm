@@ -11,7 +11,7 @@ import pytest
 
 from dryorm import constants
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.cross_backend]
 
 CLASHING_ACCESSORS = """
     from django.db import models
@@ -97,9 +97,13 @@ class TestChecksThatShouldNotAbort:
         )
         assert result["returned"] == {"ok": True}
 
-    def test_decimal_field_arguments_are_optional_on_django_6_1(self, run):
-        # 6.0 rejects this with fields.E130/E132; 6.1 accepts it.
-        result = run(
+    def test_decimal_field_arguments_are_optional_except_on_mysql(
+        self, run_raw, default_database
+    ):
+        # Django 6.0 rejected this everywhere; 6.1 accepts it wherever the
+        # backend can express an unbounded NUMERIC. MySQL cannot, so the check
+        # still fires there.
+        reply = run_raw(
             """
             from django.db import models
 
@@ -110,11 +114,19 @@ class TestChecksThatShouldNotAbort:
                 return {"ok": True}
             """
         )
-        assert result["returned"] == {"ok": True}
+        if default_database == "mariadb":
+            assert reply["event"] == constants.JOB_CODE_ERROR_EVENT
+            assert "fields.E130" in reply["error"]
+            assert "fields.E132" in reply["error"]
+        else:
+            assert reply["result"]["returned"] == {"ok": True}
 
-    def test_charfield_without_max_length_is_valid_on_django_5(self, run):
-        # max_length stopped being required; this must not regress into an error.
-        result = run(
+    def test_charfield_without_max_length_except_on_mysql(
+        self, run_raw, default_database
+    ):
+        # max_length stopped being required, but only where VARCHAR can be
+        # unbounded. MySQL needs a length, so fields.E120 still fires there.
+        reply = run_raw(
             """
             from django.db import models
 
@@ -126,4 +138,8 @@ class TestChecksThatShouldNotAbort:
                 return {"n": Thing.objects.count()}
             """
         )
-        assert result["returned"] == {"n": 1}
+        if default_database == "mariadb":
+            assert reply["event"] == constants.JOB_CODE_ERROR_EVENT
+            assert "fields.E120" in reply["error"]
+        else:
+            assert reply["result"]["returned"] == {"n": 1}

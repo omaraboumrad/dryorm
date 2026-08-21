@@ -61,10 +61,48 @@ def unique_snippet():
 
 
 @pytest.fixture
-def run():
-    return execute_ok
+def default_database(request):
+    """The backend a test runs against unless it names one explicitly.
+
+    Parametrized indirectly by the `cross_backend` mark below.
+    """
+    return getattr(request, "param", "sqlite")
 
 
 @pytest.fixture
-def run_raw():
-    return execute
+def run(default_database):
+    def _run(code, database=None, orm_version=DEFAULT_ORM_VERSION):
+        return execute_ok(code, database or default_database, orm_version)
+
+    return _run
+
+
+@pytest.fixture
+def run_raw(default_database):
+    def _run(code, database=None, orm_version=DEFAULT_ORM_VERSION):
+        return execute(code, database or default_database, orm_version)
+
+    return _run
+
+
+ALL_BACKENDS = ["sqlite", "postgres", "mariadb", "postgis"]
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--backends",
+        default=",".join(ALL_BACKENDS),
+        help="Comma-separated backends for cross_backend tests. Narrow it to "
+        "sqlite for a fast inner loop.",
+    )
+
+
+def pytest_generate_tests(metafunc):
+    """Expand every cross_backend test over the requested backends.
+
+    Deciding up front which assertions could not possibly differ per backend
+    turned out to be a bad bet, so the default is all of them.
+    """
+    if metafunc.definition.get_closest_marker("cross_backend"):
+        backends = [b.strip() for b in metafunc.config.getoption("--backends").split(",")]
+        metafunc.parametrize("default_database", backends, indirect=True)

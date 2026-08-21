@@ -8,7 +8,7 @@ precede whatever run() prints, whatever order they appear in the source.
 
 import pytest
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.cross_backend]
 
 
 class TestModuleLevelOrdering:

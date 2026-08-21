@@ -9,7 +9,7 @@ import pytest
 
 from dryorm import constants
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.cross_backend]
 
 
 BLOG = """

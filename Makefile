@@ -62,6 +62,12 @@ test-scenarios: ## Run end-to-end scenarios against real executor containers
 	# their own pass with nothing else in flight.
 	docker compose exec backend pytest dryorm/tests/ -m "not serial" -n 4
 	docker compose exec backend pytest dryorm/tests/ -m serial
+
+test-fast: ## Run the scenarios against SQLite only (inner loop)
+	@echo "$(BLUE)Running scenarios against SQLite only...$(NC)"
+	docker compose exec backend pytest dryorm/tests/ -m "not serial" -n 4 --backends sqlite
+	docker compose exec backend pytest dryorm/tests/ -m serial
+	@echo "$(GREEN)✓ Fast pass complete$(NC)"
 	@echo "$(GREEN)✓ Scenarios complete$(NC)"
 
 # ==================== Docker ====================
@@ -75,4 +81,4 @@ build-executors: ## Build all executor images using multi-stage Dockerfile
 .PHONY: frontend-install frontend-build frontend-watch frontend-clean
 .PHONY: up down restart logs logs-backend logs-worker ps build-docker build-executors
 .PHONY: shell dbshell makemigrations migrate createsuperuser collectstatic
-.PHONY: dev dev-watch setup clean clean-all test test-quick test-cov test-scenarios check requirements
+.PHONY: dev dev-watch setup clean clean-all test test-quick test-cov test-scenarios test-fast check requirements
