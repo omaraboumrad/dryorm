@@ -46,7 +46,6 @@ def run():
 """
 
 BULK = """from django.db import models
-from django.db import models
 
 class Person(models.Model):
     name = models.CharField(max_length=100)
@@ -184,7 +183,6 @@ def run():
 """
 
 TABULAR_OUTPUT = """from django.db import models
-from django.db import models
 
 class Person(models.Model):
     name = models.CharField(max_length=100)
