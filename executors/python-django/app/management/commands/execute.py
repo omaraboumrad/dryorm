@@ -1,79 +1,19 @@
-import builtins
 import contextlib
+import inspect
 import io
 import json
 import re
 import time
-import inspect
-
-from django.core.management.base import BaseCommand, CommandError
-from django.core.management import call_command
-from django.db import connection
 
 import sqlparse
-from . import mermaid
-
 from app import models
+from app.thread_locals import thread_locals
+from django.core.management import call_command
+from django.core.management.base import BaseCommand, CommandError
+from django.db import connection
 
-
-class LineAwarePrintCapture:
-    """Captures print statements with their line numbers from user code"""
-
-    def __init__(self):
-        self.outputs = []
-        self.user_code_lines = []
-        self.original_print = builtins.print
-        self.output_buffer = io.StringIO()
-
-    def set_user_code(self, code):
-        """Store user code lines for line number tracking"""
-        self.user_code_lines = code.splitlines()
-
-    def get_user_code_line(self):
-        """Extract line number from user code in the stack trace"""
-        try:
-            stack = inspect.stack()
-            for frame_info in stack:
-                if frame_info.filename == "/app/app/models.py":
-                    line_number = frame_info.lineno
-                    if self.user_code_lines and 1 <= line_number <= len(self.user_code_lines):
-                        return {
-                            "line_number": line_number,
-                            "source_context": self.user_code_lines[line_number - 1].strip(),
-                        }
-        except Exception:
-            pass
-        return {}
-
-    def tracked_print(self, *args, **kwargs):
-        """Replacement print function that tracks line numbers"""
-        line_info = self.get_user_code_line()
-
-        # Capture the output
-        output = io.StringIO()
-        self.original_print(*args, file=output, **{k: v for k, v in kwargs.items() if k != 'file'})
-        output_text = output.getvalue().rstrip('\n')
-
-        # Store with line info
-        self.outputs.append({
-            "line_number": line_info.get("line_number"),
-            "output": output_text,
-        })
-
-        # Also write to the buffer for combined output
-        self.original_print(*args, file=self.output_buffer, **{k: v for k, v in kwargs.items() if k != 'file'})
-
-    def patch(self):
-        """Install the tracked print function"""
-        builtins.print = self.tracked_print
-
-    def restore(self):
-        """Restore the original print function"""
-        builtins.print = self.original_print
-
-    def get_combined_output(self):
-        """Get all output as a single string"""
-        return self.output_buffer.getvalue()
+from ...utils import LineAwarePrintCapture
+from . import mermaid
 
 
 def format_ddl(sql):
@@ -254,6 +194,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         global _global_query_logger
 
+        if local_print_capture := getattr(thread_locals, "print_capture", None):
+            module_level_output = local_print_capture.get_combined_output()
+            local_print_capture.restore()
+        else:
+            module_level_output = ""
+
         # Initialize line-aware query logger
         query_logger = LineAwareQueryLogger()
         _global_query_logger = query_logger
@@ -305,7 +251,7 @@ class Command(BaseCommand):
                 combined_output += stderr_output
 
             combined = dict(
-                output=combined_output,
+                output=module_level_output + combined_output,
                 outputs=print_capture.outputs,  # Line-aware print outputs
                 erd=erd,
                 queries=all_queries,

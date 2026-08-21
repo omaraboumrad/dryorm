@@ -2,7 +2,8 @@
 import os
 import sys
 
-
+from app.thread_locals import thread_locals
+from app.utils import LineAwarePrintCapture
 # Why? Because we're using test client in the snippets
 # which resets the queries and closes old connections
 # which won't allow us to capture _everything_ that
@@ -33,4 +34,7 @@ if __name__ == "__main__":
                 "forget to activate a virtual environment?"
             )
         raise
+    if sys.argv[1] == "execute":
+        thread_locals.print_capture = LineAwarePrintCapture()
+        thread_locals.print_capture.patch()
     execute_from_command_line(sys.argv)
