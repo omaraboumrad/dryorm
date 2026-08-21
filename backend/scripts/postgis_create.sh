@@ -9,7 +9,6 @@ DB_USER=${6:-$DB_USER}
 DB_PASSWORD=${7:-$DB_PASSWORD}
 
 PGPASSWORD=$SERVICE_DB_PASSWORD psql -h $SERVICE_DB_HOST -p $SERVICE_DB_PORT -U $SERVICE_DB_USER -v db_name="$DB_NAME" -v db_user="$DB_USER" -v db_pass="'$DB_PASSWORD'" <<SQL
-REVOKE CONNECT ON DATABASE "$DB_NAME" FROM public;
 SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$DB_NAME';
 
 -- Drop database and user if they exist
@@ -18,13 +17,13 @@ DROP USER IF EXISTS "$DB_USER";
 
 -- Create fresh database and user
 CREATE DATABASE "$DB_NAME";
+REVOKE CONNECT ON DATABASE "$DB_NAME" FROM PUBLIC;
 CREATE USER "$DB_USER" WITH PASSWORD '$DB_PASSWORD';
 ALTER ROLE "$DB_USER" NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT LOGIN;
 
 -- Grant access to only this DB
 GRANT CONNECT ON DATABASE "$DB_NAME" TO "$DB_USER";
-REVOKE CONNECT ON DATABASE postgres FROM "$DB_USER";
-REVOKE CONNECT ON DATABASE template1 FROM "$DB_USER";
+REVOKE CONNECT ON DATABASE postgres, template1, dryorm FROM PUBLIC;
 
 -- Switch to the new database
 \connect "$DB_NAME"

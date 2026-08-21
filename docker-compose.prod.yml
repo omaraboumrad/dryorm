@@ -20,18 +20,18 @@ services:
     database:
         image: postgres:alpine
         environment:
-            POSTGRES_USER: dryorm
-            POSTGRES_PASSWORD: dryorm
-            POSTGRES_DB: dryorm
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
         volumes:
             - ./pg_data:/var/lib/postgresql/data
 
     database_postgres:
         image: postgres:alpine
         environment:
-            POSTGRES_USER: dryorm
-            POSTGRES_PASSWORD: dryorm
-            POSTGRES_DB: dryorm
+            POSTGRES_USER: ${POSTGRES_SNIPPETS_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_SNIPPETS_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_SNIPPETS_DB}
         volumes:
             - postgres_snippets_data:/var/lib/postgresql/data
         networks:
@@ -40,9 +40,9 @@ services:
     database_postgis:
         image: postgis/postgis:16-3.5-alpine
         environment:
-            POSTGRES_USER: dryorm
-            POSTGRES_PASSWORD: dryorm
-            POSTGRES_DB: dryorm
+            POSTGRES_USER: ${POSTGIS_SNIPPETS_USER}
+            POSTGRES_PASSWORD: ${POSTGIS_SNIPPETS_PASSWORD}
+            POSTGRES_DB: ${POSTGIS_SNIPPETS_DB}
         volumes:
             - postgis_snippets_data:/var/lib/postgresql/data
         networks:
@@ -51,10 +51,10 @@ services:
     database_mariadb:
         image: yobasystems/alpine-mariadb
         environment:
-            MYSQL_ROOT_PASSWORD: dryorm
-            MYSQL_DATABASE: dryorm
-            MYSQL_USER: dryorm
-            MYSQL_PASSWORD: dryorm
+            MYSQL_ROOT_PASSWORD: ${MARIADB_SNIPPETS_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MARIADB_SNIPPETS_DB}
+            MYSQL_USER: ${MARIADB_SNIPPETS_USER}
+            MYSQL_PASSWORD: ${MARIADB_SNIPPETS_PASSWORD}
         volumes:
             - mariadb_snippets_data:/var/lib/mysql
         networks:

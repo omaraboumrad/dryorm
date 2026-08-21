@@ -39,10 +39,10 @@ class PostgreSQL(Database):
             key="postgres",
             description="PostgreSQL 17.4",
             needs_setup=True,
-            host="database_postgres",
+            host=os.environ.get("POSTGRES_SNIPPETS_HOST", "database_postgres"),
             port=5432,
-            user="dryorm",
-            password="dryorm",
+            user=os.environ.get("POSTGRES_SNIPPETS_USER", "dryorm"),
+            password=os.environ.get("POSTGRES_SNIPPETS_PASSWORD", "dryorm"),
             script="scripts/postgres_create.sh",
         )
 
@@ -86,10 +86,10 @@ class MariaDB(Database):
             key="mariadb",
             description="MariaDB 11.4.5",
             needs_setup=True,
-            host="database_mariadb",
+            host=os.environ.get("MARIADB_SNIPPETS_HOST", "database_mariadb"),
             port=3306,
-            user="dryorm",
-            password="dryorm",
+            user=os.environ.get("MARIADB_SNIPPETS_USER", "dryorm"),
+            password=os.environ.get("MARIADB_SNIPPETS_PASSWORD", "dryorm"),
             script="scripts/mariadb_create.sh",
         )
 
@@ -133,10 +133,10 @@ class PostGIS(Database):
             key="postgis",
             description="PostGIS 3.5 (PostgreSQL 16)",
             needs_setup=True,
-            host="database_postgis",
+            host=os.environ.get("POSTGIS_SNIPPETS_HOST", "database_postgis"),
             port=5432,
-            user="dryorm",
-            password="dryorm",
+            user=os.environ.get("POSTGIS_SNIPPETS_USER", "dryorm"),
+            password=os.environ.get("POSTGIS_SNIPPETS_PASSWORD", "dryorm"),
             script="scripts/postgis_create.sh",
         )
 

@@ -34,11 +34,28 @@ PYTHONUNBUFFERED=1
 SECRET_KEY="your-secret-key"
 ENVIRONMENT=development
 
-# Database
+# App database
 POSTGRES_USER=dryorm
 POSTGRES_PASSWORD=dryorm
 POSTGRES_DB=dryorm
 POSTGRES_HOST=database
+
+# Snippet-executor databases
+POSTGRES_SNIPPETS_HOST=database_postgres
+POSTGRES_SNIPPETS_USER=dryorm
+POSTGRES_SNIPPETS_PASSWORD=dryorm
+POSTGRES_SNIPPETS_DB=dryorm
+
+POSTGIS_SNIPPETS_HOST=database_postgis
+POSTGIS_SNIPPETS_USER=dryorm
+POSTGIS_SNIPPETS_PASSWORD=dryorm
+POSTGIS_SNIPPETS_DB=dryorm
+
+MARIADB_SNIPPETS_HOST=database_mariadb
+MARIADB_SNIPPETS_ROOT_PASSWORD=dryorm
+MARIADB_SNIPPETS_DB=dryorm
+MARIADB_SNIPPETS_USER=dryorm
+MARIADB_SNIPPETS_PASSWORD=dryorm
 
 # Optional: GitHub token for higher API rate limits
 GITHUB_TOKEN=""
@@ -126,9 +143,9 @@ To use, click the settings icon and select "GitHub Reference" to search and fetc
 
 **Frontend:** React 18, Vite, Tailwind CSS, CodeMirror 6
 
-**Backend:** Django 5.2, PostgreSQL, Redis, Docker
+**Backend:** Django 6.1, PostgreSQL, Redis, Docker
 
-**Executors:** Isolated Docker containers running Django 4.2/5.2 with PostgreSQL or MariaDB
+**Executors:** Isolated Docker containers running Django 4.2/5.2/6.0/6.1 (default 6.1) with SQLite, PostgreSQL, MariaDB, or PostGIS
 
 
 ## FAQ
