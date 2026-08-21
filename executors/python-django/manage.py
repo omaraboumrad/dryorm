@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 "forget to activate a virtual environment?"
             )
         raise
-    if sys.argv[1] == "execute":
+    if len(sys.argv) > 1 and sys.argv[1] == "run_snippet":
         thread_locals.print_capture = LineAwarePrintCapture()
         thread_locals.print_capture.patch()
     execute_from_command_line(sys.argv)

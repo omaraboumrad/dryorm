@@ -9,10 +9,11 @@ from django.contrib.contenttypes.models import ContentType
 
 
 def get_field_type(field):
-    if isinstance(field, models.ForeignKey):
-        return "ForeignKey"
-    elif isinstance(field, models.OneToOneField):
+    # OneToOneField subclasses ForeignKey, so it has to be checked first.
+    if isinstance(field, models.OneToOneField):
         return "OneToOneField"
+    elif isinstance(field, models.ForeignKey):
+        return "ForeignKey"
     elif isinstance(field, models.ManyToManyField):
         return "ManyToManyField"
     return field.get_internal_type()

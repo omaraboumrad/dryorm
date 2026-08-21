@@ -55,6 +55,15 @@ test-cov: ## Run tests with coverage report
 	docker compose exec backend pytest dryorm/tests/ --cov=dryorm --cov-report=term-missing
 	@echo "$(GREEN)✓ Coverage report complete$(NC)"
 
+test-scenarios: ## Run end-to-end scenarios against real executor containers
+	@echo "$(BLUE)Running end-to-end scenarios...$(NC)"
+	# 4 workers keeps us under the executor container cap, which is 5 for the
+	# ref executors. The serial tests saturate that cap on purpose, so they get
+	# their own pass with nothing else in flight.
+	docker compose exec backend pytest dryorm/tests/ -m "not serial" -n 4
+	docker compose exec backend pytest dryorm/tests/ -m serial
+	@echo "$(GREEN)✓ Scenarios complete$(NC)"
+
 # ==================== Docker ====================
 
 build-executors: ## Build all executor images using multi-stage Dockerfile
@@ -66,4 +75,4 @@ build-executors: ## Build all executor images using multi-stage Dockerfile
 .PHONY: frontend-install frontend-build frontend-watch frontend-clean
 .PHONY: up down restart logs logs-backend logs-worker ps build-docker build-executors
 .PHONY: shell dbshell makemigrations migrate createsuperuser collectstatic
-.PHONY: dev dev-watch setup clean clean-all test test-quick test-cov check requirements
+.PHONY: dev dev-watch setup clean clean-all test test-quick test-cov test-scenarios check requirements
