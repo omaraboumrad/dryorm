@@ -88,6 +88,19 @@ function AboutPage() {
         <section>
           <h2 className="text-xl font-semibold text-theme-text border-b border-t border-theme-border py-2 mb-4"># Changelog</h2>
           <div className="space-y-4">
+            <ChangelogEntry date="August 21st, 2026">
+              <li>Engine - adds support for Django 6.1 (now the default)</li>
+              <li>Engine - hardened per-snippet database isolation with per-service credentials</li>
+            </ChangelogEntry>
+
+            <ChangelogEntry date="August 20th, 2026">
+              <li>Engine - captures output printed at the module level, outside <code className="bg-theme-surface px-1 rounded text-sm">run()</code></li>
+            </ChangelogEntry>
+
+            <ChangelogEntry date="August 19th, 2026">
+              <li>UI - adds a privacy page <a className="text-django-secondary hover:underline" href="/privacy">(Link)</a></li>
+            </ChangelogEntry>
+
             <ChangelogEntry date="December 31st, 2025">
               <li>UI - complete rewrite from vanilla JS to React</li>
               <li>UI - adds theme switching (Light / Dark / System preference)</li>
